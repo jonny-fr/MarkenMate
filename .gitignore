@@ -43,3 +43,5 @@ next-env.d.ts
 
 # Our database
 *.sqlite
+
+debug-docker.ps1 

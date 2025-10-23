@@ -1,8 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  typedRoutes: true,
+  // Disable typed routes to avoid strict href validation issues in Docker builds
+  typedRoutes: false,
 };
 
 export default nextConfig;
