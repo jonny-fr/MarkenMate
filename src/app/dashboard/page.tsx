@@ -1,4 +1,6 @@
-import { Suspense, type CSSProperties } from "react";
+"use client";
+
+import { Suspense, type CSSProperties, useState } from "react";
 
 import { AppSidebar } from "@/components/app-sidebar";
 import { ChartAreaInteractive } from "@/components/chart-area-interactive";
@@ -9,10 +11,8 @@ import {
   type LendingUser,
   TokenLendingPanel,
 } from "./_components/token-lending-panel";
-import {
-  type Restaurant,
-  RestaurantDirectory,
-} from "./_components/restaurant-directory";
+import { RestaurantsView } from "./_components/restaurants-view";
+import type { Restaurant } from "./_components/restaurants-view";
 
 const restaurantsPromise: Promise<Restaurant[]> = Promise.resolve([
   {
@@ -21,6 +21,7 @@ const restaurantsPromise: Promise<Restaurant[]> = Promise.resolve([
     cuisine: "Italienisch · Frische Pasta",
     address: "Innenstadt · Musterstraße 12",
     rating: 4.7,
+    isOpen: true,
     dishes: [
       {
         id: "pl-1",
@@ -48,6 +49,7 @@ const restaurantsPromise: Promise<Restaurant[]> = Promise.resolve([
     cuisine: "Bowls & Salate",
     address: "Campus Mitte · Kantinenhof",
     rating: 4.5,
+    isOpen: true,
     dishes: [
       {
         id: "gb-1",
@@ -75,6 +77,7 @@ const restaurantsPromise: Promise<Restaurant[]> = Promise.resolve([
     cuisine: "Burger & Streetfood",
     address: "Foodcourt · Werkstraße 8",
     rating: 4.3,
+    isOpen: false,
     dishes: [
       {
         id: "bw-1",
@@ -102,6 +105,7 @@ const restaurantsPromise: Promise<Restaurant[]> = Promise.resolve([
     cuisine: "Schnelle Mittagssnacks",
     address: "City Gate · Lobby West",
     rating: 4.1,
+    isOpen: true,
     dishes: [
       {
         id: "nd-1",
@@ -154,7 +158,11 @@ function LoadingCard({ label }: { label: string }) {
   );
 }
 
+type ViewType = "dashboard" | "restaurants";
+
 export default function Page() {
+  const [currentView, setCurrentView] = useState<ViewType>("dashboard");
+
   return (
     <SidebarProvider
       style={
@@ -164,26 +172,33 @@ export default function Page() {
         } as CSSProperties
       }
     >
-      <AppSidebar variant="inset" />
+      <AppSidebar variant="inset" onNavigate={setCurrentView} />
       <SidebarInset>
         <SiteHeader />
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-              <SectionCards />
-              <div className="grid gap-4 px-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:px-6">
-                <div className="space-y-4">
-                  <ChartAreaInteractive />
+              {currentView === "restaurants" ? (
+                <div className="px-4 lg:px-6">
                   <Suspense fallback={<LoadingCard label="Restaurants" />}>
-                    <RestaurantDirectory dataPromise={restaurantsPromise} />
+                    <RestaurantsView dataPromise={restaurantsPromise} />
                   </Suspense>
                 </div>
-                <div className="space-y-4">
-                  <Suspense fallback={<LoadingCard label="Markenleihen" />}>
-                    <TokenLendingPanel dataPromise={lendingPromise} />
-                  </Suspense>
-                </div>
-              </div>
+              ) : (
+                <>
+                  <SectionCards />
+                  <div className="grid gap-4 px-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:px-6">
+                    <div className="space-y-4">
+                      <ChartAreaInteractive />
+                    </div>
+                    <div className="space-y-4">
+                      <Suspense fallback={<LoadingCard label="Markenleihen" />}>
+                        <TokenLendingPanel dataPromise={lendingPromise} />
+                      </Suspense>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
