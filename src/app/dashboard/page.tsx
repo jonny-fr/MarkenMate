@@ -11,6 +11,7 @@ import {
   type LendingUser,
   TokenLendingPanel,
 } from "./_components/token-lending-panel";
+import { LendingView } from "./_components/lending-view";
 import { RestaurantsView } from "./_components/restaurants-view";
 import { StatsView, type StatsData, type GraphDataPoint } from "./_components/stats-view";
 import { HistoryView, type HistoryItem } from "./_components/history-view";
@@ -141,14 +142,26 @@ const lendingPromise: Promise<LendingUser[]> = Promise.resolve([
   {
     id: "amir-safar",
     name: "Amir Safar",
-    balance: 2,
-    note: "Gleicht Freitag nach der Schicht aus.",
+    balance: -3,
+    note: "Schuldet Marken von letztem Freitag.",
   },
   {
     id: "selina-wolf",
     name: "Selina Wolf",
     balance: 6,
     note: "Vergütung geplant zum Monatsende.",
+  },
+  {
+    id: "max-mueller",
+    name: "Max Müller",
+    balance: -2,
+    note: "Gleicht Mittwoch nach der Schicht aus.",
+  },
+  {
+    id: "anna-schmidt",
+    name: "Anna Schmidt",
+    balance: 5,
+    note: "Hat mir 5 Marken für das Team Event verliehen.",
   },
 ]);
 
@@ -420,6 +433,12 @@ export default function Page() {
                 <div className="px-4 lg:px-6">
                   <Suspense fallback={<LoadingCard label="History" />}>
                     <HistoryView dataPromise={historyPromise} />
+                  </Suspense>
+                </div>
+              ) : currentView === "lending" ? (
+                <div className="px-4 lg:px-6">
+                  <Suspense fallback={<LoadingCard label="Markenleihen" />}>
+                    <LendingView dataPromise={lendingPromise} />
                   </Suspense>
                 </div>
               ) : (
