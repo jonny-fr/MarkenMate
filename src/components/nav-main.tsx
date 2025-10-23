@@ -20,20 +20,20 @@ type NavMainItem = {
 
 export function NavMain({
   items,
-  onNavigate,
+  onNavigateAction,
 }: {
   items: NavMainItem[];
-  onNavigate?: (view: string) => void;
+  onNavigateAction?: (view: "dashboard" | "restaurants" | "stats" | "history" | "comparison" | "lending") => void;
 }) {
   const handleClick = (title: string) => {
     if (title === "Restaurants") {
-      onNavigate?.("restaurants");
+      onNavigateAction?.("restaurants");
     } else if (title === "Restaurant-Vergleich") {
-      onNavigate?.("comparison");
+      onNavigateAction?.("comparison");
     } else if (title === "Markenleihen") {
-      onNavigate?.("lending");
+      onNavigateAction?.("lending");
     } else {
-      onNavigate?.("dashboard");
+      onNavigateAction?.("dashboard");
     }
   };
 
@@ -49,7 +49,7 @@ export function NavMain({
                 tooltip={item.title}
                 onClick={() => handleClick(item.title)}
               >
-                <a href="#">
+                <a href="#" onClick={(e) => e.preventDefault()}>
                   <item.icon className="size-4" />
                   <span>{item.title}</span>
                 </a>

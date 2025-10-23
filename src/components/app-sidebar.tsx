@@ -61,10 +61,10 @@ const sidebarData = {
 };
 
 export function AppSidebar({
-  onNavigate,
+  onNavigateAction,
   ...props
 }: ComponentProps<typeof Sidebar> & {
-  onNavigate?: (view: string) => void;
+  onNavigateAction?: (view: "dashboard" | "restaurants" | "stats" | "history" | "comparison" | "lending") => void;
 }) {
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -75,7 +75,13 @@ export function AppSidebar({
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
-              <a href="#" onClick={() => onNavigate?.("dashboard")}>
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onNavigateAction?.("dashboard");
+                }}
+              >
                 <Building2 className="size-5" />
                 <span className="text-base font-semibold">MarkenMate</span>
               </a>
@@ -84,9 +90,13 @@ export function AppSidebar({
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={sidebarData.navigation} onNavigate={onNavigate} />
+        <NavMain
+          items={sidebarData.navigation}
+          onNavigateAction={onNavigateAction}
+        />
         <NavSecondary
           items={sidebarData.secondary}
+          onNavigateAction={onNavigateAction}
           className="mt-auto"
         />
       </SidebarContent>
