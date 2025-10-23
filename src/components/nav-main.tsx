@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+
 import type { LucideIcon } from "lucide-react";
 
 import {
@@ -18,7 +18,25 @@ type NavMainItem = {
   icon: LucideIcon;
 };
 
-export function NavMain({ items }: { items: NavMainItem[] }) {
+export function NavMain({
+  items,
+  onNavigate,
+}: {
+  items: NavMainItem[];
+  onNavigate?: (view: string) => void;
+}) {
+  const handleClick = (title: string) => {
+    if (title === "Restaurants") {
+      onNavigate?.("restaurants");
+    } else if (title === "Restaurant-Vergleich") {
+      onNavigate?.("comparison");
+    } else if (title === "Markenleihen") {
+      onNavigate?.("lending");
+    } else {
+      onNavigate?.("dashboard");
+    }
+  };
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Bereiche</SidebarGroupLabel>
@@ -26,11 +44,15 @@ export function NavMain({ items }: { items: NavMainItem[] }) {
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton asChild tooltip={item.title}>
-                <Link href={item.url as any}>
+              <SidebarMenuButton
+                asChild
+                tooltip={item.title}
+                onClick={() => handleClick(item.title)}
+              >
+                <a href="#">
                   <item.icon className="size-4" />
                   <span>{item.title}</span>
-                </Link>
+                </a>
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}

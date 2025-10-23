@@ -61,8 +61,11 @@ const sidebarData = {
 };
 
 export function AppSidebar({
+  onNavigate,
   ...props
-}: ComponentProps<typeof Sidebar>) {
+}: ComponentProps<typeof Sidebar> & {
+  onNavigate?: (view: string) => void;
+}) {
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -72,7 +75,7 @@ export function AppSidebar({
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
-              <a href="#">
+              <a href="#" onClick={() => onNavigate?.("dashboard")}>
                 <Building2 className="size-5" />
                 <span className="text-base font-semibold">MarkenMate</span>
               </a>
@@ -81,7 +84,7 @@ export function AppSidebar({
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={sidebarData.navigation} />
+        <NavMain items={sidebarData.navigation} onNavigate={onNavigate} />
         <NavSecondary
           items={sidebarData.secondary}
           className="mt-auto"
