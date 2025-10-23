@@ -6,10 +6,8 @@ import {
   ChartPie,
   Clock,
   HandCoins,
-  HelpCircle,
-  Search,
-  Settings,
   UtensilsCrossed,
+  BarChart3,
 } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -43,11 +41,6 @@ const sidebarData = {
       icon: ChartPie,
     },
     {
-      title: "Allgemeine Infos",
-      url: "#info",
-      icon: Clock,
-    },
-    {
       title: "Markenleihen",
       url: "#lending",
       icon: HandCoins,
@@ -55,19 +48,14 @@ const sidebarData = {
   ],
   secondary: [
     {
-      title: "Einstellungen",
-      url: "#settings",
-      icon: Settings,
+      title: "Stats",
+      url: "#stats",
+      icon: BarChart3,
     },
     {
-      title: "Support",
-      url: "#support",
-      icon: HelpCircle,
-    },
-    {
-      title: "Suche",
-      url: "#",
-      icon: Search,
+      title: "History",
+      url: "#history",
+      icon: Clock,
     },
   ],
 };

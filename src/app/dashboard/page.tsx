@@ -6,10 +6,6 @@ import { SectionCards } from "@/components/section-cards";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import {
-  type GeneralInfo,
-  GeneralInfoPanel,
-} from "./_components/general-info-panel";
-import {
   type LendingUser,
   TokenLendingPanel,
 } from "./_components/token-lending-panel";
@@ -129,26 +125,6 @@ const restaurantsPromise: Promise<Restaurant[]> = Promise.resolve([
   },
 ]);
 
-const generalInfoPromise: Promise<GeneralInfo> = Promise.resolve({
-  location: "Essensausgabe · Campus Nord, Gebäude B2, Erdgeschoss",
-  openingHours: [
-    { day: "Montag", hours: "11:30 – 14:30" },
-    { day: "Dienstag", hours: "11:30 – 14:30" },
-    { day: "Mittwoch", hours: "11:30 – 14:30" },
-    { day: "Donnerstag", hours: "11:30 – 14:30" },
-    { day: "Freitag", hours: "11:30 – 14:00" },
-  ],
-  contact: {
-    phone: "+49 30 123 45 67",
-    email: "support@markenmate.de",
-  },
-  notes: [
-    "Neue Essensmarken werden montags um 09:00 Uhr ausgegeben.",
-    "Restaurant-Partner aktualisieren ihre Menüs jeweils am Freitagabend.",
-    "Feiertagsöffnungszeiten werden zwei Wochen im Voraus angekündigt.",
-  ],
-});
-
 const lendingPromise: Promise<LendingUser[]> = Promise.resolve([
   {
     id: "lena-graf",
@@ -203,9 +179,6 @@ export default function Page() {
                   </Suspense>
                 </div>
                 <div className="space-y-4">
-                  <Suspense fallback={<LoadingCard label="Allgemeine Infos" />}>
-                    <GeneralInfoPanel dataPromise={generalInfoPromise} />
-                  </Suspense>
                   <Suspense fallback={<LoadingCard label="Markenleihen" />}>
                     <TokenLendingPanel dataPromise={lendingPromise} />
                   </Suspense>
