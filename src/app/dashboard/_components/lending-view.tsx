@@ -89,6 +89,14 @@ export function LendingView({
     return "text-muted-foreground";
   };
 
+  const getBalanceBadgeClass = (balance: number) => {
+    if (balance > 0)
+      return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+    if (balance < 0)
+      return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
+    return "";
+  };
+
   return (
     <div className="space-y-6">
       {/* Überschrift */}
@@ -212,7 +220,9 @@ export function LendingView({
                           ? "default"
                           : "secondary"
                     }
-                    className="min-w-12 justify-center px-3 py-1 text-base font-semibold"
+                    className={`min-w-12 justify-center px-3 py-1 text-base font-semibold ${getBalanceBadgeClass(
+                      user.balance
+                    )}`}
                   >
                     {user.balance < 0 ? "-" : user.balance > 0 ? "+" : ""}
                     {Math.abs(user.balance)}
