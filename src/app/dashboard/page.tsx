@@ -12,6 +12,7 @@ import {
   TokenLendingPanel,
 } from "./_components/token-lending-panel";
 import { RestaurantsView } from "./_components/restaurants-view";
+import { StatsView, type StatsData, type GraphDataPoint } from "./_components/stats-view";
 import type { Restaurant } from "./_components/restaurants-view";
 
 const restaurantsPromise: Promise<Restaurant[]> = Promise.resolve([
@@ -150,6 +151,111 @@ const lendingPromise: Promise<LendingUser[]> = Promise.resolve([
   },
 ]);
 
+const statsPromise: Promise<StatsData> = Promise.resolve({
+  lastMonthSpent: 245.50,
+  totalLendingBalance: 12,
+  spendingTrend: 8.5,
+});
+
+const graphDataPromise: Promise<GraphDataPoint[]> = Promise.resolve([
+  { date: "2025-09-23", spent: 45, lent: 2 },
+  { date: "2025-09-24", spent: 52, lent: 1 },
+  { date: "2025-09-25", spent: 38, lent: 3 },
+  { date: "2025-09-26", spent: 61, lent: 2 },
+  { date: "2025-09-27", spent: 48, lent: 1 },
+  { date: "2025-09-28", spent: 55, lent: 2 },
+  { date: "2025-09-29", spent: 42, lent: 0 },
+  { date: "2025-09-30", spent: 58, lent: 1 },
+]);
+
+// Daten für 1 Monat (September 2025)
+const graphDataMonth: Promise<GraphDataPoint[]> = Promise.resolve([
+  { date: "2025-09-01", spent: 42, lent: 1 },
+  { date: "2025-09-02", spent: 38, lent: 2 },
+  { date: "2025-09-03", spent: 55, lent: 1 },
+  { date: "2025-09-04", spent: 61, lent: 3 },
+  { date: "2025-09-05", spent: 48, lent: 2 },
+  { date: "2025-09-06", spent: 52, lent: 1 },
+  { date: "2025-09-07", spent: 45, lent: 2 },
+  { date: "2025-09-08", spent: 58, lent: 1 },
+  { date: "2025-09-09", spent: 65, lent: 3 },
+  { date: "2025-09-10", spent: 44, lent: 2 },
+  { date: "2025-09-11", spent: 51, lent: 1 },
+  { date: "2025-09-12", spent: 47, lent: 2 },
+  { date: "2025-09-13", spent: 63, lent: 2 },
+  { date: "2025-09-14", spent: 52, lent: 1 },
+  { date: "2025-09-15", spent: 59, lent: 3 },
+  { date: "2025-09-16", spent: 48, lent: 2 },
+  { date: "2025-09-17", spent: 55, lent: 1 },
+  { date: "2025-09-18", spent: 68, lent: 2 },
+  { date: "2025-09-19", spent: 41, lent: 1 },
+  { date: "2025-09-20", spent: 57, lent: 3 },
+  { date: "2025-09-21", spent: 53, lent: 2 },
+  { date: "2025-09-22", spent: 46, lent: 1 },
+  { date: "2025-09-23", spent: 45, lent: 2 },
+  { date: "2025-09-24", spent: 52, lent: 1 },
+  { date: "2025-09-25", spent: 38, lent: 3 },
+  { date: "2025-09-26", spent: 61, lent: 2 },
+  { date: "2025-09-27", spent: 48, lent: 1 },
+  { date: "2025-09-28", spent: 55, lent: 2 },
+  { date: "2025-09-29", spent: 42, lent: 0 },
+  { date: "2025-09-30", spent: 58, lent: 1 },
+]);
+
+// Daten für 3 Monate (Juli - September 2025)
+const graphDataQuarter: Promise<GraphDataPoint[]> = Promise.resolve([
+  // Juli
+  { date: "2025-07-01", spent: 55, lent: 2 },
+  { date: "2025-07-05", spent: 62, lent: 1 },
+  { date: "2025-07-10", spent: 48, lent: 3 },
+  { date: "2025-07-15", spent: 71, lent: 2 },
+  { date: "2025-07-20", spent: 59, lent: 1 },
+  { date: "2025-07-25", spent: 45, lent: 2 },
+  { date: "2025-07-31", spent: 68, lent: 1 },
+  // August
+  { date: "2025-08-05", spent: 52, lent: 2 },
+  { date: "2025-08-10", spent: 58, lent: 1 },
+  { date: "2025-08-15", spent: 46, lent: 3 },
+  { date: "2025-08-20", spent: 64, lent: 2 },
+  { date: "2025-08-25", spent: 51, lent: 1 },
+  { date: "2025-08-31", spent: 57, lent: 2 },
+  // September
+  { date: "2025-09-05", spent: 48, lent: 2 },
+  { date: "2025-09-10", spent: 44, lent: 2 },
+  { date: "2025-09-15", spent: 59, lent: 3 },
+  { date: "2025-09-20", spent: 57, lent: 3 },
+  { date: "2025-09-25", spent: 38, lent: 3 },
+  { date: "2025-09-30", spent: 58, lent: 1 },
+]);
+
+// Daten für 1 Jahr (alle 12 Monate 2025)
+const graphDataYear: Promise<GraphDataPoint[]> = Promise.resolve([
+  // Januar
+  { date: "2025-01-15", spent: 58, lent: 2 },
+  // Februar
+  { date: "2025-02-14", spent: 51, lent: 1 },
+  // März
+  { date: "2025-03-15", spent: 63, lent: 2 },
+  // April
+  { date: "2025-04-15", spent: 55, lent: 3 },
+  // Mai
+  { date: "2025-05-15", spent: 72, lent: 2 },
+  // Juni
+  { date: "2025-06-15", spent: 48, lent: 1 },
+  // Juli
+  { date: "2025-07-15", spent: 71, lent: 2 },
+  // August
+  { date: "2025-08-15", spent: 46, lent: 3 },
+  // September
+  { date: "2025-09-15", spent: 59, lent: 3 },
+  // Oktober
+  { date: "2025-10-15", spent: 65, lent: 2 },
+  // November
+  { date: "2025-11-15", spent: 52, lent: 1 },
+  // Dezember
+  { date: "2025-12-15", spent: 78, lent: 4 },
+]);
+
 function LoadingCard({ label }: { label: string }) {
   return (
     <div className="rounded-xl border border-dashed border-border/60 bg-muted/30 px-4 py-16 text-center text-sm text-muted-foreground">
@@ -158,7 +264,7 @@ function LoadingCard({ label }: { label: string }) {
   );
 }
 
-type ViewType = "dashboard" | "restaurants";
+type ViewType = "dashboard" | "restaurants" | "stats" | "history" | "comparison" | "lending";
 
 export default function Page() {
   const [currentView, setCurrentView] = useState<ViewType>("dashboard");
@@ -172,7 +278,7 @@ export default function Page() {
         } as CSSProperties
       }
     >
-      <AppSidebar variant="inset" onNavigate={setCurrentView} />
+      <AppSidebar variant="inset" onNavigateAction={setCurrentView} />
       <SidebarInset>
         <SiteHeader />
         <div className="flex flex-1 flex-col">
@@ -182,6 +288,18 @@ export default function Page() {
                 <div className="px-4 lg:px-6">
                   <Suspense fallback={<LoadingCard label="Restaurants" />}>
                     <RestaurantsView dataPromise={restaurantsPromise} />
+                  </Suspense>
+                </div>
+              ) : currentView === "stats" ? (
+                <div className="px-4 lg:px-6">
+                  <Suspense fallback={<LoadingCard label="Stats" />}>
+                    <StatsView
+                      statsPromise={statsPromise}
+                      graphDataPromise={graphDataPromise}
+                      graphDataMonth={graphDataMonth}
+                      graphDataQuarter={graphDataQuarter}
+                      graphDataYear={graphDataYear}
+                    />
                   </Suspense>
                 </div>
               ) : (

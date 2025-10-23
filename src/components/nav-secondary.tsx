@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
 
 import {
@@ -21,10 +20,20 @@ type NavSecondaryItem = {
 
 export function NavSecondary({
   items,
+  onNavigateAction,
   ...props
 }: {
   items: NavSecondaryItem[];
+  onNavigateAction?: (view: "dashboard" | "restaurants" | "stats" | "history" | "comparison" | "lending") => void;
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
+  const handleClick = (title: string) => {
+    if (title === "Stats") {
+      onNavigateAction?.("stats");
+    } else if (title === "History") {
+      onNavigateAction?.("history");
+    }
+  };
+
   return (
     <SidebarGroup {...props}>
       <SidebarGroupLabel>Werkzeuge</SidebarGroupLabel>
@@ -32,11 +41,14 @@ export function NavSecondary({
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton asChild>
-                <Link href={item.url}>
+              <SidebarMenuButton
+                asChild
+                onClick={() => handleClick(item.title)}
+              >
+                <a href="#" onClick={(e) => e.preventDefault()}>
                   <item.icon className="size-4" />
                   <span>{item.title}</span>
-                </Link>
+                </a>
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
