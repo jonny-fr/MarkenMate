@@ -13,6 +13,7 @@ import {
 } from "./_components/token-lending-panel";
 import { RestaurantsView } from "./_components/restaurants-view";
 import { StatsView, type StatsData, type GraphDataPoint } from "./_components/stats-view";
+import { HistoryView, type HistoryItem } from "./_components/history-view";
 import type { Restaurant } from "./_components/restaurants-view";
 
 const restaurantsPromise: Promise<Restaurant[]> = Promise.resolve([
@@ -256,6 +257,119 @@ const graphDataYear: Promise<GraphDataPoint[]> = Promise.resolve([
   { date: "2025-12-15", spent: 78, lent: 4 },
 ]);
 
+// History Daten
+const historyPromise: Promise<HistoryItem[]> = Promise.resolve([
+  // Diese Woche (aktuelle Woche)
+  {
+    id: "h1",
+    date: "2025-10-23",
+    restaurant: "Pasta Loft",
+    totalPrice: 23.80,
+    items: [
+      { id: "i1", name: "Trüffel Tagliatelle", price: 11.90, quantity: 1 },
+      { id: "i2", name: "Ofenlasagne", price: 9.50, quantity: 1 },
+      { id: "i3", name: "Wasser", price: 2.40, quantity: 1 },
+    ],
+  },
+  {
+    id: "h2",
+    date: "2025-10-22",
+    restaurant: "Green Bowl",
+    totalPrice: 17.60,
+    items: [
+      { id: "i4", name: "Protein Power Bowl", price: 8.90, quantity: 1 },
+      { id: "i5", name: "Seasonal Smoothie", price: 4.70, quantity: 2 },
+    ],
+  },
+  {
+    id: "h3",
+    date: "2025-10-21",
+    restaurant: "Burger Werk",
+    totalPrice: 16.10,
+    items: [
+      { id: "i6", name: "MarkenMate Signature Burger", price: 10.90, quantity: 1 },
+      { id: "i7", name: "Loaded Sweet Fries", price: 5.20, quantity: 1 },
+    ],
+  },
+  // Letzte Woche
+  {
+    id: "h4",
+    date: "2025-10-16",
+    restaurant: "Noon Deli",
+    totalPrice: 14.20,
+    items: [
+      { id: "i8", name: "Ciabatta Caprese", price: 6.40, quantity: 1 },
+      { id: "i9", name: "Tagesuppe", price: 4.80, quantity: 1 },
+      { id: "i10", name: "Panna Cotta", price: 3.00, quantity: 1 },
+    ],
+  },
+  {
+    id: "h5",
+    date: "2025-10-14",
+    restaurant: "Pasta Loft",
+    totalPrice: 31.90,
+    items: [
+      { id: "i11", name: "Trüffel Tagliatelle", price: 11.90, quantity: 2 },
+      { id: "i12", name: "Burrata Bowl", price: 10.40, quantity: 1 },
+      { id: "i13", name: "Wasser", price: 2.40, quantity: 2 },
+    ],
+  },
+  {
+    id: "h6",
+    date: "2025-10-12",
+    restaurant: "Green Bowl",
+    totalPrice: 21.40,
+    items: [
+      { id: "i14", name: "Falafel Salad", price: 7.80, quantity: 1 },
+      { id: "i15", name: "Protein Power Bowl", price: 8.90, quantity: 1 },
+      { id: "i16", name: "Seasonal Smoothie", price: 4.70, quantity: 1 },
+    ],
+  },
+  // Weitere (älter)
+  {
+    id: "h7",
+    date: "2025-10-05",
+    restaurant: "Burger Werk",
+    totalPrice: 26.00,
+    items: [
+      { id: "i17", name: "MarkenMate Signature Burger", price: 10.90, quantity: 2 },
+      { id: "i18", name: "Loaded Sweet Fries", price: 5.20, quantity: 2 },
+    ],
+  },
+  {
+    id: "h8",
+    date: "2025-09-28",
+    restaurant: "Noon Deli",
+    totalPrice: 18.60,
+    items: [
+      { id: "i19", name: "Ciabatta Caprese", price: 6.40, quantity: 2 },
+      { id: "i20", name: "Tagesuppe", price: 4.80, quantity: 1 },
+    ],
+  },
+  {
+    id: "h9",
+    date: "2025-09-20",
+    restaurant: "Pasta Loft",
+    totalPrice: 25.70,
+    items: [
+      { id: "i21", name: "Trüffel Tagliatelle", price: 11.90, quantity: 1 },
+      { id: "i22", name: "Ofenlasagne", price: 9.50, quantity: 1 },
+      { id: "i23", name: "Burrata Bowl", price: 10.40, quantity: 0.5 },
+    ],
+  },
+  {
+    id: "h10",
+    date: "2025-09-10",
+    restaurant: "Green Bowl",
+    totalPrice: 20.30,
+    items: [
+      { id: "i24", name: "Protein Power Bowl", price: 8.90, quantity: 2 },
+      { id: "i25", name: "Seasonal Smoothie", price: 4.70, quantity: 1 },
+      { id: "i26", name: "Falafel Salad", price: 7.80, quantity: 0.5 },
+    ],
+  },
+]);
+
 function LoadingCard({ label }: { label: string }) {
   return (
     <div className="rounded-xl border border-dashed border-border/60 bg-muted/30 px-4 py-16 text-center text-sm text-muted-foreground">
@@ -300,6 +414,12 @@ export default function Page() {
                       graphDataQuarter={graphDataQuarter}
                       graphDataYear={graphDataYear}
                     />
+                  </Suspense>
+                </div>
+              ) : currentView === "history" ? (
+                <div className="px-4 lg:px-6">
+                  <Suspense fallback={<LoadingCard label="History" />}>
+                    <HistoryView dataPromise={historyPromise} />
                   </Suspense>
                 </div>
               ) : (
