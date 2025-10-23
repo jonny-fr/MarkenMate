@@ -1,13 +1,15 @@
 "use client";
 
 import {
-  IconCreditCard,
-  IconDotsVertical,
-  IconLogout,
-  IconNotification,
-  IconUserCircle,
-} from "@tabler/icons-react";
+  Bell,
+  CreditCard,
+  LogOut,
+  MoreVertical,
+  UserCircle2,
+} from "lucide-react";
+import { useActionState } from "react";
 
+import { logout } from "@/actions/logout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -24,26 +26,26 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { logout } from "@/actions/logout";
-import { useActionState } from "react";
-import { Loader2Icon } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
+import { Loader2Icon } from "lucide-react";
 
-export function NavUser({
-  user,
-}: {
+type NavUserProps = {
   user: {
     name: string;
     email: string;
     avatar: string;
   };
-}) {
+};
+
+export function NavUser({ user }: NavUserProps) {
   const { isMobile } = useSidebar();
-
-  const [state, logoutAction, pending] = useActionState(logout, {});
-
-  // Example of how to use the useSession hook in client-side components
+  const [, logoutAction, pending] = useActionState(logout, {});
   const session = useSession();
+
+  const displayName = session.data?.user.name ?? user.name;
+  const displayEmail = session.data?.user.email ?? user.email;
+  const displayAvatar = session.data?.user.image ?? user.avatar;
+  const initials = displayName ? displayName.charAt(0).toUpperCase() : "M";
 
   return (
     <SidebarMenu>
@@ -55,23 +57,18 @@ export function NavUser({
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg grayscale">
-                <AvatarImage
-                  src={session.data?.user.image ?? undefined}
-                  alt={session.data?.user.name}
-                />
+                <AvatarImage src={displayAvatar} alt={displayName} />
                 <AvatarFallback className="rounded-lg">
-                  {session.data?.user.name.charAt(0).toUpperCase()}
+                  {initials}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">
-                  {session.data?.user.name}
-                </span>
+                <span className="truncate font-medium">{displayName}</span>
                 <span className="text-muted-foreground truncate text-xs">
-                  {session.data?.user.email}
+                  {displayEmail}
                 </span>
               </div>
-              <IconDotsVertical className="ml-auto size-4" />
+              <MoreVertical className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -83,20 +80,15 @@ export function NavUser({
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage
-                    src={session.data?.user.image ?? undefined}
-                    alt={session.data?.user.name}
-                  />
+                  <AvatarImage src={displayAvatar} alt={displayName} />
                   <AvatarFallback className="rounded-lg">
-                    {session.data?.user.name.charAt(0).toUpperCase()}
+                    {initials}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">
-                    {session.data?.user.name}
-                  </span>
+                  <span className="truncate font-medium">{displayName}</span>
                   <span className="text-muted-foreground truncate text-xs">
-                    {session.data?.user.email}
+                    {displayEmail}
                   </span>
                 </div>
               </div>
@@ -104,15 +96,15 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
-                <IconUserCircle />
+                <UserCircle2 className="size-4" />
                 Account
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <IconCreditCard />
+                <CreditCard className="size-4" />
                 Billing
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <IconNotification />
+                <Bell className="size-4" />
                 Notifications
               </DropdownMenuItem>
             </DropdownMenuGroup>
@@ -123,7 +115,7 @@ export function NavUser({
                   {pending ? (
                     <Loader2Icon className="size-4 animate-spin" />
                   ) : (
-                    <IconLogout />
+                    <LogOut className="size-4" />
                   )}
                   Log out
                 </DropdownMenuItem>

@@ -1,6 +1,8 @@
-import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
-import { SidebarTrigger } from "@/components/ui/sidebar"
+import { RefreshCcw } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export function SiteHeader() {
   return (
@@ -11,20 +13,19 @@ export function SiteHeader() {
           orientation="vertical"
           className="mx-2 data-[orientation=vertical]:h-4"
         />
-        <h1 className="text-base font-medium">Documents</h1>
+        <div className="flex flex-col gap-0.5">
+          <h1 className="text-base font-semibold">Essensmarken Cockpit</h1>
+          <span className="text-xs text-muted-foreground">
+            Überblick über Restaurants, Marken und Auslastung
+          </span>
+        </div>
         <div className="ml-auto flex items-center gap-2">
-          <Button variant="ghost" asChild size="sm" className="hidden sm:flex">
-            <a
-              href="https://github.com/shadcn-ui/ui/tree/main/apps/v4/app/(examples)/dashboard"
-              rel="noopener noreferrer"
-              target="_blank"
-              className="dark:text-foreground"
-            >
-              GitHub
-            </a>
+          <Button variant="outline" size="sm" className="hidden sm:flex">
+            <RefreshCcw className="size-4" />
+            Aktualisieren
           </Button>
         </div>
       </div>
     </header>
-  )
+  );
 }
