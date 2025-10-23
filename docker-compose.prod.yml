@@ -1,0 +1,17 @@
+# Production Docker Compose Override
+# Verwendung: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+version: '3.9'
+
+services:
+  app:
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET}
+      - NEXT_PUBLIC_BETTER_AUTH_URL=${NEXT_PUBLIC_BETTER_AUTH_URL}
+    healthcheck:
+      interval: 60s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
