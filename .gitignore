@@ -41,7 +41,15 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Our database
+# Database files
+# SQLite (legacy)
 *.sqlite
+*.sqlite-*
+src/db/localdb.sqlite
+
+# PostgreSQL backups and snapshots
+backups/
+snapshots/
 
 debug-docker.ps1 
+*.md

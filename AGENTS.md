@@ -5,7 +5,8 @@
 - **Components:** shadcn/ui (radix-ui based)
 - **Tables:** TanStack Table (Themed by shadcn/ui)
 - **Authentication:** better-auth
-- **Database ORM:** drizzle-orm
+- **Database:** PostgreSQL 16 (via Docker)
+- **Database ORM:** drizzle-orm (PostgreSQL dialect)
 
 
 ## Behavior rules
@@ -13,6 +14,7 @@
 - If additional information on a dependency is required or you're unsure on what to do to implement new functionality, use the context7 tools (only if they're available).
 - Always use `pnpm` as a package manager for all commands.
 - Always run `pnpm lint` and `pnpm test` before committing.
+- **Database:** Before making schema changes, create a snapshot: `.\scripts\create-snapshot.ps1 -SnapshotName "before-change"`
 
 ### Commit style
 
@@ -38,6 +40,16 @@
 - Enforce authentication for certain routes and server actions in the `middleware.ts` file.
 - Prefer using the Next.js given `<Link>` and `<Image>` components over `<a>` and `<img>` tags.
 
+### Database rules
+
+- **Schema changes:** Always use PostgreSQL-compatible types from `drizzle-orm/pg-core`
+- **Timestamps:** Use `timestamp("name", { mode: "date" }).defaultNow()` for timestamps
+- **Booleans:** Use `boolean("name")` instead of SQLite's integer-based booleans
+- **Auto-increment IDs:** Use `.generatedAlwaysAsIdentity()` for auto-incrementing integer primary keys
+- **Quoted identifiers:** PostgreSQL is case-sensitive for quoted identifiers - table/column names in lowercase
+- **Migrations:** After schema changes, run `pnpm db:push` to apply to database
+- **Testing schema:** Use `pnpm db:studio` to visually explore and verify schema changes
+
 ## File structure
 
 ### Overview
@@ -54,9 +66,15 @@
     - `src/components`: Containing all kinds of reusable components (based on shadcn/ui)
         - `src/components/ui`: Primitives for UI components like button, dialog, select etc.
     - `src/db`: Database definitions
-        - `src/db/index.ts`: Definition of the database connection, basic drizzle-orm setup
-        - `src/db/schema.ts`: Database schema
+        - `src/db/index.ts`: PostgreSQL connection using drizzle-orm and postgres.js
+        - `src/db/schema.ts`: Database schema using PostgreSQL types
     - `src/lib`: Server- and Client- side utilities that may be reunsed in different places.
+- `scripts`: Database management scripts
+    - `scripts/backup.sh` / `scripts/backup.ps1`: Create database backups
+    - `scripts/restore.sh` / `scripts/restore.ps1`: Restore database from backup
+    - `scripts/create-snapshot.sh` / `scripts/create-snapshot.ps1`: Create named snapshots
+- `backups`: Auto-generated directory for database backups (gitignored)
+- `snapshots`: Directory for named database snapshots (gitignored)
 
 ### Where to add new data
 
@@ -66,3 +84,20 @@
 ### New routes/pages/segments
 
 - Adhere to the Next.js App Router rules and conventions for building new pages in the app.
+
+## Database Management
+
+### Quick Reference
+
+- **Start database:** `docker-compose up -d postgres`
+- **Apply schema changes:** `pnpm db:push`
+- **Create backup:** `.\scripts\backup.ps1` (Windows) or `./scripts/backup.sh` (Linux/macOS)
+- **Explore database:** `pnpm db:studio`
+- **Database shell:** `docker exec -it markenmate-postgres psql -U markenmate -d markenmate`
+
+### Important Notes
+
+- Database data persists in Docker volume `postgres_data`
+- Backups are stored in `./backups/` directory (auto-rotated, keeps last 10)
+- Always create a snapshot before risky operations
+- See [DATABASE.md](DATABASE.md) for comprehensive documentation

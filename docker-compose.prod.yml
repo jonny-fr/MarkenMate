@@ -1,13 +1,26 @@
 # Production Docker Compose Override
 # Verwendung: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 
-version: '3.9'
-
 services:
+  postgres:
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      # Don't expose PostgreSQL port externally in production for security
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
   app:
     restart: always
     environment:
       - NODE_ENV=production
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET}
       - NEXT_PUBLIC_BETTER_AUTH_URL=${NEXT_PUBLIC_BETTER_AUTH_URL}
     healthcheck:

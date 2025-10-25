@@ -6,23 +6,20 @@ WORKDIR /app
 # Copy package files
 COPY package.json package-lock.json* pnpm-lock.yaml* ./
 
-# Install dependencies using npm (more reliable in Docker)
+# Install all dependencies (including devDependencies for build)
 RUN npm install
 
-# Copy all source code
+# Copy all source code and configuration
 COPY . .
 
-# Ensure .env exists (required by Next.js)
-RUN test -f .env || echo "DATABASE_URL=file:./src/db/localdb.sqlite" > .env && echo "BETTER_AUTH_SECRET=build-secret" >> .env && echo "NEXT_PUBLIC_BETTER_AUTH_URL=http://localhost:3000" >> .env
+# Ensure .env exists (required by Next.js build - will be overridden at runtime)
+RUN test -f .env || echo "DATABASE_URL=postgresql://placeholder:placeholder@localhost:5432/placeholder" > .env && echo "BETTER_AUTH_SECRET=build-secret-placeholder" >> .env && echo "NEXT_PUBLIC_BETTER_AUTH_URL=http://localhost:3000" >> .env
 
-# Initialize database schema during build
-RUN npm run db:push || echo "ℹ️  Note: Database schema will be initialized at runtime if needed"
-
-# Remove Turbopack from build script to avoid LICENSE parsing issues
-RUN sed -i 's/--turbopack//' package.json
-
-# Build the application
+# Build the application (without database access at build time)
 RUN npm run build
+
+# Verify scripts directory exists
+RUN test -d scripts && echo "✓ scripts directory found" || echo "✗ scripts directory not found"
 
 # Runtime stage
 FROM node:20-alpine
@@ -32,28 +29,33 @@ WORKDIR /app
 # Install dumb-init for proper signal handling
 RUN apk add --no-cache dumb-init
 
-# Copy dependency files
+# Copy package files
 COPY package.json package-lock.json* pnpm-lock.yaml* ./
 
-# Install only production dependencies
-RUN npm install --production
+# Install all dependencies (including drizzle-kit needed by init-schema.js at runtime)
+RUN npm install
 
 # Copy built application from builder
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 
-# Create directories for database
-RUN mkdir -p /app/data
+# Copy source and config files needed for database operations
+COPY --from=builder /app/src ./src
+COPY --from=builder /app/drizzle.config.ts ./drizzle.config.ts
+COPY --from=builder /app/scripts ./scripts
+
+# Make init scripts executable
+RUN chmod +x scripts/*.js scripts/*.sh 2>/dev/null || chmod +x scripts/*.js || true
 
 # Expose port
 EXPOSE 3000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+# Health check - wait longer for initial schema creation
+HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000/api/health', (res) => { if (res.statusCode !== 200) throw new Error(res.statusCode) })"
 
 # Use dumb-init to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]
 
-# Start the application
+# Start the application (init-schema.js runs before next start)
 CMD ["npm", "start"]

@@ -43,6 +43,22 @@ jest.config.js
 README.md
 AGENTS.md
 docs
+DATABASE.md
+MIGRATION_GUIDE.md
+POSTGRES_QUICKSTART.md
+*_ANALYSIS.md
+*_FIXES*.md
+*_DOCKER*.md
+*_SUCCESS.md
+
+# Database files
+*.sqlite
+*.sqlite-*
+backups/
+snapshots/
+
+# PowerShell script (not needed in container)
+db-management.psm1
 
 # Other
 .editorconfig
@@ -52,3 +68,4 @@ biome.json
 # KEEP these files - they're needed for the build!
 # tsconfig.json - NEEDED for path resolution
 # next.config.ts - NEEDED for Next.js build
+# scripts/ - NEEDED for database initialization
