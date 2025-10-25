@@ -14,6 +14,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import { AuroraBackground } from "@/components/aurora";
 import {
   Card,
   CardContent,
@@ -55,33 +56,35 @@ function StatCard({
   isTrendPositive: boolean;
 }) {
   return (
-    <Card className="flex-1">
-      <CardContent className="pt-6">
-        <div className="space-y-4">
-          <p className="text-sm font-medium text-muted-foreground">{title}</p>
-          <div className="space-y-2">
-            <div className="text-3xl font-bold text-foreground">
-              {value}
-              {unit && <span className="text-lg ml-1">{unit}</span>}
-            </div>
-            <div className="flex items-center gap-2">
-              {isTrendPositive ? (
-                <TrendingUp className="size-4 text-green-500" />
-              ) : (
-                <TrendingDown className="size-4 text-red-500" />
-              )}
-              <span
-                className={`text-sm font-medium ${
-                  isTrendPositive ? "text-green-500" : "text-red-500"
-                }`}
-              >
-                {Math.abs(trend)}%
-              </span>
+    <AuroraBackground className="rounded-lg">
+      <Card className="flex-1 border-none bg-transparent backdrop-blur-sm">
+        <CardContent className="pt-6">
+          <div className="space-y-4">
+            <p className="text-sm font-medium text-muted-foreground">{title}</p>
+            <div className="space-y-2">
+              <div className="text-3xl font-bold text-muted-foreground">
+                {value}
+                {unit && <span className="text-lg ml-1">{unit}</span>}
+              </div>
+              <div className="flex items-center gap-2">
+                {isTrendPositive ? (
+                  <TrendingUp className="size-4 text-green-500" />
+                ) : (
+                  <TrendingDown className="size-4 text-red-500" />
+                )}
+                <span
+                  className={`text-sm font-medium ${
+                    isTrendPositive ? "text-green-500" : "text-red-500"
+                  }`}
+                >
+                  {Math.abs(trend)}%
+                </span>
+              </div>
             </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </AuroraBackground>
   );
 }
 
@@ -169,11 +172,12 @@ export function StatsView({
       </div>
 
       {/* Graph Section */}
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
-              <CardTitle>Detaillierte Ausgaben</CardTitle>
+      <AuroraBackground className="rounded-lg">
+        <Card className="border-none bg-transparent backdrop-blur-sm">
+          <CardHeader>
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <CardTitle className="text-muted-foreground">Detaillierte Ausgaben</CardTitle>
               <CardDescription>
                 Wählen Sie Kontext und Dauer zur Analyse
               </CardDescription>
@@ -286,6 +290,7 @@ export function StatsView({
           </p>
         </CardContent>
       </Card>
+      </AuroraBackground>
     </div>
   );
 }

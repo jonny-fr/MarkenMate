@@ -2,6 +2,7 @@
 
 import { use } from "react";
 import { ChevronDown } from "lucide-react";
+import { AuroraBackground } from "@/components/aurora";
 import {
   Card,
   CardContent,

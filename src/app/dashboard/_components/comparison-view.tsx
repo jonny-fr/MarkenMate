@@ -6,6 +6,7 @@ import {CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XA
 
 import {Badge} from "@/components/ui/badge";
 import {Button} from "@/components/ui/button";
+import { AuroraBackground } from "@/components/aurora";
 import {Card, CardContent, CardDescription, CardHeader, CardTitle,} from "@/components/ui/card";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
 
@@ -174,18 +175,19 @@ export function ComparisonView({
       </div>
 
       {/* Graph Section */}
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
-              <CardTitle>Vergleichsgraph</CardTitle>
+      <AuroraBackground className="rounded-lg">
+        <Card className="border-none bg-transparent backdrop-blur-sm">
+          <CardHeader>
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <CardTitle className="text-muted-foreground">Vergleichsgraph</CardTitle>
               <CardDescription>
                 Vergleiche die Ausgaben und Häufigkeit zwischen Restaurants
               </CardDescription>
             </div>
             <div className="flex gap-3 flex-col sm:flex-row">
               <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectTrigger className="w-full sm:w-[180px] text-muted-foreground">
                   <SelectValue placeholder="Kategorie" />
                 </SelectTrigger>
                 <SelectContent>
@@ -195,7 +197,7 @@ export function ComparisonView({
                 </SelectContent>
               </Select>
               <Select value={timeInterval} onValueChange={setTimeInterval}>
-                <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectTrigger className="w-full sm:w-[180px] text-muted-foreground">
                   <SelectValue placeholder="Zeitraum" />
                 </SelectTrigger>
                 <SelectContent>
@@ -209,21 +211,26 @@ export function ComparisonView({
           </div>
         </CardHeader>
         <CardContent>
-          <div className="h-[400px] w-full">
+          <div className="h-[400px] w-full bg-transparent">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="dateShort" />
-                <YAxis />
+              <LineChart data={chartData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.2)" />
+                <XAxis dataKey="dateShort" stroke="rgba(148, 163, 184, 0.6)" />
+                <YAxis stroke="rgba(148, 163, 184, 0.6)" />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "var(--background)",
-                    border: "1px solid var(--border)",
+                    backgroundColor: "rgba(15, 15, 25, 0.9)",
+                    border: "1px solid rgba(168, 85, 247, 0.3)",
                     borderRadius: "0.5rem",
+                    backdropFilter: "blur(8px)",
                   }}
-                  labelStyle={{ color: "var(--foreground)" }}
+                  labelStyle={{ color: "rgba(148, 163, 184, 0.8)" }}
+                  cursor={{ stroke: "rgba(168, 85, 247, 0.3)" }}
                 />
-                <Legend />
+                <Legend
+                  wrapperStyle={{ paddingTop: "20px" }}
+                  iconType="line"
+                />
                 {selectedRestaurants.map((restaurantId, index) => (
                   <Line
                     key={restaurantId}
@@ -240,15 +247,17 @@ export function ComparisonView({
           </div>
         </CardContent>
       </Card>
+      </AuroraBackground>
 
       {/* Restaurant Selection Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Zu vergleichende Restaurants</CardTitle>
-          <CardDescription>
-            Wähle die Restaurants aus, die du vergleichen möchtest
-          </CardDescription>
-        </CardHeader>
+      <AuroraBackground className="rounded-lg">
+        <Card className="border-none bg-transparent backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="text-muted-foreground">Zu vergleichende Restaurants</CardTitle>
+            <CardDescription>
+              Wähle die Restaurants aus, die du vergleichen möchtest
+            </CardDescription>
+          </CardHeader>
         <CardContent className="space-y-4">
           {/* Selected Restaurants */}
           <div className="space-y-3">
@@ -257,15 +266,15 @@ export function ComparisonView({
                 key={restaurantId}
                 className="flex items-center justify-between rounded-lg border border-border/60 bg-card/70 p-3"
               >
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                  />
-                  <div className="flex flex-col">
-                    <span className="font-medium text-foreground">
-                      {getRestaurantName(restaurantId)}
-                    </span>
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-3 h-3 rounded-full"
+                      style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                    />
+                    <div className="flex flex-col">
+                      <span className="font-medium text-muted-foreground">
+                        {getRestaurantName(restaurantId)}
+                      </span>
                     <span className="text-xs text-muted-foreground">
                       {
                         restaurants.find((r) => r.id === restaurantId)
@@ -304,7 +313,7 @@ export function ComparisonView({
                   {availableRestaurants.map((restaurant) => (
                     <SelectItem key={restaurant.id} value={restaurant.id}>
                       <div className="flex items-center gap-2">
-                        <span>{restaurant.name}</span>
+                        <span className="text-muted-foreground">{restaurant.name}</span>
                         <Badge variant="secondary" className="ml-2">
                           {restaurant.rating.toFixed(1)} ⭐
                         </Badge>
@@ -324,6 +333,7 @@ export function ComparisonView({
           )}
         </CardContent>
       </Card>
+      </AuroraBackground>
     </div>
   );
 }

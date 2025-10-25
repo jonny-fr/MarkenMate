@@ -5,6 +5,7 @@ import { Minus, Plus, MoreVertical, Trash2, Users } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { AuroraBackground } from "@/components/aurora";
 import {
   Card,
   CardContent,
@@ -107,59 +108,66 @@ export function LendingView({
       {/* Drei Container mit Statistiken */}
       <div className="grid gap-4 md:grid-cols-3">
         {/* Verliehen */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Verliehen</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-green-600">
-              {stats.lent}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Marken an Personen verliehen
-            </p>
-          </CardContent>
-        </Card>
+        <AuroraBackground className="rounded-lg">
+          <Card className="border-none bg-transparent backdrop-blur-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base text-muted-foreground">Verliehen</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-green-600">
+                {stats.lent}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Marken an Personen verliehen
+              </p>
+            </CardContent>
+          </Card>
+        </AuroraBackground>
 
         {/* Schulden */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Schulden</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-red-600">
-              {stats.owed}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Marken zu begleichen
-            </p>
-          </CardContent>
-        </Card>
+        <AuroraBackground className="rounded-lg">
+          <Card className="border-none bg-transparent backdrop-blur-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base text-muted-foreground">Schulden</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-red-600">
+                {stats.owed}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Marken zu begleichen
+              </p>
+            </CardContent>
+          </Card>
+        </AuroraBackground>
 
         {/* Gesamt */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Gesamt</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className={`text-3xl font-bold ${getTotalColor(stats.total)}`}>
-              {stats.total > 0 ? "+" : ""}{stats.total}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Nettostand
-            </p>
-          </CardContent>
-        </Card>
+        <AuroraBackground className="rounded-lg">
+          <Card className="border-none bg-transparent backdrop-blur-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base text-muted-foreground">Gesamt</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className={`text-3xl font-bold ${getTotalColor(stats.total)}`}>
+                {stats.total > 0 ? "+" : ""}{stats.total}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Nettostand
+              </p>
+            </CardContent>
+          </Card>
+        </AuroraBackground>
       </div>
 
       {/* Liste der Personen */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Personen</CardTitle>
-          <CardDescription>
-            Verwalte ausgeliehene und geschuldete Essensmarken
-          </CardDescription>
-        </CardHeader>
+      <AuroraBackground className="rounded-lg">
+        <Card className="border-none bg-transparent backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="text-muted-foreground">Personen</CardTitle>
+            <CardDescription>
+              Verwalte ausgeliehene und geschuldete Essensmarken
+            </CardDescription>
+          </CardHeader>
         <CardContent className="space-y-3">
           {sortedUsers.length === 0 ? (
             <div className="flex items-center justify-center py-8 text-muted-foreground">
@@ -174,7 +182,7 @@ export function LendingView({
                 <div className="flex flex-1 flex-col gap-1">
                   <div className="flex items-center gap-2">
                     <Users className="size-4" />
-                    <span className="font-medium text-foreground">
+                    <span className="font-medium text-muted-foreground">
                       {user.name}
                     </span>
                   </div>
@@ -289,6 +297,7 @@ export function LendingView({
           </div>
         )}
       </Card>
+      </AuroraBackground>
     </div>
   );
 }
