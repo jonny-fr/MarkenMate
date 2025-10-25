@@ -1,0 +1,30 @@
+.app-sidebar-with-liquid-ether {
+  position: relative;
+  background: #0f172a; /* Dunkelblau Hintergrund */
+  color: #d1d5db; /* Grau Textfarbe */
+}
+
+.app-sidebar-with-liquid-ether [data-sidebar="sidebar"] {
+  background: transparent !important;
+  color: #d1d5db !important;
+}
+
+.app-sidebar-with-liquid-ether [data-slot="sidebar-inner"] {
+  background: transparent !important;
+  color: #d1d5db !important;
+}
+
+.app-sidebar-with-liquid-ether * {
+  color: #d1d5db;
+}
+
+.app-sidebar-liquid-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  height: 100%;
+  width: 100%;
+  pointer-events: none;
+  opacity: 0.8; /* Etwas transparent für dunkelblau Basis-Farbe */
+}
+

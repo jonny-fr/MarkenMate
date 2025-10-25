@@ -204,7 +204,7 @@ export function LendingView({
                       onClick={() => adjustBalance(user.id, 1)}
                       title="Schulden verringern"
                     >
-                      <Plus className="size-4" />
+                      <Plus className="size-4 text-black dark:text-black" />
                     </Button>
                   ) : user.balance > 0 ? (
                     // Verliehen (positiv) - Minus-Button
@@ -216,7 +216,7 @@ export function LendingView({
                       onClick={() => adjustBalance(user.id, -1)}
                       title="Verliehene Marken verringern"
                     >
-                      <Minus className="size-4" />
+                      <Minus className="size-4 text-black dark:text-black" />
                     </Button>
                   ) : null}
 
