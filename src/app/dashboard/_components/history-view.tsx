@@ -6,7 +6,7 @@ import {
   Card,
   CardContent,
 } from "@/components/ui/card";
-import { StarBorder } from "@/components/star-border";
+import StarBorder from "@/components/StarBorder";
 import { AuroraBackground } from "@/components/aurora";
 
 export type HistoryItem = {

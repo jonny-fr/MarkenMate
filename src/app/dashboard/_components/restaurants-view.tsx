@@ -4,7 +4,7 @@ import { use } from "react";
 import { ChevronDown, MapPin, Star } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { StarBorder } from "@/components/star-border";
+import StarBorder from "@/components/StarBorder";
 import { AuroraBackground } from "@/components/aurora";
 import {
   Card,
@@ -150,4 +150,3 @@ export function RestaurantsView({
     </div>
   );
 }
-

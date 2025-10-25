@@ -6,7 +6,7 @@ import {CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XA
 
 import {Badge} from "@/components/ui/badge";
 import {Button} from "@/components/ui/button";
-import { StarBorder } from "@/components/star-border";
+import StarBorder from "@/components/StarBorder";
 import { AuroraBackground } from "@/components/aurora";
 import {Card, CardContent, CardDescription, CardHeader, CardTitle,} from "@/components/ui/card";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";

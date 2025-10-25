@@ -5,7 +5,7 @@ import { Minus, Plus, Users } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { StarBorder } from "@/components/star-border";
+import StarBorder from "@/components/StarBorder";
 import { AuroraBackground } from "@/components/aurora";
 import {
   Card,

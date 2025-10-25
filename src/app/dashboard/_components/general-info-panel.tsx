@@ -4,7 +4,7 @@ import { use } from "react";
 import { Clock, Info, Mail, MapPin, Phone } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { StarBorder } from "@/components/star-border";
+import StarBorder from "@/components/StarBorder";
 import { AuroraBackground } from "@/components/aurora";
 import {
   Card,
