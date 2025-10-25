@@ -2,11 +2,12 @@
 
 import { use } from "react";
 import { ChevronDown } from "lucide-react";
-import { AuroraBackground } from "@/components/aurora";
 import {
   Card,
   CardContent,
 } from "@/components/ui/card";
+import { StarBorder } from "@/components/star-border";
+import { AuroraBackground } from "@/components/aurora";
 
 export type HistoryItem = {
   id: string;
@@ -30,42 +31,44 @@ function TransactionCard({ item }: { item: HistoryItem }) {
   });
 
   return (
-    <details className="group rounded-lg border border-border/60 bg-card/80 p-4 transition-all open:bg-card">
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
-        <div className="space-y-1 flex-1">
-          <p className="text-sm font-medium text-muted-foreground">
-            {formattedDate}
-          </p>
-          <p className="text-base font-semibold text-foreground">
-            {item.restaurant}
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <p className="text-lg font-bold text-foreground">
-            €{item.totalPrice.toFixed(2)}
-          </p>
-          <ChevronDown className="size-4 transition-transform group-open:-rotate-180" />
-        </div>
-      </summary>
-      <div className="mt-4 space-y-2 border-t border-border/50 pt-4">
-        {item.items.map((product) => (
-          <div
-            key={product.id}
-            className="flex items-center justify-between gap-4 text-sm"
-          >
-            <div className="flex-1">
-              <p className="font-medium text-foreground">{product.name}</p>
-              <p className="text-xs text-muted-foreground">
-                Menge: {product.quantity}
-              </p>
-            </div>
-            <p className="font-semibold text-foreground">
-              €{(product.price * product.quantity).toFixed(2)}
+    <StarBorder className="rounded-lg" color="rgba(168, 85, 247, 0.8)" speed="6s">
+      <details className="group rounded-lg border border-border/60 bg-card/80 p-4 transition-all open:bg-card">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
+          <div className="space-y-1 flex-1">
+            <p className="text-sm font-medium text-muted-foreground">
+              {formattedDate}
+            </p>
+            <p className="text-base font-semibold text-foreground">
+              {item.restaurant}
             </p>
           </div>
-        ))}
-      </div>
-    </details>
+          <div className="flex items-center gap-3">
+            <p className="text-lg font-bold text-foreground">
+              €{item.totalPrice.toFixed(2)}
+            </p>
+            <ChevronDown className="size-4 transition-transform group-open:-rotate-180" />
+          </div>
+        </summary>
+        <div className="mt-4 space-y-2 border-t border-border/50 pt-4">
+          {item.items.map((product) => (
+            <div
+              key={product.id}
+              className="flex items-center justify-between gap-4 text-sm"
+            >
+              <div className="flex-1">
+                <p className="font-medium text-foreground">{product.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  Menge: {product.quantity}
+                </p>
+              </div>
+              <p className="font-semibold text-foreground">
+                €{(product.price * product.quantity).toFixed(2)}
+              </p>
+            </div>
+          ))}
+        </div>
+      </details>
+    </StarBorder>
   );
 }
 
@@ -83,19 +86,23 @@ function HistorySection({
   const totalCost = items.reduce((sum, item) => sum + item.totalPrice, 0);
 
   return (
-    <div className="space-y-4 pb-8">
-      <h2 className="text-lg font-semibold text-foreground">{title}</h2>
-      <div className="space-y-3">
-        {items.map((item) => (
-          <TransactionCard key={item.id} item={item} />
-        ))}
-      </div>
-      <div className="pt-4 border-t border-border/40 pr-8">
-        <p className="text-right text-2xl font-bold text-foreground">
-          €{totalCost.toFixed(2)}
-        </p>
-      </div>
-    </div>
+    <AuroraBackground className="rounded-lg">
+      <Card className="border-none bg-transparent backdrop-blur-sm">
+        <CardContent className="space-y-4 pt-6">
+          <h2 className="text-lg font-semibold text-muted-foreground">{title}</h2>
+          <div className="space-y-3">
+            {items.map((item) => (
+              <TransactionCard key={item.id} item={item} />
+            ))}
+          </div>
+          <div className="pt-4 border-t border-border/40">
+            <p className="text-right text-2xl font-bold text-muted-foreground">
+              €{totalCost.toFixed(2)}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    </AuroraBackground>
   );
 }
 

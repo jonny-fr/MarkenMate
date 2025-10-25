@@ -6,6 +6,7 @@ import {CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XA
 
 import {Badge} from "@/components/ui/badge";
 import {Button} from "@/components/ui/button";
+import { StarBorder } from "@/components/star-border";
 import { AuroraBackground } from "@/components/aurora";
 import {Card, CardContent, CardDescription, CardHeader, CardTitle,} from "@/components/ui/card";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
@@ -262,10 +263,10 @@ export function ComparisonView({
           {/* Selected Restaurants */}
           <div className="space-y-3">
             {selectedRestaurants.map((restaurantId, index) => (
-              <div
-                key={restaurantId}
-                className="flex items-center justify-between rounded-lg border border-border/60 bg-card/70 p-3"
-              >
+              <StarBorder key={restaurantId} className="rounded-lg" color="rgba(168, 85, 247, 0.8)" speed="6s">
+                <div
+                  className="flex items-center justify-between rounded-lg border border-border/60 bg-card/70 p-3"
+                >
                   <div className="flex items-center gap-3">
                     <div
                       className="w-3 h-3 rounded-full"
@@ -295,7 +296,8 @@ export function ComparisonView({
                     <X className="size-4" />
                   </Button>
                 )}
-              </div>
+                </div>
+              </StarBorder>
             ))}
           </div>
 

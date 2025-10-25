@@ -4,6 +4,7 @@ import { use } from "react";
 import { Clock, Info, Mail, MapPin, Phone } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { StarBorder } from "@/components/star-border";
 import { AuroraBackground } from "@/components/aurora";
 import {
   Card,
@@ -50,13 +51,12 @@ export function GeneralInfoPanel({
             </div>
             <ul className="grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
               {info.openingHours.map((slot) => (
-                <li
-                  key={slot.day}
-                  className="flex items-center justify-between rounded-lg border border-border/60 bg-background/60 px-3 py-2"
-                >
-                  <span className="font-medium text-muted-foreground">{slot.day}</span>
-                  <span className="text-muted-foreground">{slot.hours}</span>
-                </li>
+                <StarBorder key={slot.day} className="rounded-lg" color="rgba(168, 85, 247, 0.8)" speed="6s">
+                  <li className="flex items-center justify-between rounded-lg border border-border/60 bg-background/60 px-3 py-2">
+                    <span className="font-medium text-muted-foreground">{slot.day}</span>
+                    <span className="text-muted-foreground">{slot.hours}</span>
+                  </li>
+                </StarBorder>
               ))}
             </ul>
           </section>
@@ -66,9 +66,11 @@ export function GeneralInfoPanel({
               <MapPin className="size-4" />
               Standort
             </div>
-            <p className="rounded-lg border border-dashed border-border/60 bg-background/60 px-3 py-2 text-sm text-muted-foreground">
-              {info.location}
-            </p>
+            <StarBorder className="rounded-lg" color="rgba(168, 85, 247, 0.8)" speed="6s">
+              <p className="rounded-lg border border-dashed border-border/60 bg-background/60 px-3 py-2 text-sm text-muted-foreground">
+                {info.location}
+              </p>
+            </StarBorder>
           </section>
 
           <section className="space-y-2">
@@ -76,17 +78,16 @@ export function GeneralInfoPanel({
               <Info className="size-4" />
               Hinweise
             </div>
-            <ul className="space-y-2 text-sm text-muted-foreground">
+            <ul className="grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
               {info.notes.map((note, index) => (
-                <li
-                  key={`${note}-${index.toString()}`}
-                  className="flex items-start gap-2 rounded-lg border border-border/60 bg-background/60 px-3 py-2"
-                >
-                  <Badge variant="secondary" className="mt-0.5">
-                    Neu
-                  </Badge>
-                  <span>{note}</span>
-                </li>
+                <StarBorder key={`${note}-${index.toString()}`} className="rounded-lg" color="rgba(168, 85, 247, 0.8)" speed="6s">
+                  <li className="flex items-start gap-2 rounded-lg border border-border/60 bg-background/60 px-3 py-2">
+                    <Badge variant="secondary" className="mt-0.5">
+                      Neu
+                    </Badge>
+                    <span>{note}</span>
+                  </li>
+                </StarBorder>
               ))}
             </ul>
           </section>

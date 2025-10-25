@@ -8,14 +8,7 @@ import {
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardAction,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { ProfileCard } from "@/components/profile-card";
 
 const overviewCards = [
   {
@@ -56,28 +49,31 @@ const overviewCards = [
 
 export function SectionCards() {
   return (
-    <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
+    <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
       {overviewCards.map((card) => (
-        <Card key={card.title} className="@container/card">
-          <CardHeader>
-            <CardDescription>{card.title}</CardDescription>
-            <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-              {card.value}
-            </CardTitle>
-            <CardAction>
-              <Badge variant="outline" className="gap-1.5">
-                <card.icon className="size-4" />
-                {card.badgeLabel}
-              </Badge>
-            </CardAction>
-          </CardHeader>
-          <CardFooter className="flex-col items-start gap-1.5 text-sm">
-            <div className="line-clamp-2 flex gap-2 font-medium">
-              <Sparkles className="size-4" />
-              {card.description}
+        <ProfileCard key={card.title} className="@container/card">
+          <div className="flex flex-col gap-3">
+            <div className="flex items-start justify-between">
+              <div className="flex flex-col gap-2">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  {card.title}
+                </p>
+                <p className="text-2xl font-bold tabular-nums text-foreground @[250px]/card:text-3xl">
+                  {card.value}
+                </p>
+              </div>
+              <card.icon className="size-5 text-muted-foreground opacity-60" />
             </div>
-          </CardFooter>
-        </Card>
+            <Badge variant="outline" className="w-fit gap-1.5">
+              <card.icon className="size-4" />
+              {card.badgeLabel}
+            </Badge>
+            <div className="flex gap-2 text-xs text-muted-foreground">
+              <Sparkles className="size-3.5 mt-0.5 flex-shrink-0" />
+              <span className="line-clamp-2">{card.description}</span>
+            </div>
+          </div>
+        </ProfileCard>
       ))}
     </div>
   );

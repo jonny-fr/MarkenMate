@@ -5,6 +5,7 @@ import { Minus, Plus, MoreVertical, Trash2, Users } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { StarBorder } from "@/components/star-border";
 import { AuroraBackground } from "@/components/aurora";
 import {
   Card,
@@ -175,10 +176,10 @@ export function LendingView({
             </div>
           ) : (
             sortedUsers.map((user) => (
-              <div
-                key={user.id}
-                className="flex items-center justify-between rounded-lg border border-border/60 bg-card/70 p-3"
-              >
+              <StarBorder key={user.id} className="rounded-lg" color="rgba(168, 85, 247, 0.8)" speed="6s">
+                <div
+                  className="flex items-center justify-between rounded-lg border border-border/60 bg-card/70 p-3"
+                >
                 <div className="flex flex-1 flex-col gap-1">
                   <div className="flex items-center gap-2">
                     <Users className="size-4" />
@@ -278,6 +279,7 @@ export function LendingView({
                   </DropdownMenu>
                 </div>
               </div>
+            </StarBorder>
             ))
           )}
         </CardContent>

@@ -5,6 +5,7 @@ import { TrendingUp } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 
 import { useIsMobile } from "@/hooks/use-mobile";
+import { AuroraBackground } from "@/components/aurora";
 import {
   Card,
   CardAction,
@@ -134,107 +135,121 @@ export function ChartAreaInteractive() {
   );
 
   return (
-    <Card className="@container/card" id="comparison">
-      <CardHeader>
-        <CardTitle>Restaurant-Vergleich</CardTitle>
-        <CardDescription>
-          Markenverbrauch pro Woche im ausgewählten Zeitraum
-        </CardDescription>
-        <CardAction className="gap-2">
-          <ToggleGroup
-            type="single"
-            value={timeRange}
-            onValueChange={(value) => {
-              if (value) {
-                setTimeRange(value as RangeValue);
-              }
-            }}
-            variant="outline"
-            className="hidden @[767px]/card:flex *:data-[slot=toggle-group-item]:!px-4"
-          >
-            {RANGE_OPTIONS.map((option) => (
-              <ToggleGroupItem key={option.value} value={option.value}>
-                {option.label}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
-          <Select
-            value={timeRange}
-            onValueChange={(value) => setTimeRange(value as RangeValue)}
-          >
-            <SelectTrigger className="flex w-40 @[767px]/card:hidden">
-              <SelectValue placeholder="Zeitraum auswählen" />
-            </SelectTrigger>
-            <SelectContent className="rounded-xl">
+    <AuroraBackground className="rounded-2xl">
+      <Card className="border-none bg-transparent backdrop-blur-sm @container/card" id="comparison">
+        <CardHeader>
+          <CardTitle className="text-muted-foreground">Restaurant-Vergleich</CardTitle>
+          <CardDescription>
+            Markenverbrauch pro Woche im ausgewählten Zeitraum
+          </CardDescription>
+          <CardAction className="gap-2">
+            <ToggleGroup
+              type="single"
+              value={timeRange}
+              onValueChange={(value) => {
+                if (value) {
+                  setTimeRange(value as RangeValue);
+                }
+              }}
+              variant="outline"
+              className="hidden @[767px]/card:flex *:data-[slot=toggle-group-item]:!px-4 [&_button]:text-muted-foreground"
+            >
               {RANGE_OPTIONS.map((option) => (
-                <SelectItem
-                  key={option.value}
-                  value={option.value}
-                  className="rounded-lg"
-                >
+                <ToggleGroupItem key={option.value} value={option.value}>
                   {option.label}
-                </SelectItem>
+                </ToggleGroupItem>
               ))}
-            </SelectContent>
-          </Select>
-        </CardAction>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <ChartContainer config={chartConfig}>
-          <AreaChart data={filteredData}>
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="period"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-            />
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent indicator="dot" />}
-            />
-            <ChartLegend
-              verticalAlign="top"
-              content={<ChartLegendContent className="pt-0" />}
-            />
-            <Area
-              dataKey="pastaLoft"
-              type="monotone"
-              stroke="var(--color-pastaLoft)"
-              fill="var(--color-pastaLoft)"
-              fillOpacity={0.2}
-              strokeWidth={2}
-              dot={false}
-            />
-            <Area
-              dataKey="greenBowl"
-              type="monotone"
-              stroke="var(--color-greenBowl)"
-              fill="var(--color-greenBowl)"
-              fillOpacity={0.2}
-              strokeWidth={2}
-              dot={false}
-            />
-            <Area
-              dataKey="burgerWerk"
-              type="monotone"
-              stroke="var(--color-burgerWerk)"
-              fill="var(--color-burgerWerk)"
-              fillOpacity={0.2}
-              strokeWidth={2}
-              dot={false}
-            />
-          </AreaChart>
-        </ChartContainer>
-        <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
-          <Badge variant="outline" className="gap-1.5">
-            <TrendingUp className="size-4" />
-            {leadingLabel} führt mit{" "}
-            {numberFormatter.format(totals[leadingKey])} Marken
-          </Badge>
-          <span className="text-muted-foreground">{rangeLabel}</span>
-        </div>
-      </CardContent>
-    </Card>
+            </ToggleGroup>
+            <Select
+              value={timeRange}
+              onValueChange={(value) => setTimeRange(value as RangeValue)}
+            >
+              <SelectTrigger className="flex w-40 @[767px]/card:hidden text-muted-foreground">
+                <SelectValue placeholder="Zeitraum auswählen" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl">
+                {RANGE_OPTIONS.map((option) => (
+                  <SelectItem
+                    key={option.value}
+                    value={option.value}
+                    className="rounded-lg"
+                  >
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </CardAction>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <ChartContainer config={chartConfig}>
+            <AreaChart data={filteredData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.2)" />
+              <XAxis
+                dataKey="period"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                stroke="rgba(148, 163, 184, 0.6)"
+              />
+              <ChartTooltip
+                cursor={{ stroke: "rgba(168, 85, 247, 0.3)" }}
+                content={
+                  <ChartTooltipContent
+                    indicator="dot"
+                    contentStyle={{
+                      backgroundColor: "rgba(15, 15, 25, 0.9)",
+                      border: "1px solid rgba(168, 85, 247, 0.3)",
+                      borderRadius: "0.5rem",
+                      backdropFilter: "blur(8px)",
+                    }}
+                    labelStyle={{ color: "rgba(148, 163, 184, 0.8)" }}
+                  />
+                }
+              />
+              <ChartLegend
+                verticalAlign="top"
+                content={<ChartLegendContent className="pt-0 [&_*]:!text-muted-foreground" />}
+              />
+              <Area
+                dataKey="pastaLoft"
+                type="monotone"
+                stroke="var(--color-pastaLoft)"
+                fill="var(--color-pastaLoft)"
+                fillOpacity={0.2}
+                strokeWidth={2}
+                dot={false}
+              />
+              <Area
+                dataKey="greenBowl"
+                type="monotone"
+                stroke="var(--color-greenBowl)"
+                fill="var(--color-greenBowl)"
+                fillOpacity={0.2}
+                strokeWidth={2}
+                dot={false}
+              />
+              <Area
+                dataKey="burgerWerk"
+                type="monotone"
+                stroke="var(--color-burgerWerk)"
+                fill="var(--color-burgerWerk)"
+                fillOpacity={0.2}
+                strokeWidth={2}
+                dot={false}
+              />
+            </AreaChart>
+          </ChartContainer>
+          <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+            <Badge variant="outline" className="gap-1.5 text-muted-foreground">
+              <TrendingUp className="size-4" />
+              {leadingLabel} führt mit{" "}
+              {numberFormatter.format(totals[leadingKey])} Marken
+            </Badge>
+            <span className="text-muted-foreground">{rangeLabel}</span>
+          </div>
+        </CardContent>
+      </Card>
+    </AuroraBackground>
   );
 }
