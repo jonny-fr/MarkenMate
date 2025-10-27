@@ -9,8 +9,7 @@
     "lint": "biome check",
     "format": "biome format --write",
     "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio",
-    "postinstall": "bash -c '([ ! -f src/components/LiquidEther.tsx ] && echo y | pnpm dlx shadcn@latest add https://reactbits.dev/r/LiquidEther-TS-TW --overwrite || true) && ([ ! -f src/components/StarBorder.tsx ] && echo y | pnpm dlx shadcn@latest add https://reactbits.dev/r/StarBorder-TS-TW --overwrite || true)'"
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -55,6 +54,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/three": "^0.128.0",
     "drizzle-kit": "^0.31.5",
     "server-only": "^0.0.1",
     "tailwindcss": "^4",

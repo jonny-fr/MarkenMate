@@ -3,11 +3,14 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
-COPY package.json package-lock.json* pnpm-lock.yaml* ./
+# Install pnpm globally
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Install dependencies using npm (more reliable in Docker)
-RUN npm install
+# Copy package files
+COPY package.json pnpm-lock.yaml* ./
+
+# Install dependencies using pnpm
+RUN pnpm install --frozen-lockfile
 
 # Copy all source code
 COPY . .
@@ -16,27 +19,27 @@ COPY . .
 RUN test -f .env || echo "DATABASE_URL=file:./src/db/localdb.sqlite" > .env && echo "BETTER_AUTH_SECRET=build-secret" >> .env && echo "NEXT_PUBLIC_BETTER_AUTH_URL=http://localhost:3000" >> .env
 
 # Initialize database schema during build
-RUN npm run db:push || echo "ℹ️  Note: Database schema will be initialized at runtime if needed"
+RUN pnpm db:push || echo "ℹ️  Note: Database schema will be initialized at runtime if needed"
 
 # Remove Turbopack from build script to avoid LICENSE parsing issues
 RUN sed -i 's/--turbopack//' package.json
 
 # Build the application
-RUN npm run build
+RUN pnpm build
 
 # Runtime stage
 FROM node:20-alpine
 
 WORKDIR /app
 
-# Install dumb-init for proper signal handling
-RUN apk add --no-cache dumb-init
+# Install pnpm and dumb-init for proper signal handling
+RUN corepack enable && corepack prepare pnpm@latest --activate && apk add --no-cache dumb-init
 
 # Copy dependency files
-COPY package.json package-lock.json* pnpm-lock.yaml* ./
+COPY package.json pnpm-lock.yaml* ./
 
 # Install only production dependencies
-RUN npm install --production
+RUN pnpm install --prod --frozen-lockfile
 
 # Copy built application from builder
 COPY --from=builder /app/.next ./.next
@@ -56,4 +59,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
 ENTRYPOINT ["dumb-init", "--"]
 
 # Start the application
-CMD ["npm", "start"]
+CMD ["pnpm", "start"]
