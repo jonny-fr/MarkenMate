@@ -7,6 +7,7 @@ import { ChartAreaInteractive } from "@/components/chart-area-interactive";
 import { SectionCards } from "@/components/section-cards";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   type LendingUser,
   TokenLendingPanel,
@@ -22,8 +23,8 @@ const restaurantsPromise: Promise<Restaurant[]> = Promise.resolve([
   {
     id: "pasta-loft",
     name: "Pasta Loft",
-    cuisine: "Italienisch · Frische Pasta",
-    address: "Innenstadt · Musterstraße 12",
+    cuisine: "Italienisch·  ",
+    address: "Innenstadt · Musterseddd 12",
     rating: 4.7,
     isOpen: true,
     dishes: [
@@ -584,6 +585,16 @@ export default function Page() {
                       <Suspense fallback={<LoadingCard label="Markenleihen" />}>
                         <TokenLendingPanel dataPromise={lendingPromise} />
                       </Suspense>
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Test Tile</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-sm text-muted-foreground">
+                            This is a temporary test tile. You can remove or repurpose it anytime.
+                          </p>
+                        </CardContent>
+                      </Card>
                     </div>
                   </div>
                 </>

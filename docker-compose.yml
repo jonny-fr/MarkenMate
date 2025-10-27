@@ -1,32 +1,10 @@
 services:
-  app:
+  web:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: markenmate-app
     ports:
-      - "3000:3000"
+      - "8080:80"
     environment:
-      # Database
-      - DATABASE_URL=file:/app/data/localdb.sqlite
-      
-      # Authentication
-      - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET:-your-secret-change-in-production}
-      - NEXT_PUBLIC_BETTER_AUTH_URL=http://localhost:3000
-      
-      # Node environment
-      - NODE_ENV=production
-    volumes:
-      # Persist database data
-      - app_data:/app/data
+      NODE_ENV: production
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-
-volumes:
-  app_data:
-    driver: local

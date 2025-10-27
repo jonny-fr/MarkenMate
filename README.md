@@ -75,3 +75,12 @@ To learn more about Next.js, take a look at the following resources:
 - [Next.js templates](https://vercel.com/templates/next.js) - need other functionality? Look here for other cool templates
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Development (HMR)
+docker compose -f docker-compose.dev.yml up
+# Vite: http://localhost:5173  |  CRA: http://localhost:3000
+# Next.js: http://localhost:3000 (Webpack dev server with polling; Turbopack disabled for Docker HMR)
+
+## Production
+docker compose up --build -d
+# http://localhost:8080
