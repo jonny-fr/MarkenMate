@@ -1,54 +1,30 @@
-# Dependencies - lokale Dependencies müssen neu installiert werden
 node_modules
-npm-debug.log
-yarn-error.log
-pnpm-debug.log
-
-# Git
+dist
+build
 .git
+.vscode
+.DS_Store
 .gitignore
 .gitattributes
-
-# Development
+.idea
+.env
+.env.example
 .env.local
+.next
 .env.development.local
 .env.test.local
 .env.production.local
-
-# Build artifacts
-.next
-dist
-build
+coverage
+.nyc_output
 *.tsbuildinfo
-
-# IDE
-.vscode
-.idea
+pnpm-debug.log
+npm-debug.log
+yarn-error.log
 *.swp
 *.swo
 *~
-.DS_Store
-
-# Testing
-coverage
-.nyc_output
-jest.config.js
-
-# CI/CD
-.github
-.gitlab-ci.yml
-.circleci
-
-# Documentation
+docs
 README.md
 AGENTS.md
-docs
-
-# Other
-.editorconfig
-.prettierrc
-.eslintrc
 biome.json
-# KEEP these files - they're needed for the build!
-# tsconfig.json - NEEDED for path resolution
-# next.config.ts - NEEDED for Next.js build
+.editorconfig

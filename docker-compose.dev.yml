@@ -1,0 +1,24 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    environment:
+      NODE_ENV: development
+      # Harmless if unused; helps Docker/WSL/VMs propagate changes:
+      CHOKIDAR_USEPOLLING: "true"   # Vite/Chokidar (some setups)
+      WATCHPACK_POLLING: "true"     # CRA/Webpack 5 watcher
+      WATCHPACK_POLLING_INTERVAL: "100"
+      NEXT_WEBPACK_USEPOLLING: "true"
+      NEXT_DISABLE_TURBOPACK: "1"
+      NEXT_FORCE_WEBPACK: "1"
+    ports:
+      - "5173:5173"   # Vite
+      - "3000:3000"   # CRA
+    working_dir: /app
+    volumes:
+      - .:/app                      # Live code mount (HMR)
+      - /app/node_modules           # Keep deps inside container
+      - pnpm-store:/root/.pnpm-store
+volumes:
+  pnpm-store:
