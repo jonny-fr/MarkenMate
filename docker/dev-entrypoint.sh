@@ -32,4 +32,3 @@ else
   exec sh -c "pnpm dev || pnpm start || node server.js"
 fi
 
-

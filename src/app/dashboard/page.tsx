@@ -22,7 +22,7 @@ const restaurantsPromise: Promise<Restaurant[]> = Promise.resolve([
   {
     id: "pasta-loft",
     name: "Pasta Loft",
-    cuisine: "Italienisch · Frische Pasta",
+    cuisine: " · Frische Pasta",
     address: "Innenstadt · Musterstraße 12",
     rating: 4.7,
     isOpen: true,
