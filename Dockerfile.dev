@@ -8,11 +8,23 @@ WORKDIR /app
 
 # Cache-friendly: lockfiles first
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm fetch && pnpm install --frozen-lockfile
+
+# Install dependencies with explicit rebuild of native modules
+RUN pnpm fetch
+RUN pnpm install --frozen-lockfile --prefer-frozen-lockfile
+
+# Ensure ogl is properly installed
+RUN pnpm install ogl --force
+
+# Install ReactBits Plasma-JS-CSS component
+RUN pnpm dlx shadcn@latest add https://reactbits.dev/r/Plasma-JS-CSS --overwrite
 
 # Autopilot entrypoint
 COPY docker/dev-entrypoint.sh /usr/local/bin/dev-entrypoint
 RUN chmod +x /usr/local/bin/dev-entrypoint
+
+# Copy the rest of the application
+COPY . .
 
 EXPOSE 5173 3000
 ENTRYPOINT ["dev-entrypoint"]
