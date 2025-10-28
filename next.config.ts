@@ -8,7 +8,7 @@ const aggregateTimeout = Number(
 const nextConfig: NextConfig = {
   // Disable typed routes to avoid strict href validation issues in Docker builds
   typedRoutes: false,
-  webpackDevMiddleware: (config) => {
+  webpackDevMiddleware: (config: any) => {
     config.watchOptions = {
       ...config.watchOptions,
       poll: pollingInterval,

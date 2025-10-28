@@ -41,7 +41,7 @@ const restaurantsPromise: Promise<Restaurant[]> = Promise.resolve([
       },
       {
         id: "pl-3",
-        name: "Burrata Bowl",
+        name: "BOWL Bowl",
         priceEuro: "€10,40",
         priceTokens: 2,
       },

@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
+import { Plasma } from "@/components/Plasma"
 import {
   Sheet,
   SheetContent,
@@ -241,10 +242,18 @@ function Sidebar({
         )}
         {...props}
       >
+        {/* Plasma Background Effect */}
+        <div className="absolute inset-0 z-0">
+          <Plasma
+            color="#EBA064FF"
+            speed={0.5}
+          />
+        </div>
+
         <div
           data-sidebar="sidebar"
           data-slot="sidebar-inner"
-          className="bg-sidebar group-data-[variant=floating]:border-sidebar-border flex h-full w-full flex-col group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:shadow-sm"
+          className="bg-sidebar group-data-[variant=floating]:border-sidebar-border flex h-full w-full flex-col group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:shadow-sm relative z-10"
         >
           {children}
         </div>
