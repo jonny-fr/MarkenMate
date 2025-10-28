@@ -1,9 +1,11 @@
 import "server-only";
 import { initializeDatabase } from "@/lib/init-db";
 
+export const runtime = "nodejs";
+
 // Initialize database when the app server starts
 export async function register() {
-  console.log("📋 Registering server lifecycle hooks...");
+  console.info("[instrumentation] Registering server lifecycle hooks");
   try {
     await initializeDatabase();
   } catch (error) {

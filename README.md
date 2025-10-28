@@ -3,7 +3,7 @@
 Used deps:
 
 - Main framework: Next.js
-- DB: SQLite
+- DB: PostgreSQL (Dockerised)
 - ORM: Drizzle
 - Styling: Tailwind v4
 - Auth: better-auth
@@ -31,9 +31,9 @@ You do this whenever new dependencies should get installed
 pnpm db:push
 ```
 
-This command creates a (.gitignore'd) SQLite DB file in src/db/localdb.sqlite.
+This command will synchronise the Drizzle schema to the Postgres database defined via `DATABASE_URL`.
 
-*You also use this command later to push the changes to the schema into the database!*
+*Run this whenever the schema changes to keep the database in sync!*
 
 ### 3. Running the development server
 
@@ -77,10 +77,10 @@ To learn more about Next.js, take a look at the following resources:
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
 ## Development (HMR)
-docker compose -f docker-compose.dev.yml up
-# Vite: http://localhost:5173  |  CRA: http://localhost:3000
-# Next.js: http://localhost:3000 (Webpack dev server with polling; Turbopack disabled for Docker HMR)
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+# Next.js: http://localhost:3000
+# Postgres: localhost:5432 (user: markenmate, password: markenmate)
 
 ## Production
-docker compose up --build -d
-# http://localhost:8080
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up --build -d
+# Application: http://localhost:8080

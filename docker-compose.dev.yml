@@ -1,24 +1,67 @@
+version: "3.9"
+
 services:
-  web:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-markenmate}
+      POSTGRES_USER: ${POSTGRES_USER:-markenmate}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-markenmate}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U ${POSTGRES_USER:-markenmate} -d ${POSTGRES_DB:-markenmate}
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  migrations:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: migrations
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-markenmate}:${POSTGRES_PASSWORD:-markenmate}@db:5432/${POSTGRES_DB:-markenmate}
+      DATABASE_SSL: disable
+    restart: "no"
+
+  app:
     build:
       context: .
       dockerfile: Dockerfile.dev
     environment:
       NODE_ENV: development
-      # Harmless if unused; helps Docker/WSL/VMs propagate changes:
-      CHOKIDAR_USEPOLLING: "true"   # Vite/Chokidar (some setups)
-      WATCHPACK_POLLING: "true"     # CRA/Webpack 5 watcher
+      DATABASE_URL: postgresql://${POSTGRES_USER:-markenmate}:${POSTGRES_PASSWORD:-markenmate}@db:5432/${POSTGRES_DB:-markenmate}
+      DATABASE_SSL: disable
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-dev-secret}
+      NEXT_PUBLIC_BETTER_AUTH_URL: ${NEXT_PUBLIC_BETTER_AUTH_URL:-http://localhost:3000}
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
       WATCHPACK_POLLING_INTERVAL: "100"
       NEXT_WEBPACK_USEPOLLING: "true"
       NEXT_DISABLE_TURBOPACK: "1"
       NEXT_FORCE_WEBPACK: "1"
     ports:
-      - "5173:5173"   # Vite
-      - "3000:3000"   # CRA
+      - "3000:3000"
     working_dir: /app
     volumes:
-      - .:/app                      # Live code mount (HMR)
-      - /app/node_modules           # Keep deps inside container
+      - .:/app
+      - /app/node_modules
       - pnpm-store:/root/.pnpm-store
+    depends_on:
+      db:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+
 volumes:
   pnpm-store:
+  postgres-data:

@@ -1,20 +1,23 @@
 import type { NextConfig } from "next";
 
-const pollingInterval = Number(process.env.WATCHPACK_POLLING_INTERVAL ?? "100");
-const aggregateTimeout = Number(
-  process.env.WATCHPACK_AGGREGATE_TIMEOUT ?? "200",
-);
-
 const nextConfig: NextConfig = {
-  // Disable typed routes to avoid strict href validation issues in Docker builds
   typedRoutes: false,
-  webpackDevMiddleware: (config: any) => {
-    config.watchOptions = {
-      ...config.watchOptions,
-      poll: pollingInterval,
-      aggregateTimeout,
-      ignored: config.watchOptions?.ignored ?? ["**/node_modules/**"],
-    };
+  output: "standalone",
+  experimental: {
+    serverComponentsExternalPackages: ["pg"],
+  },
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      const externals = Array.isArray(config.externals)
+        ? config.externals
+        : [];
+      externals.push({
+        pg: "commonjs pg",
+        "pg-native": "commonjs pg-native",
+      });
+      config.externals = externals;
+    }
+
     return config;
   },
 };
