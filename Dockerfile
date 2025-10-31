@@ -1,12 +1,13 @@
 FROM node:20-alpine AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
+ENV NODE_OPTIONS="--dns-result-order=ipv4first"
 RUN corepack enable
 WORKDIR /app
 
 FROM base AS deps
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
 FROM base AS workspace
 COPY --from=deps /app/node_modules ./node_modules
@@ -18,6 +19,7 @@ RUN pnpm build
 FROM node:20-alpine AS runner
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
+ENV NODE_OPTIONS="--dns-result-order=ipv4first"
 RUN corepack enable
 RUN apk add --no-cache curl
 WORKDIR /app
@@ -32,4 +34,6 @@ EXPOSE 3000
 CMD ["node", "server.js"]
 
 FROM workspace AS migrations
+# Prepare pnpm to avoid runtime downloads
+RUN pnpm --version
 CMD ["pnpm", "db:push"]
