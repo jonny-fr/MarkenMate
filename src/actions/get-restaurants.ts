@@ -3,6 +3,46 @@ import { db } from "@/db";
 import { restaurant, menuItem } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
+/**
+ * Conversion rate for calculating token prices from euro prices.
+ * 1 token ≈ €4.50 (configurable for business logic changes)
+ */
+const EURO_PER_TOKEN = 4.5;
+
+/**
+ * Check if a restaurant is currently open based on opening hours.
+ * @param openingHoursJson - JSON string of opening hours
+ * @returns true if restaurant is open, false otherwise
+ */
+function isRestaurantOpen(openingHoursJson: string | null): boolean {
+  if (!openingHoursJson) return false;
+
+  try {
+    const hours = JSON.parse(openingHoursJson);
+    const now = new Date();
+    const dayNames = [
+      "sunday",
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+    ];
+    const todayHours = hours[dayNames[now.getDay()]];
+
+    // If closed or no hours defined
+    if (!todayHours || todayHours === "closed") return false;
+
+    // For demo purposes, return true if there are hours defined
+    // In production, you'd parse the time range and check against current time
+    return true;
+  } catch {
+    // If parsing fails, default to closed
+    return false;
+  }
+}
+
 export type RestaurantWithDishes = {
   id: string;
   name: string;
@@ -32,21 +72,16 @@ export async function getRestaurants(): Promise<RestaurantWithDishes[]> {
         .from(menuItem)
         .where(eq(menuItem.restaurantId, rest.id));
 
-      // Check if restaurant is open (simplified - always open for now)
-      // In a real app, this would check current time against opening hours
-      const isOpen = rest.name !== "Burger Werk"; // Hardcode Burger Werk as closed for consistency
-
       return {
         id: `${rest.id}`,
         name: rest.name,
         cuisine: ` · ${rest.tag}`,
         address: rest.location,
         rating: Number.parseFloat(rest.rating ?? "0"),
-        isOpen,
+        isOpen: isRestaurantOpen(rest.openingHours),
         dishes: dishes.map((dish) => {
           const price = Number.parseFloat(dish.price);
-          // Calculate token price: roughly 1 token per 4-5 euros
-          const tokenPrice = Math.max(1, Math.round(price / 4.5));
+          const tokenPrice = Math.max(1, Math.round(price / EURO_PER_TOKEN));
 
           return {
             id: `${dish.id}`,

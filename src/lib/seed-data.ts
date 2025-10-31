@@ -6,6 +6,43 @@ import { restaurant, menuItem } from "@/db/schema";
  * Seeds the database with test data on first application start.
  * This function is idempotent - it checks if data already exists before seeding.
  */
+/**
+ * Common opening hours patterns for restaurants
+ */
+const OPENING_HOURS = {
+  fullWeek: {
+    monday: "11:00-22:00",
+    tuesday: "11:00-22:00",
+    wednesday: "11:00-22:00",
+    thursday: "11:00-22:00",
+    friday: "11:00-23:00",
+    saturday: "12:00-23:00",
+    sunday: "12:00-21:00",
+  },
+  weekdaysOnly: {
+    monday: "10:00-20:00",
+    tuesday: "10:00-20:00",
+    wednesday: "10:00-20:00",
+    thursday: "10:00-20:00",
+    friday: "10:00-20:00",
+    saturday: "11:00-19:00",
+    sunday: "closed",
+  },
+  breakfast: {
+    monday: "08:00-18:00",
+    tuesday: "08:00-18:00",
+    wednesday: "08:00-18:00",
+    thursday: "08:00-18:00",
+    friday: "08:00-18:00",
+    saturday: "09:00-15:00",
+    sunday: "closed",
+  },
+};
+
+/**
+ * Seeds the database with test data on first application start.
+ * This function is idempotent - it checks if data already exists before seeding.
+ */
 export async function seedTestData() {
   try {
     // Check if test data already exists by checking for any restaurants
@@ -29,15 +66,7 @@ export async function seedTestData() {
         location: "Innenstadt · Musterstraße 12",
         tag: "Frische Pasta",
         phoneNumber: "+49 123 456789",
-        openingHours: JSON.stringify({
-          monday: "11:00-22:00",
-          tuesday: "11:00-22:00",
-          wednesday: "11:00-22:00",
-          thursday: "11:00-22:00",
-          friday: "11:00-23:00",
-          saturday: "12:00-23:00",
-          sunday: "12:00-21:00",
-        }),
+        openingHours: JSON.stringify(OPENING_HOURS.fullWeek),
         rating: "4.7",
       })
       .returning();
@@ -49,15 +78,7 @@ export async function seedTestData() {
         location: "Campus Mitte · Kantinenhof",
         tag: "Bowls & Salate",
         phoneNumber: "+49 123 456790",
-        openingHours: JSON.stringify({
-          monday: "10:00-20:00",
-          tuesday: "10:00-20:00",
-          wednesday: "10:00-20:00",
-          thursday: "10:00-20:00",
-          friday: "10:00-20:00",
-          saturday: "11:00-19:00",
-          sunday: "closed",
-        }),
+        openingHours: JSON.stringify(OPENING_HOURS.weekdaysOnly),
         rating: "4.5",
       })
       .returning();
@@ -69,15 +90,7 @@ export async function seedTestData() {
         location: "Foodcourt · Werkstraße 8",
         tag: "Burger & Streetfood",
         phoneNumber: "+49 123 456791",
-        openingHours: JSON.stringify({
-          monday: "11:30-22:00",
-          tuesday: "11:30-22:00",
-          wednesday: "11:30-22:00",
-          thursday: "11:30-22:00",
-          friday: "11:30-23:00",
-          saturday: "12:00-23:00",
-          sunday: "closed",
-        }),
+        openingHours: JSON.stringify(OPENING_HOURS.weekdaysOnly),
         rating: "4.3",
       })
       .returning();
@@ -89,15 +102,7 @@ export async function seedTestData() {
         location: "City Gate · Lobby West",
         tag: "Schnelle Mittagssnacks",
         phoneNumber: "+49 123 456792",
-        openingHours: JSON.stringify({
-          monday: "08:00-18:00",
-          tuesday: "08:00-18:00",
-          wednesday: "08:00-18:00",
-          thursday: "08:00-18:00",
-          friday: "08:00-18:00",
-          saturday: "09:00-15:00",
-          sunday: "closed",
-        }),
+        openingHours: JSON.stringify(OPENING_HOURS.breakfast),
         rating: "4.1",
       })
       .returning();
