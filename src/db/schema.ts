@@ -172,6 +172,9 @@ export const menuItem = pgTable("menu_item", {
 });
 
 // Token lending (Markenverleih)
+// Note: This table tracks lending relationships between users
+// Each record represents a lending relationship with a specific person
+// Multiple records can exist for the same person (different transactions)
 export const tokenLending = pgTable("token_lending", {
   id: serial("id").primaryKey(),
   userId: text("user_id")
@@ -182,7 +185,7 @@ export const tokenLending = pgTable("token_lending", {
   lastLendingDate: timestamp("last_lending_date", { withTimezone: true })
     .defaultNow()
     .notNull(),
-  totalTokensLent: integer("total_tokens_lent").default(0).notNull(), // cumulative count of lent tokens
+  totalTokensLent: integer("total_tokens_lent").default(0).notNull(), // cumulative count for this relationship (manually updated by application logic)
   acceptanceStatus: acceptanceStatusEnum("acceptance_status")
     .default("pending")
     .notNull(), // 'pending', 'accepted', 'declined'
@@ -214,13 +217,15 @@ export const orderHistory = pgTable("order_history", {
 });
 
 // Order history items (individual products in an order)
+// Note: Uses text instead of enums for historical data preservation
+// This allows display of correct values even if menu structure changes
 export const orderHistoryItem = pgTable("order_history_item", {
   id: serial("id").primaryKey(),
   orderHistoryId: integer("order_history_id")
     .notNull()
     .references(() => orderHistory.id, { onDelete: "cascade" }),
   dishName: text("dish_name").notNull(), // stored at time of order
-  type: text("type").notNull(), // stored at time of order
+  type: text("type").notNull(), // stored at time of order (e.g., 'drink', 'main_course', 'dessert')
   category: text("category").notNull(), // stored at time of order
   price: numeric("price", { precision: 10, scale: 2 }).notNull(), // price at time of order
   createdAt: timestamp("created_at", { withTimezone: true })

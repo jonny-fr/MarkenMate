@@ -45,27 +45,31 @@ Stores menu items for each restaurant with pricing and categorization.
   - `createdAt`, `updatedAt`: Timestamps
 
 ### 4. Token Lending Table (Markenverleih)
-Tracks token lending/borrowing between users.
+Tracks token lending/borrowing relationships between users.
+
+**Design Note**: Each record represents a lending transaction/relationship. Multiple records can exist for the same person (different lending events).
 
 - **Fields**:
   - `id`: Primary key (serial)
   - `userId`: Foreign key → user.id (cascade delete)
   - `personName`: Name of the person tokens are lent to/borrowed from (text, required)
-  - `tokenCount`: Number of tokens (integer, required)
+  - `tokenCount`: Number of tokens in this transaction (integer, required)
     - **Positive value** = tokens lent out
     - **Negative value** = tokens borrowed
   - `lastLendingDate`: Date of last transaction (timestamp, auto-set)
-  - `totalTokensLent`: Cumulative count of all tokens lent (integer, default 0)
+  - `totalTokensLent`: Cumulative count for this relationship (integer, default 0)
+    - **Note**: This is a denormalized field maintained by application logic for performance
     - Used for calculating "top 5 probable friends" recommendation
   - `acceptanceStatus`: Status of lending (enum, default 'pending')
     - **Enum**: 'pending', 'accepted', 'declined'
   - `createdAt`, `updatedAt`: Timestamps
 
-**Algorithm Note**: The "quick display of 5 probable friends" can be calculated using `totalTokensLent` and `acceptanceStatus` fields with a formula like:
-```
-score = totalTokensLent * (acceptance_rate)
-where acceptance_rate = (accepted_count / total_count)
-```
+**Algorithm Note**: The "quick display of 5 probable friends" can be calculated by:
+1. Aggregating all records by `personName`
+2. Calculating: `score = SUM(totalTokensLent) * (COUNT(acceptanceStatus='accepted') / COUNT(*))`
+3. Sorting by score descending and taking top 5
+
+**Implementation Note**: The `totalTokensLent` field should be updated by application logic when creating new lending records to maintain consistency.
 
 ### 5. Order History Tables
 Tracks user orders with historical pricing preservation.
@@ -87,11 +91,13 @@ Stores each item in an order with pricing at the time of purchase.
   - `orderHistoryId`: Foreign key → orderHistory.id (cascade delete)
   - `dishName`: Name of the dish **at time of order** (text, required)
   - `type`: Item type **at time of order** (text, required)
+    - Stores string values like 'drink', 'main_course', 'dessert'
+    - Uses `text` instead of enum to preserve historical data even if enum changes
   - `category`: Category **at time of order** (text, required)
   - `price`: Price **at time of order** (numeric 10,2, required)
   - `createdAt`: Timestamp
 
-**Important**: This table stores historical data to show correct values even after menu prices change.
+**Important**: This table stores historical snapshots to show correct values even after menu structure or prices change. Fields use `text` instead of enums for maximum flexibility in historical data preservation.
 
 ### 6. Favorites Table
 Allows users to favorite restaurants or dishes.
@@ -185,9 +191,38 @@ Users with `role = 'admin'` in the `user` table have administrative access to ma
 - Order history
 - Token lending records
 
+## Design Decisions & Trade-offs
+
+### 1. Denormalized Historical Data
+**Decision**: Order history items store denormalized snapshots (dishName, type, category, price)  
+**Rationale**: Allows accurate historical reporting even after menu changes  
+**Trade-off**: Slightly more storage, but critical for data accuracy over time
+
+### 2. Text vs Enum for Historical Fields
+**Decision**: Order history items use `text` instead of `menuItemTypeEnum`  
+**Rationale**: Maximum flexibility - can display historical data even if enum values change  
+**Trade-off**: No database-level validation on historical records (acceptable for immutable history)
+
+### 3. Cumulative Token Count Field
+**Decision**: `tokenLending.totalTokensLent` is a denormalized cumulative field  
+**Rationale**: Performance optimization for the "top 5 friends" recommendation algorithm  
+**Trade-off**: Must be maintained by application logic; could use a database trigger as alternative  
+**Best Practice**: Update this field transactionally when creating new lending records
+
+### 4. Multiple Lending Records per Person
+**Decision**: Allow multiple `tokenLending` records for the same person  
+**Rationale**: Tracks individual lending transactions, enabling detailed history and analytics  
+**Trade-off**: Need aggregation queries for current balance; but provides full audit trail
+
+### 5. Favorites XOR Constraint
+**Decision**: Favorites must reference exactly one of: restaurant OR menu item  
+**Rationale**: Prevents invalid states and simplifies application logic  
+**Trade-off**: Slightly more complex queries, but much better data integrity
+
 ## Migration Notes
 
 - The `user` table is managed by better-auth and has been extended with the `role` field
 - All tables use cascade deletion to maintain referential integrity
 - Historical data (order history items) is intentionally denormalized to preserve pricing information
 - The `demoData` table from the starter template is retained for backward compatibility
+- The `totalTokensLent` field should be maintained by application logic or database triggers
