@@ -7,10 +7,7 @@ import { ChartAreaInteractive } from "@/components/chart-area-interactive";
 import { SectionCards } from "@/components/section-cards";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import {
-  type LendingUser,
-  TokenLendingPanel,
-} from "./token-lending-panel";
+import { type LendingUser, TokenLendingPanel } from "./token-lending-panel";
 import { LendingView } from "./lending-view";
 import { RestaurantsView } from "./restaurants-view";
 import { ComparisonView, type ComparisonDataPoint } from "./comparison-view";
@@ -26,7 +23,13 @@ function LoadingCard({ label }: { label: string }) {
   );
 }
 
-type ViewType = "dashboard" | "restaurants" | "stats" | "history" | "comparison" | "lending";
+type ViewType =
+  | "dashboard"
+  | "restaurants"
+  | "stats"
+  | "history"
+  | "comparison"
+  | "lending";
 
 interface DashboardClientProps {
   restaurantsPromise: Promise<Restaurant[]>;

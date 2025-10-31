@@ -31,7 +31,7 @@ export function TokenLendingPanel({
 
   const totalOutstanding = useMemo(
     () => users.reduce((sum, user) => sum + user.balance, 0),
-    [users]
+    [users],
   );
 
   const adjustBalance = (id: string, delta: number) => {
@@ -42,8 +42,8 @@ export function TokenLendingPanel({
               ...user,
               balance: Math.max(user.balance + delta, 0),
             }
-          : user
-      )
+          : user,
+      ),
     );
   };
 
@@ -73,7 +73,8 @@ export function TokenLendingPanel({
                   Schuldet aktuell {user.balance} Marken.
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  {user.note ?? "Offene Marken können jederzeit ausgeglichen werden."}
+                  {user.note ??
+                    "Offene Marken können jederzeit ausgeglichen werden."}
                 </span>
               </div>
               <div className="flex items-center gap-2">

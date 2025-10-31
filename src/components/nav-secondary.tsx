@@ -24,7 +24,15 @@ export function NavSecondary({
   ...props
 }: {
   items: NavSecondaryItem[];
-  onNavigateAction?: (view: "dashboard" | "restaurants" | "stats" | "history" | "comparison" | "lending") => void;
+  onNavigateAction?: (
+    view:
+      | "dashboard"
+      | "restaurants"
+      | "stats"
+      | "history"
+      | "comparison"
+      | "lending",
+  ) => void;
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
   const handleClick = (title: string) => {
     if (title === "Stats") {

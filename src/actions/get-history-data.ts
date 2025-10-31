@@ -74,7 +74,7 @@ export async function getHistoryData(): Promise<HistoryItem[]> {
           ...item,
         })),
       };
-    })
+    }),
   );
 
   // Sort by date descending (most recent first)

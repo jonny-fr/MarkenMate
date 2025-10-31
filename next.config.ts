@@ -8,9 +8,7 @@ const nextConfig: NextConfig = {
   },
   webpack: (config, { isServer }) => {
     if (isServer) {
-      const externals = Array.isArray(config.externals)
-        ? config.externals
-        : [];
+      const externals = Array.isArray(config.externals) ? config.externals : [];
       externals.push({
         pg: "commonjs pg",
         "pg-native": "commonjs pg-native",

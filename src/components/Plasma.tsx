@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useEffect, useRef } from 'react';
-import { Renderer, Program, Mesh, Triangle } from 'ogl';
-import './Plasma.css';
+import { useEffect, useRef } from "react";
+import { Renderer, Program, Mesh, Triangle } from "ogl";
+import "./Plasma.css";
 
 interface PlasmaProps {
   color?: string;
   speed?: number;
-  direction?: 'forward' | 'reverse' | 'pingpong';
+  direction?: "forward" | "reverse" | "pingpong";
   scale?: number;
   opacity?: number;
   mouseInteractive?: boolean;
@@ -96,9 +96,9 @@ void main() {
 }`;
 
 export const Plasma = ({
-  color = '#ffffff',
+  color = "#ffffff",
   speed = 0.5,
-  direction = 'forward',
+  direction = "forward",
   scale = 1,
   opacity = 1,
   mouseInteractive = true,
@@ -112,7 +112,7 @@ export const Plasma = ({
     const useCustomColor = color ? 1.0 : 0.0;
     const customColorRgb = color ? hexToRgb(color) : [1, 1, 1];
 
-    const directionMultiplier = direction === 'reverse' ? -1.0 : 1.0;
+    const directionMultiplier = direction === "reverse" ? -1.0 : 1.0;
 
     const renderer = new Renderer({
       webgl: 2,
@@ -122,9 +122,9 @@ export const Plasma = ({
     } as any);
     const gl = renderer.gl;
     const canvas = gl.canvas as HTMLCanvasElement;
-    canvas.style.display = 'block';
-    canvas.style.width = '100%';
-    canvas.style.height = '100%';
+    canvas.style.display = "block";
+    canvas.style.width = "100%";
+    canvas.style.height = "100%";
     containerRef.current.appendChild(canvas);
 
     const geometry = new Triangle(gl);
@@ -159,7 +159,7 @@ export const Plasma = ({
     };
 
     if (mouseInteractive && containerRef.current) {
-      containerRef.current.addEventListener('mousemove', handleMouseMove);
+      containerRef.current.addEventListener("mousemove", handleMouseMove);
     }
 
     const setSize = () => {
@@ -184,7 +184,7 @@ export const Plasma = ({
     const loop = (t: number) => {
       const timeValue = (t - t0) * 0.001;
 
-      if (direction === 'pingpong') {
+      if (direction === "pingpong") {
         const cycle = Math.sin(timeValue * 0.5) * directionMultiplier;
         (program.uniforms as any).uDirection.value = cycle;
       }
@@ -199,12 +199,12 @@ export const Plasma = ({
       cancelAnimationFrame(raf);
       ro.disconnect();
       if (mouseInteractive && containerRef.current) {
-        containerRef.current.removeEventListener('mousemove', handleMouseMove);
+        containerRef.current.removeEventListener("mousemove", handleMouseMove);
       }
       try {
         containerRef.current?.removeChild(canvas);
       } catch {
-        console.warn('Canvas already removed from container');
+        console.warn("Canvas already removed from container");
       }
     };
   }, [color, speed, direction, scale, opacity, mouseInteractive]);
@@ -213,4 +213,3 @@ export const Plasma = ({
 };
 
 export default Plasma;
-

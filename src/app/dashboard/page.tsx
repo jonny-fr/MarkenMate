@@ -2,7 +2,7 @@
  * Dashboard Page - Server Component
  *
  * This page fetches data from the database and passes it to the DashboardClient.
- * 
+ *
  * All data is now fetched and computed from the database:
  * - Restaurant data via getRestaurants() action
  * - Lending data via getLendingData() action
@@ -10,7 +10,7 @@
  * - Stats data computed from order history and lending via getStatsData() action
  * - Graph data computed from order history and lending for different time periods
  * - Comparison data computed from order history by restaurant and date
- * 
+ *
  * The database is automatically seeded with test data on first application start.
  * NO hardcoded data - everything comes from the database.
  */
@@ -44,7 +44,7 @@ export default function Page() {
   const restaurantsPromise = getRestaurants();
   const lendingPromise = getLendingData();
   const historyPromise = getHistoryData();
-  
+
   // Compute stats and graph data from database
   const statsPromise = getStatsData();
   const graphDataPromise = getGraphDataWeek();

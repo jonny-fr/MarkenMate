@@ -29,10 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@/components/ui/toggle-group";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 const restaurantKeys = ["pastaLoft", "greenBowl", "burgerWerk"] as const;
 
@@ -107,7 +104,7 @@ export function ChartAreaInteractive() {
         }
         return acc;
       },
-      { pastaLoft: 0, greenBowl: 0, burgerWerk: 0 }
+      { pastaLoft: 0, greenBowl: 0, burgerWerk: 0 },
     );
   }, [filteredData]);
 
@@ -121,8 +118,7 @@ export function ChartAreaInteractive() {
     return currentKey;
   }, [totals]);
 
-  const leadingLabel =
-    chartConfig[leadingKey]?.label ?? leadingKey.toString();
+  const leadingLabel = chartConfig[leadingKey]?.label ?? leadingKey.toString();
 
   const rangeLabel =
     RANGE_OPTIONS.find((option) => option.value === timeRange)?.label ??
@@ -130,7 +126,7 @@ export function ChartAreaInteractive() {
 
   const numberFormatter = React.useMemo(
     () => new Intl.NumberFormat("de-DE"),
-    []
+    [],
   );
 
   return (

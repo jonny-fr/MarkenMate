@@ -64,7 +64,15 @@ export function AppSidebar({
   onNavigateAction,
   ...props
 }: ComponentProps<typeof Sidebar> & {
-  onNavigateAction?: (view: "dashboard" | "restaurants" | "stats" | "history" | "comparison" | "lending") => void;
+  onNavigateAction?: (
+    view:
+      | "dashboard"
+      | "restaurants"
+      | "stats"
+      | "history"
+      | "comparison"
+      | "lending",
+  ) => void;
 }) {
   return (
     <Sidebar collapsible="offcanvas" {...props}>

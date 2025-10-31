@@ -26,7 +26,7 @@ export async function initializeDatabase() {
         .filter((name) => !name.startsWith("_drizzle_migrations"));
 
       console.info(
-        `[database] Connected (${tableNames.length} tables: ${tableNames.join(", ")})`
+        `[database] Connected (${tableNames.length} tables: ${tableNames.join(", ")})`,
       );
 
       // Seed test data on first start

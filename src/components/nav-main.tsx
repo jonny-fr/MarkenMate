@@ -1,6 +1,5 @@
 "use client";
 
-
 import type { LucideIcon } from "lucide-react";
 
 import {
@@ -23,7 +22,15 @@ export function NavMain({
   onNavigateAction,
 }: {
   items: NavMainItem[];
-  onNavigateAction?: (view: "dashboard" | "restaurants" | "stats" | "history" | "comparison" | "lending") => void;
+  onNavigateAction?: (
+    view:
+      | "dashboard"
+      | "restaurants"
+      | "stats"
+      | "history"
+      | "comparison"
+      | "lending",
+  ) => void;
 }) {
   const handleClick = (title: string) => {
     if (title === "Restaurants") {
