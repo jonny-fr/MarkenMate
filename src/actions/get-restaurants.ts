@@ -56,7 +56,7 @@ export async function getRestaurants(): Promise<RestaurantWithDishes[]> {
           };
         }),
       };
-    })
+    }),
   );
 
   return restaurantsWithDishes;

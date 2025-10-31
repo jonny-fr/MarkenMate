@@ -1,13 +1,6 @@
 import "server-only";
 import { db } from "@/db";
-import {
-  restaurant,
-  menuItem,
-  tokenLending,
-  orderHistory,
-  orderHistoryItem,
-} from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { restaurant, menuItem } from "@/db/schema";
 
 /**
  * Seeds the database with test data on first application start.
