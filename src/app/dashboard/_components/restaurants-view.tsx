@@ -41,6 +41,7 @@ type OrderDish = {
   type: string;
   category: string;
   price: number;
+  realPaidAmount: number; // The actual amount paid with tokens
 };
 
 function RestaurantCard({
@@ -115,6 +116,7 @@ function RestaurantCard({
                         type: dish.type || "main_course",
                         category: dish.category || "general",
                         price,
+                        realPaidAmount: tokenCalc.realGezahlt, // Include the real paid amount
                       })
                     }
                   >
@@ -187,6 +189,7 @@ export function RestaurantsView({
         type: dish.type,
         category: dish.category,
         price: dish.price,
+        realPaidAmount: dish.realPaidAmount, // Pass the real paid amount
       }));
 
       const result = await saveOrderAction({ restaurantId, items });

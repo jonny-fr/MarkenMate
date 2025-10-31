@@ -8,6 +8,7 @@ export type OrderItem = {
   type: string;
   category: string;
   price: number;
+  realPaidAmount: number;
 };
 
 export type SaveOrderInput = {

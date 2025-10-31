@@ -11,6 +11,7 @@ const orderItemSchema = z.object({
   type: z.string(),
   category: z.string(),
   price: z.number(),
+  realPaidAmount: z.number(), // The actual amount paid with tokens
 });
 
 const saveOrderSchema = z.object({
@@ -44,31 +45,31 @@ export async function saveOrder(input: SaveOrderInput): Promise<{
     // Validate input
     const validatedData = saveOrderSchema.parse(input);
 
-    // Calculate total price
-    const totalPrice = validatedData.items.reduce(
-      (sum, item) => sum + item.price,
+    // Calculate total real paid amount (not the original restaurant price)
+    const totalRealPaid = validatedData.items.reduce(
+      (sum, item) => sum + item.realPaidAmount,
       0,
     );
 
-    // Create order history entry
+    // Create order history entry with the real paid amount
     const [order] = await db
       .insert(orderHistory)
       .values({
         userId,
         restaurantId: validatedData.restaurantId,
         visitDate: new Date(),
-        totalPrice: totalPrice.toString(),
+        totalPrice: totalRealPaid.toString(),
       })
       .returning();
 
-    // Create order history items
+    // Create order history items with real paid amounts
     await db.insert(orderHistoryItem).values(
       validatedData.items.map((item) => ({
         orderHistoryId: order.id,
         dishName: item.dishName,
         type: item.type,
         category: item.category,
-        price: item.price.toString(),
+        price: item.realPaidAmount.toString(), // Save the real paid amount
       })),
     );
 
