@@ -183,14 +183,29 @@ export function RestaurantsView({
 
     try {
       const restaurantId = Number.parseInt(restaurantIds[0]);
-      const items: OrderItem[] = order.map((dish) => ({
-        menuItemId: dish.menuItemId,
-        dishName: dish.dishName,
-        type: dish.type,
-        category: dish.category,
-        price: dish.price,
-        realPaidAmount: dish.realPaidAmount, // Pass the real paid amount
-      }));
+
+      // Calculate total order price
+      const totalOrderPrice = order.reduce((sum, item) => sum + item.price, 0);
+
+      // Calculate token calculation for the entire order
+      const orderTokenCalc = calculateTokens(totalOrderPrice);
+      const totalRealPaid = orderTokenCalc.realGezahlt;
+
+      // Distribute the real paid amount proportionally across items
+      const items: OrderItem[] = order.map((dish) => {
+        // Calculate proportional real paid amount for this item
+        const proportion = dish.price / totalOrderPrice;
+        const itemRealPaid = Number((totalRealPaid * proportion).toFixed(2));
+
+        return {
+          menuItemId: dish.menuItemId,
+          dishName: dish.dishName,
+          type: dish.type,
+          category: dish.category,
+          price: dish.price,
+          realPaidAmount: itemRealPaid, // Proportionally distributed real paid amount
+        };
+      });
 
       const result = await saveOrderAction({ restaurantId, items });
 
@@ -281,7 +296,14 @@ export function RestaurantsView({
             <div className="space-y-3">
               <ul className="space-y-2">
                 {order.map((item, index) => {
-                  const tokenCalc = calculateTokens(item.price);
+                  // Calculate proportional real paid amount based on total order
+                  const proportion = item.price / orderTotal;
+                  const itemRealPaid = orderTokenCalc
+                    ? Number(
+                        (orderTokenCalc.realGezahlt * proportion).toFixed(2),
+                      )
+                    : 0;
+
                   return (
                     <li
                       key={`${item.menuItemId}-${index}`}
@@ -297,12 +319,9 @@ export function RestaurantsView({
                       </div>
                       <div className="flex items-center gap-2">
                         <div className="flex flex-col items-end">
-                          <Badge variant="secondary" className="mb-1">
-                            {tokenCalc.anzahlMarken} Marken
-                          </Badge>
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-xs font-medium text-primary">
                             Bezahlt: €
-                            {tokenCalc.realGezahlt.toFixed(2).replace(".", ",")}
+                            {itemRealPaid.toFixed(2).replace(".", ",")}
                           </span>
                         </div>
                         <Button
