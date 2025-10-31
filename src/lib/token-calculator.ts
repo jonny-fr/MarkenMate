@@ -19,7 +19,7 @@ export type TokenCalculation = {
  * Calculate token requirements and real cost for a given restaurant price.
  *
  * Formula:
- * 1. anzahl_marken = floor(p / m_value) + (if (p mod m_value) > 0 then 1 else 0)
+ * 1. anzahl_marken = Math.floor(p / m_value) + (p % m_value > 0 ? 1 : 0)
  * 2. rueckgeld = (anzahl_marken * m_value) - p
  * 3. real_gezahlt = (anzahl_marken * m_cost) - rueckgeld
  *
