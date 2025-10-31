@@ -61,7 +61,7 @@ async function getComparisonData(
       }
 
       const dataPoint = dateMap.get(item.date)!;
-      dataPoint[restaurantKey] = Number(item.totalSpent.toFixed(2));
+      dataPoint[restaurantKey] = Number(Number(item.totalSpent).toFixed(2));
     }
 
     return Array.from(dateMap.values()).sort((a, b) => a.date.localeCompare(b.date));
@@ -131,7 +131,7 @@ async function getComparisonData(
       }
 
       const dataPoint = dateMap.get(item.date)!;
-      dataPoint[restaurantKey] = Number(item.avgPrice.toFixed(2));
+      dataPoint[restaurantKey] = Number(Number(item.avgPrice).toFixed(2));
     }
 
     return Array.from(dateMap.values()).sort((a, b) => a.date.localeCompare(b.date));
