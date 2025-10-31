@@ -189,7 +189,7 @@ export const tokenLending = pgTable("token_lending", {
   lastLendingDate: timestamp("last_lending_date", { withTimezone: true })
     .defaultNow()
     .notNull(),
-  totalTokensLent: integer("total_tokens_lent").default(0).notNull(), // cumulative count for this relationship (updated by application or trigger)
+  totalTokensLent: integer("total_tokens_lent").default(0).notNull(), // cumulative count across all transactions with this person (maintained by application or trigger)
   acceptanceStatus: acceptanceStatusEnum("acceptance_status")
     .default("pending")
     .notNull(), // 'pending', 'accepted', 'declined'

@@ -67,11 +67,11 @@ Tracks token lending/borrowing relationships between users.
 
 **Algorithm Note**: The "quick display of 5 probable friends" can be calculated by:
 1. Aggregating all records by `personName` for the current user
-2. For each person, calculate:
-   ```
-   acceptedCount = COUNT(acceptanceStatus='accepted')
-   totalCount = COUNT(*)
-   acceptanceRate = acceptedCount / totalCount (or 0 if totalCount = 0)
+2. For each person, calculate (pseudocode):
+   ```javascript
+   acceptedCount = COUNT(records WHERE acceptanceStatus = 'accepted')
+   totalCount = COUNT(all records for this person)
+   acceptanceRate = totalCount > 0 ? (acceptedCount / totalCount) : 0
    score = SUM(totalTokensLent) * acceptanceRate
    ```
 3. Sort by score descending and take top 5
