@@ -22,12 +22,11 @@ async function getComparisonData(
   // Get all restaurants to use as keys
   const restaurants = await db.select({ id: restaurant.id, name: restaurant.name }).from(restaurant);
 
-  // Create a map of restaurant IDs to sanitized names for object keys
+  // Create a map of restaurant IDs to string IDs for object keys
   const restaurantMap = new Map<number, string>();
   for (const rest of restaurants) {
-    // Convert restaurant name to a safe key (lowercase, replace spaces with dashes)
-    const safeKey = rest.name.toLowerCase().replace(/\s+/g, "-");
-    restaurantMap.set(rest.id, safeKey);
+    // Use the restaurant ID as the key (converted to string)
+    restaurantMap.set(rest.id, `${rest.id}`);
   }
 
   if (metric === "spending") {
