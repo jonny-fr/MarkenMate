@@ -1,6 +1,13 @@
 import "server-only";
 import { db } from "@/db";
-import { restaurant, menuItem } from "@/db/schema";
+import {
+  user,
+  restaurant,
+  menuItem,
+  tokenLending,
+  orderHistory,
+  orderHistoryItem,
+} from "@/db/schema";
 
 /**
  * Seeds the database with test data on first application start.
@@ -57,6 +64,20 @@ export async function seedTestData() {
     }
 
     console.info("[seed] Starting test data seeding...");
+
+    // Create a demo user for test data
+    const [demoUser] = await db
+      .insert(user)
+      .values({
+        id: "demo-user-123",
+        name: "Demo User",
+        email: "demo@markenmate.test",
+        emailVerified: true,
+        role: "user",
+      })
+      .returning();
+
+    console.info("[seed] Demo user created");
 
     // Insert restaurants
     const [pastaLoft] = await db
@@ -222,6 +243,400 @@ export async function seedTestData() {
     ]);
 
     console.info("[seed] Menu items created");
+
+    // Insert token lending data
+    await db.insert(tokenLending).values([
+      {
+        userId: demoUser.id,
+        personName: "Lena Graf",
+        tokenCount: 4,
+        totalTokensLent: 4,
+        acceptanceStatus: "accepted",
+      },
+      {
+        userId: demoUser.id,
+        personName: "Amir Safar",
+        tokenCount: -3,
+        totalTokensLent: -3,
+        acceptanceStatus: "accepted",
+      },
+      {
+        userId: demoUser.id,
+        personName: "Selina Wolf",
+        tokenCount: 6,
+        totalTokensLent: 6,
+        acceptanceStatus: "pending",
+      },
+      {
+        userId: demoUser.id,
+        personName: "Max Müller",
+        tokenCount: -2,
+        totalTokensLent: -2,
+        acceptanceStatus: "accepted",
+      },
+      {
+        userId: demoUser.id,
+        personName: "Anna Schmidt",
+        tokenCount: 5,
+        totalTokensLent: 5,
+        acceptanceStatus: "accepted",
+      },
+    ]);
+
+    console.info("[seed] Token lending data created");
+
+    // Insert order history with items
+    // Order 1: Pasta Loft - Recent
+    const [order1] = await db
+      .insert(orderHistory)
+      .values({
+        userId: demoUser.id,
+        restaurantId: pastaLoft.id,
+        visitDate: new Date("2025-10-23"),
+        totalPrice: "23.80",
+      })
+      .returning();
+
+    await db.insert(orderHistoryItem).values([
+      {
+        orderHistoryId: order1.id,
+        dishName: "Trüffel Tagliatelle",
+        type: "main_course",
+        category: "pasta",
+        price: "11.90",
+      },
+      {
+        orderHistoryId: order1.id,
+        dishName: "Ofenlasagne",
+        type: "main_course",
+        category: "pasta",
+        price: "9.50",
+      },
+      {
+        orderHistoryId: order1.id,
+        dishName: "Wasser",
+        type: "drink",
+        category: "beverage",
+        price: "2.40",
+      },
+    ]);
+
+    // Order 2: Green Bowl - Recent
+    const [order2] = await db
+      .insert(orderHistory)
+      .values({
+        userId: demoUser.id,
+        restaurantId: greenBowl.id,
+        visitDate: new Date("2025-10-22"),
+        totalPrice: "17.60",
+      })
+      .returning();
+
+    await db.insert(orderHistoryItem).values([
+      {
+        orderHistoryId: order2.id,
+        dishName: "Protein Power Bowl",
+        type: "main_course",
+        category: "bowl",
+        price: "8.90",
+      },
+      {
+        orderHistoryId: order2.id,
+        dishName: "Seasonal Smoothie",
+        type: "drink",
+        category: "smoothie",
+        price: "4.70",
+      },
+    ]);
+
+    // Order 3: Burger Werk - Recent
+    const [order3] = await db
+      .insert(orderHistory)
+      .values({
+        userId: demoUser.id,
+        restaurantId: burgerWerk.id,
+        visitDate: new Date("2025-10-21"),
+        totalPrice: "16.10",
+      })
+      .returning();
+
+    await db.insert(orderHistoryItem).values([
+      {
+        orderHistoryId: order3.id,
+        dishName: "MarkenMate Signature Burger",
+        type: "main_course",
+        category: "burger",
+        price: "10.90",
+      },
+      {
+        orderHistoryId: order3.id,
+        dishName: "Loaded Sweet Fries",
+        type: "main_course",
+        category: "sides",
+        price: "5.20",
+      },
+    ]);
+
+    // Order 4: Noon Deli - Last week
+    const [order4] = await db
+      .insert(orderHistory)
+      .values({
+        userId: demoUser.id,
+        restaurantId: noonDeli.id,
+        visitDate: new Date("2025-10-16"),
+        totalPrice: "14.20",
+      })
+      .returning();
+
+    await db.insert(orderHistoryItem).values([
+      {
+        orderHistoryId: order4.id,
+        dishName: "Ciabatta Caprese",
+        type: "main_course",
+        category: "sandwich",
+        price: "6.40",
+      },
+      {
+        orderHistoryId: order4.id,
+        dishName: "Tagesuppe",
+        type: "main_course",
+        category: "soup",
+        price: "4.80",
+      },
+      {
+        orderHistoryId: order4.id,
+        dishName: "Panna Cotta",
+        type: "dessert",
+        category: "dessert",
+        price: "3.00",
+      },
+    ]);
+
+    // Order 5: Pasta Loft - Last week
+    const [order5] = await db
+      .insert(orderHistory)
+      .values({
+        userId: demoUser.id,
+        restaurantId: pastaLoft.id,
+        visitDate: new Date("2025-10-14"),
+        totalPrice: "31.90",
+      })
+      .returning();
+
+    await db.insert(orderHistoryItem).values([
+      {
+        orderHistoryId: order5.id,
+        dishName: "Trüffel Tagliatelle",
+        type: "main_course",
+        category: "pasta",
+        price: "11.90",
+      },
+      {
+        orderHistoryId: order5.id,
+        dishName: "Trüffel Tagliatelle",
+        type: "main_course",
+        category: "pasta",
+        price: "11.90",
+      },
+      {
+        orderHistoryId: order5.id,
+        dishName: "Burrata Bowl",
+        type: "main_course",
+        category: "bowl",
+        price: "10.40",
+      },
+      {
+        orderHistoryId: order5.id,
+        dishName: "Wasser",
+        type: "drink",
+        category: "beverage",
+        price: "2.40",
+      },
+      {
+        orderHistoryId: order5.id,
+        dishName: "Wasser",
+        type: "drink",
+        category: "beverage",
+        price: "2.40",
+      },
+    ]);
+
+    // Order 6: Green Bowl - Last week
+    const [order6] = await db
+      .insert(orderHistory)
+      .values({
+        userId: demoUser.id,
+        restaurantId: greenBowl.id,
+        visitDate: new Date("2025-10-12"),
+        totalPrice: "21.40",
+      })
+      .returning();
+
+    await db.insert(orderHistoryItem).values([
+      {
+        orderHistoryId: order6.id,
+        dishName: "Falafel Salad",
+        type: "main_course",
+        category: "salad",
+        price: "7.80",
+      },
+      {
+        orderHistoryId: order6.id,
+        dishName: "Protein Power Bowl",
+        type: "main_course",
+        category: "bowl",
+        price: "8.90",
+      },
+      {
+        orderHistoryId: order6.id,
+        dishName: "Seasonal Smoothie",
+        type: "drink",
+        category: "smoothie",
+        price: "4.70",
+      },
+    ]);
+
+    // Order 7: Burger Werk - Older
+    const [order7] = await db
+      .insert(orderHistory)
+      .values({
+        userId: demoUser.id,
+        restaurantId: burgerWerk.id,
+        visitDate: new Date("2025-10-05"),
+        totalPrice: "26.00",
+      })
+      .returning();
+
+    await db.insert(orderHistoryItem).values([
+      {
+        orderHistoryId: order7.id,
+        dishName: "MarkenMate Signature Burger",
+        type: "main_course",
+        category: "burger",
+        price: "10.90",
+      },
+      {
+        orderHistoryId: order7.id,
+        dishName: "MarkenMate Signature Burger",
+        type: "main_course",
+        category: "burger",
+        price: "10.90",
+      },
+      {
+        orderHistoryId: order7.id,
+        dishName: "Loaded Sweet Fries",
+        type: "main_course",
+        category: "sides",
+        price: "5.20",
+      },
+    ]);
+
+    // Order 8: Noon Deli - Older
+    const [order8] = await db
+      .insert(orderHistory)
+      .values({
+        userId: demoUser.id,
+        restaurantId: noonDeli.id,
+        visitDate: new Date("2025-09-28"),
+        totalPrice: "18.60",
+      })
+      .returning();
+
+    await db.insert(orderHistoryItem).values([
+      {
+        orderHistoryId: order8.id,
+        dishName: "Ciabatta Caprese",
+        type: "main_course",
+        category: "sandwich",
+        price: "6.40",
+      },
+      {
+        orderHistoryId: order8.id,
+        dishName: "Ciabatta Caprese",
+        type: "main_course",
+        category: "sandwich",
+        price: "6.40",
+      },
+      {
+        orderHistoryId: order8.id,
+        dishName: "Tagesuppe",
+        type: "main_course",
+        category: "soup",
+        price: "4.80",
+      },
+    ]);
+
+    // Order 9: Pasta Loft - Older
+    const [order9] = await db
+      .insert(orderHistory)
+      .values({
+        userId: demoUser.id,
+        restaurantId: pastaLoft.id,
+        visitDate: new Date("2025-09-20"),
+        totalPrice: "25.70",
+      })
+      .returning();
+
+    await db.insert(orderHistoryItem).values([
+      {
+        orderHistoryId: order9.id,
+        dishName: "Trüffel Tagliatelle",
+        type: "main_course",
+        category: "pasta",
+        price: "11.90",
+      },
+      {
+        orderHistoryId: order9.id,
+        dishName: "Ofenlasagne",
+        type: "main_course",
+        category: "pasta",
+        price: "9.50",
+      },
+      {
+        orderHistoryId: order9.id,
+        dishName: "Burrata Bowl",
+        type: "main_course",
+        category: "bowl",
+        price: "5.20",
+      },
+    ]);
+
+    // Order 10: Green Bowl - Older
+    const [order10] = await db
+      .insert(orderHistory)
+      .values({
+        userId: demoUser.id,
+        restaurantId: greenBowl.id,
+        visitDate: new Date("2025-09-10"),
+        totalPrice: "20.30",
+      })
+      .returning();
+
+    await db.insert(orderHistoryItem).values([
+      {
+        orderHistoryId: order10.id,
+        dishName: "Protein Power Bowl",
+        type: "main_course",
+        category: "bowl",
+        price: "8.90",
+      },
+      {
+        orderHistoryId: order10.id,
+        dishName: "Protein Power Bowl",
+        type: "main_course",
+        category: "bowl",
+        price: "8.90",
+      },
+      {
+        orderHistoryId: order10.id,
+        dishName: "Seasonal Smoothie",
+        type: "drink",
+        category: "smoothie",
+        price: "4.70",
+      },
+    ]);
+
+    console.info("[seed] Order history data created");
 
     console.info("[seed] Test data seeding completed successfully");
     return { success: true, alreadySeeded: false };
