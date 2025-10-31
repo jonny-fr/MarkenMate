@@ -1,3 +1,17 @@
+/**
+ * Dashboard Page - Server Component
+ *
+ * This page fetches data from the database and passes it to the DashboardClient.
+ * 
+ * Restaurant data is now fetched from the database via getRestaurants() action.
+ * The database is automatically seeded with test restaurants on first application start.
+ * 
+ * Note: Lending, history, stats, and comparison data are still hardcoded as UI mockups.
+ * In a production app, these would come from actual user data:
+ * - Lending data from tokenLending table (requires authenticated users)
+ * - History data from orderHistory and orderHistoryItem tables (requires user orders)
+ * - Stats/Comparison data computed from aggregated order history
+ */
 import { getRestaurants } from "@/actions/get-restaurants";
 import { DashboardClient } from "./_components/dashboard-client";
 import type { Restaurant } from "./_components/restaurants-view";
@@ -9,123 +23,47 @@ import type { HistoryItem } from "./_components/history-view";
 // Force dynamic rendering since this page requires database access
 export const dynamic = "force-dynamic";
 
-// TODO: Remove this hardcoded data once we have real data from DB
-const restaurantsPromiseFallback: Promise<Restaurant[]> = Promise.resolve([
+/**
+ * Hardcoded mockup data for UI demonstration.
+ * These represent user-specific data that would normally be generated
+ * through actual application usage and stored in the database.
+ */
+
+// Lending data (mockup - would come from tokenLending table for authenticated user)
+const lendingPromise: Promise<LendingUser[]> = Promise.resolve([
   {
-    id: "pasta-loft",
-    name: "Pasta Loft",
-    cuisine: " · Frische Pasta",
-    address: "Innenstadt · Musterstraße 12",
-    rating: 4.7,
-    isOpen: true,
-    dishes: [
-      {
-        id: "pl-1",
-        name: "Trüffel Tagliatelle",
-        priceEuro: "€11,90",
-        priceTokens: 3,
-      },
-      {
-        id: "pl-2",
-        name: "Ofenlasagne",
-        priceEuro: "€9,50",
-        priceTokens: 2,
-      },
-      {
-        id: "pl-3",
-        name: "BOWL Bowl",
-        priceEuro: "€10,40",
-        priceTokens: 2,
-      },
-    ],
+    id: "lena-graf",
+    name: "Lena Graf",
+    balance: 4,
+    note: "Benötigt Marken für Team Lunch am Mittwoch.",
   },
   {
-    id: "green-bowl",
-    name: "Green Bowl",
-    cuisine: "Bowls & Salate",
-    address: "Campus Mitte · Kantinenhof",
-    rating: 4.5,
-    isOpen: true,
-    dishes: [
-      {
-        id: "gb-1",
-        name: "Protein Power Bowl",
-        priceEuro: "€8,90",
-        priceTokens: 2,
-      },
-      {
-        id: "gb-2",
-        name: "Falafel Salad",
-        priceEuro: "€7,80",
-        priceTokens: 2,
-      },
-      {
-        id: "gb-3",
-        name: "Seasonal Smoothie",
-        priceEuro: "€4,70",
-        priceTokens: 1,
-      },
-    ],
+    id: "amir-safar",
+    name: "Amir Safar",
+    balance: -3,
+    note: "Schuldet Marken von letztem Freitag.",
   },
   {
-    id: "burger-werk",
-    name: "Burger Werk",
-    cuisine: "Burger & Streetfood",
-    address: "Foodcourt · Werkstraße 8",
-    rating: 4.3,
-    isOpen: false,
-    dishes: [
-      {
-        id: "bw-1",
-        name: "MarkenMate Signature Burger",
-        priceEuro: "€10,90",
-        priceTokens: 3,
-      },
-      {
-        id: "bw-2",
-        name: "Loaded Sweet Fries",
-        priceEuro: "€5,20",
-        priceTokens: 1,
-      },
-      {
-        id: "bw-3",
-        name: "Spicy Veggie Burger",
-        priceEuro: "€9,30",
-        priceTokens: 2,
-      },
-    ],
+    id: "selina-wolf",
+    name: "Selina Wolf",
+    balance: 6,
+    note: "Vergütung geplant zum Monatsende.",
   },
   {
-    id: "noon-deli",
-    name: "Noon Deli",
-    cuisine: "Schnelle Mittagssnacks",
-    address: "City Gate · Lobby West",
-    rating: 4.1,
-    isOpen: true,
-    dishes: [
-      {
-        id: "nd-1",
-        name: "Ciabatta Caprese",
-        priceEuro: "€6,40",
-        priceTokens: 1,
-      },
-      {
-        id: "nd-2",
-        name: "Tagesuppe",
-        priceEuro: "€4,80",
-        priceTokens: 1,
-      },
-      {
-        id: "nd-3",
-        name: "Panna Cotta",
-        priceEuro: "€3,60",
-        priceTokens: 1,
-      },
-    ],
+    id: "max-mueller",
+    name: "Max Müller",
+    balance: -2,
+    note: "Gleicht Mittwoch nach der Schicht aus.",
+  },
+  {
+    id: "anna-schmidt",
+    name: "Anna Schmidt",
+    balance: 5,
+    note: "Hat mir 5 Marken für das Team Event verliehen.",
   },
 ]);
 
-// Spending Daten (Ausgaben)
+// Comparison data - Spending (mockup - would be computed from orderHistory)
 const comparisonDataSpending: Promise<ComparisonDataPoint[]> = Promise.resolve([
   // Woche
   { date: "2025-10-17", "pasta-loft": 45, "green-bowl": 35, "burger-werk": 52, "noon-deli": 28 },
@@ -245,39 +183,7 @@ const comparisonDataAvgPrice: Promise<ComparisonDataPoint[]> = Promise.resolve([
   { date: "2025-12-15", "pasta-loft": 14.2, "green-bowl": 15, "burger-werk": 16, "noon-deli": 14.5 },
 ]);
 
-const lendingPromise: Promise<LendingUser[]> = Promise.resolve([
-  {
-    id: "lena-graf",
-    name: "Lena Graf",
-    balance: 4,
-    note: "Benötigt Marken für Team Lunch am Mittwoch.",
-  },
-  {
-    id: "amir-safar",
-    name: "Amir Safar",
-    balance: -3,
-    note: "Schuldet Marken von letztem Freitag.",
-  },
-  {
-    id: "selina-wolf",
-    name: "Selina Wolf",
-    balance: 6,
-    note: "Vergütung geplant zum Monatsende.",
-  },
-  {
-    id: "max-mueller",
-    name: "Max Müller",
-    balance: -2,
-    note: "Gleicht Mittwoch nach der Schicht aus.",
-  },
-  {
-    id: "anna-schmidt",
-    name: "Anna Schmidt",
-    balance: 5,
-    note: "Hat mir 5 Marken für das Team Event verliehen.",
-  },
-]);
-
+// Stats data (mockup - would be computed from orderHistory aggregations)
 const statsPromise: Promise<StatsData> = Promise.resolve({
   lastMonthSpent: 245.50,
   totalLendingBalance: 12,
