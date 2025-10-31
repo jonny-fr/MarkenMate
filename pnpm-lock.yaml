@@ -73,7 +73,7 @@ importers:
         version: 2.1.1
       drizzle-orm:
         specifier: ^0.44.6
-        version: 0.44.6(@libsql/client@0.15.15)(kysely@0.28.7)(pg@8.16.3)
+        version: 0.44.6(@libsql/client@0.15.15)(@types/pg@8.15.6)(kysely@0.28.7)(pg@8.16.3)
       lucide-react:
         specifier: ^0.544.0
         version: 0.544.0(react@19.1.0)
@@ -120,6 +120,9 @@ importers:
       '@types/node':
         specifier: ^20
         version: 20.19.19
+      '@types/pg':
+        specifier: ^8.15.6
+        version: 8.15.6
       '@types/react':
         specifier: ^19
         version: 19.2.0
@@ -1449,6 +1452,9 @@ packages:
 
   '@types/node@20.19.19':
     resolution: {integrity: sha512-pb1Uqj5WJP7wrcbLU7Ru4QtA0+3kAXrkutGiD26wUKzSMgNNaPARTUDQmElUXp64kh3cWdou3Q0C7qwwxqSFmg==}
+
+  '@types/pg@8.15.6':
+    resolution: {integrity: sha512-NoaMtzhxOrubeL/7UZuNTrejB4MPAJ0RpxZqXQf2qXuVlTPuG6Y8p4u9dKRaue4yjmC7ZhzVO2/Yyyn25znrPQ==}
 
   '@types/react-dom@19.2.0':
     resolution: {integrity: sha512-brtBs0MnE9SMx7px208g39lRmC5uHZs96caOJfTjFcYSLHNamvaSMfJNagChVNkup2SdtOxKX1FDBkRSJe1ZAg==}
@@ -3345,6 +3351,12 @@ snapshots:
     dependencies:
       undici-types: 6.21.0
 
+  '@types/pg@8.15.6':
+    dependencies:
+      '@types/node': 20.19.19
+      pg-protocol: 1.10.3
+      pg-types: 2.2.0
+
   '@types/react-dom@19.2.0(@types/react@19.2.0)':
     dependencies:
       '@types/react': 19.2.0
@@ -3484,9 +3496,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.44.6(@libsql/client@0.15.15)(kysely@0.28.7)(pg@8.16.3):
+  drizzle-orm@0.44.6(@libsql/client@0.15.15)(@types/pg@8.15.6)(kysely@0.28.7)(pg@8.16.3):
     optionalDependencies:
       '@libsql/client': 0.15.15
+      '@types/pg': 8.15.6
       kysely: 0.28.7
       pg: 8.16.3
 

@@ -1,24 +1,16 @@
-"use client";
-
-import { Suspense, type CSSProperties, useState } from "react";
-
-import { AppSidebar } from "@/components/app-sidebar";
-import { ChartAreaInteractive } from "@/components/chart-area-interactive";
-import { SectionCards } from "@/components/section-cards";
-import { SiteHeader } from "@/components/site-header";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import {
-  type LendingUser,
-  TokenLendingPanel,
-} from "./_components/token-lending-panel";
-import { LendingView } from "./_components/lending-view";
-import { RestaurantsView } from "./_components/restaurants-view";
-import { ComparisonView, type ComparisonDataPoint } from "./_components/comparison-view";
-import { StatsView, type StatsData, type GraphDataPoint } from "./_components/stats-view";
-import { HistoryView, type HistoryItem } from "./_components/history-view";
+import { getRestaurants } from "@/actions/get-restaurants";
+import { DashboardClient } from "./_components/dashboard-client";
 import type { Restaurant } from "./_components/restaurants-view";
+import type { LendingUser } from "./_components/token-lending-panel";
+import type { ComparisonDataPoint } from "./_components/comparison-view";
+import type { StatsData, GraphDataPoint } from "./_components/stats-view";
+import type { HistoryItem } from "./_components/history-view";
 
-const restaurantsPromise: Promise<Restaurant[]> = Promise.resolve([
+// Force dynamic rendering since this page requires database access
+export const dynamic = "force-dynamic";
+
+// TODO: Remove this hardcoded data once we have real data from DB
+const restaurantsPromiseFallback: Promise<Restaurant[]> = Promise.resolve([
   {
     id: "pasta-loft",
     name: "Pasta Loft",
@@ -504,94 +496,23 @@ const historyPromise: Promise<HistoryItem[]> = Promise.resolve([
   },
 ]);
 
-function LoadingCard({ label }: { label: string }) {
-  return (
-    <div className="rounded-xl border border-dashed border-border/60 bg-muted/30 px-4 py-16 text-center text-sm text-muted-foreground">
-      {label} werden geladen...
-    </div>
-  );
-}
-
-type ViewType = "dashboard" | "restaurants" | "stats" | "history" | "comparison" | "lending";
-
 export default function Page() {
-  const [currentView, setCurrentView] = useState<ViewType>("dashboard");
+  // Fetch data from database
+  const restaurantsPromise = getRestaurants();
 
   return (
-    <SidebarProvider
-      style={
-        {
-          "--sidebar-width": "calc(var(--spacing) * 72)",
-          "--header-height": "calc(var(--spacing) * 12)",
-        } as CSSProperties
-      }
-    >
-      <AppSidebar variant="inset" onNavigateAction={setCurrentView} />
-      <SidebarInset>
-        <SiteHeader />
-        <div className="flex flex-1 flex-col">
-          <div className="@container/main flex flex-1 flex-col gap-2">
-            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-              {currentView === "restaurants" ? (
-                <div className="px-4 lg:px-6">
-                  <Suspense fallback={<LoadingCard label="Restaurants" />}>
-                    <RestaurantsView dataPromise={restaurantsPromise} />
-                  </Suspense>
-                </div>
-              ) : currentView === "stats" ? (
-                <div className="px-4 lg:px-6">
-                  <Suspense fallback={<LoadingCard label="Stats" />}>
-                    <StatsView
-                      statsPromise={statsPromise}
-                      graphDataPromise={graphDataPromise}
-                      graphDataMonth={graphDataMonth}
-                      graphDataQuarter={graphDataQuarter}
-                      graphDataYear={graphDataYear}
-                    />
-                  </Suspense>
-                </div>
-              ) : currentView === "history" ? (
-                <div className="px-4 lg:px-6">
-                  <Suspense fallback={<LoadingCard label="History" />}>
-                    <HistoryView dataPromise={historyPromise} />
-                  </Suspense>
-                </div>
-              ) : currentView === "lending" ? (
-                <div className="px-4 lg:px-6">
-                  <Suspense fallback={<LoadingCard label="Markenleihen" />}>
-                    <LendingView dataPromise={lendingPromise} />
-                  </Suspense>
-                </div>
-              ) : currentView === "comparison" ? (
-                <div className="px-4 lg:px-6">
-                  <Suspense fallback={<LoadingCard label="Vergleich" />}>
-                    <ComparisonView
-                      restaurantsPromise={restaurantsPromise}
-                      comparisonDataSpending={comparisonDataSpending}
-                      comparisonDataFrequency={comparisonDataFrequency}
-                      comparisonDataAvgPrice={comparisonDataAvgPrice}
-                    />
-                  </Suspense>
-                </div>
-              ) : (
-                <>
-                  <SectionCards />
-                  <div className="grid gap-4 px-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:px-6">
-                    <div className="space-y-4">
-                      <ChartAreaInteractive />
-                    </div>
-                    <div className="space-y-4">
-                      <Suspense fallback={<LoadingCard label="Markenleihen" />}>
-                        <TokenLendingPanel dataPromise={lendingPromise} />
-                      </Suspense>
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+    <DashboardClient
+      restaurantsPromise={restaurantsPromise}
+      lendingPromise={lendingPromise}
+      statsPromise={statsPromise}
+      graphDataPromise={graphDataPromise}
+      graphDataMonth={graphDataMonth}
+      graphDataQuarter={graphDataQuarter}
+      graphDataYear={graphDataYear}
+      historyPromise={historyPromise}
+      comparisonDataSpending={comparisonDataSpending}
+      comparisonDataFrequency={comparisonDataFrequency}
+      comparisonDataAvgPrice={comparisonDataAvgPrice}
+    />
   );
 }

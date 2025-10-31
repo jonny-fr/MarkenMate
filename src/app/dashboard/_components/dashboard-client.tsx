@@ -1,0 +1,137 @@
+"use client";
+
+import { Suspense, type CSSProperties, useState } from "react";
+
+import { AppSidebar } from "@/components/app-sidebar";
+import { ChartAreaInteractive } from "@/components/chart-area-interactive";
+import { SectionCards } from "@/components/section-cards";
+import { SiteHeader } from "@/components/site-header";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import {
+  type LendingUser,
+  TokenLendingPanel,
+} from "./token-lending-panel";
+import { LendingView } from "./lending-view";
+import { RestaurantsView } from "./restaurants-view";
+import { ComparisonView, type ComparisonDataPoint } from "./comparison-view";
+import { StatsView, type StatsData, type GraphDataPoint } from "./stats-view";
+import { HistoryView, type HistoryItem } from "./history-view";
+import type { Restaurant } from "./restaurants-view";
+
+function LoadingCard({ label }: { label: string }) {
+  return (
+    <div className="rounded-xl border border-dashed border-border/60 bg-muted/30 px-4 py-16 text-center text-sm text-muted-foreground">
+      {label} werden geladen...
+    </div>
+  );
+}
+
+type ViewType = "dashboard" | "restaurants" | "stats" | "history" | "comparison" | "lending";
+
+interface DashboardClientProps {
+  restaurantsPromise: Promise<Restaurant[]>;
+  lendingPromise: Promise<LendingUser[]>;
+  statsPromise: Promise<StatsData>;
+  graphDataPromise: Promise<GraphDataPoint[]>;
+  graphDataMonth: Promise<GraphDataPoint[]>;
+  graphDataQuarter: Promise<GraphDataPoint[]>;
+  graphDataYear: Promise<GraphDataPoint[]>;
+  historyPromise: Promise<HistoryItem[]>;
+  comparisonDataSpending: Promise<ComparisonDataPoint[]>;
+  comparisonDataFrequency: Promise<ComparisonDataPoint[]>;
+  comparisonDataAvgPrice: Promise<ComparisonDataPoint[]>;
+}
+
+export function DashboardClient({
+  restaurantsPromise,
+  lendingPromise,
+  statsPromise,
+  graphDataPromise,
+  graphDataMonth,
+  graphDataQuarter,
+  graphDataYear,
+  historyPromise,
+  comparisonDataSpending,
+  comparisonDataFrequency,
+  comparisonDataAvgPrice,
+}: DashboardClientProps) {
+  const [currentView, setCurrentView] = useState<ViewType>("dashboard");
+
+  return (
+    <SidebarProvider
+      style={
+        {
+          "--sidebar-width": "calc(var(--spacing) * 72)",
+          "--header-height": "calc(var(--spacing) * 12)",
+        } as CSSProperties
+      }
+    >
+      <AppSidebar variant="inset" onNavigateAction={setCurrentView} />
+      <SidebarInset>
+        <SiteHeader />
+        <div className="flex flex-1 flex-col">
+          <div className="@container/main flex flex-1 flex-col gap-2">
+            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+              {currentView === "restaurants" ? (
+                <div className="px-4 lg:px-6">
+                  <Suspense fallback={<LoadingCard label="Restaurants" />}>
+                    <RestaurantsView dataPromise={restaurantsPromise} />
+                  </Suspense>
+                </div>
+              ) : currentView === "stats" ? (
+                <div className="px-4 lg:px-6">
+                  <Suspense fallback={<LoadingCard label="Stats" />}>
+                    <StatsView
+                      statsPromise={statsPromise}
+                      graphDataPromise={graphDataPromise}
+                      graphDataMonth={graphDataMonth}
+                      graphDataQuarter={graphDataQuarter}
+                      graphDataYear={graphDataYear}
+                    />
+                  </Suspense>
+                </div>
+              ) : currentView === "history" ? (
+                <div className="px-4 lg:px-6">
+                  <Suspense fallback={<LoadingCard label="History" />}>
+                    <HistoryView dataPromise={historyPromise} />
+                  </Suspense>
+                </div>
+              ) : currentView === "lending" ? (
+                <div className="px-4 lg:px-6">
+                  <Suspense fallback={<LoadingCard label="Markenleihen" />}>
+                    <LendingView dataPromise={lendingPromise} />
+                  </Suspense>
+                </div>
+              ) : currentView === "comparison" ? (
+                <div className="px-4 lg:px-6">
+                  <Suspense fallback={<LoadingCard label="Vergleich" />}>
+                    <ComparisonView
+                      restaurantsPromise={restaurantsPromise}
+                      comparisonDataSpending={comparisonDataSpending}
+                      comparisonDataFrequency={comparisonDataFrequency}
+                      comparisonDataAvgPrice={comparisonDataAvgPrice}
+                    />
+                  </Suspense>
+                </div>
+              ) : (
+                <>
+                  <SectionCards />
+                  <div className="grid gap-4 px-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:px-6">
+                    <div className="space-y-4">
+                      <ChartAreaInteractive />
+                    </div>
+                    <div className="space-y-4">
+                      <Suspense fallback={<LoadingCard label="Markenleihen" />}>
+                        <TokenLendingPanel dataPromise={lendingPromise} />
+                      </Suspense>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
+  );
+}

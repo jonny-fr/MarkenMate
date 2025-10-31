@@ -1,5 +1,6 @@
 import "server-only";
 import { pool } from "@/db";
+import { seedTestData } from "./seed-data";
 
 /**
  * Ensure the application can reach the database.
@@ -27,6 +28,11 @@ export async function initializeDatabase() {
       console.info(
         `[database] Connected (${tableNames.length} tables: ${tableNames.join(", ")})`
       );
+
+      // Seed test data on first start
+      if (tableNames.length > 0) {
+        await seedTestData();
+      }
     } finally {
       client.release();
     }
