@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the implementation of automatic database seeding for test objects (restaurants and menu items) that occurs on application first start.
+This document describes the implementation of automatic database seeding for test objects (restaurants, menu items, lending data, and order history) that occurs on application first start.
 
 ## What Was Implemented
 
@@ -10,13 +10,16 @@ This document describes the implementation of automatic database seeding for tes
 
 **File: `/src/lib/seed-data.ts`**
 
-- Created `seedTestData()` function that seeds the database with test restaurants and menu items
+- Created `seedTestData()` function that seeds the database with comprehensive test data
 - The function is **idempotent** - it checks if data already exists before seeding
+- Seeds a **demo user** for test data association
 - Seeds 4 restaurants with their associated menu items:
   - **Pasta Loft** - Italian restaurant with 3 pasta dishes
   - **Green Bowl** - Health food with 3 bowls/salads/smoothies
   - **Burger Werk** - Burger restaurant with 3 items (marked as closed)
   - **Noon Deli** - Quick lunch spot with 3 snacks/desserts
+- Seeds **token lending data** (5 lending relationships)
+- Seeds **order history data** (10 orders with items spanning multiple weeks)
 
 ### 2. Integration with Application Startup
 
@@ -34,12 +37,27 @@ This document describes the implementation of automatic database seeding for tes
 - Transforms database records into the format expected by UI components
 - Calculates token prices based on menu item prices (1 token ≈ €4-5)
 
+**File: `/src/actions/get-lending-data.ts`**
+
+- Created `getLendingData()` server action to fetch token lending records from database
+- Fetches data for the demo user (in production, would use authenticated user)
+- Transforms database records into UI format
+
+**File: `/src/actions/get-history-data.ts`**
+
+- Created `getHistoryData()` server action to fetch order history from database
+- Joins orderHistory and orderHistoryItem tables with restaurant data
+- Groups items by dish and counts quantities
+- Sorts by date (most recent first)
+
 ### 4. Updated Dashboard Architecture
 
 **File: `/src/app/dashboard/page.tsx`**
 
 - Converted to a server component that fetches data from database
 - Calls `getRestaurants()` to load restaurant data from database
+- Calls `getLendingData()` to load lending data from database
+- Calls `getHistoryData()` to load order history from database
 
 **File: `/src/app/dashboard/_components/dashboard-client.tsx`**
 
@@ -49,20 +67,23 @@ This document describes the implementation of automatic database seeding for tes
 
 ## What Is Still Hardcoded
 
-The following data remains hardcoded as UI mockups because they represent user-specific data that would normally be generated through actual application usage:
+The following data remains hardcoded as UI mockups:
 
-1. **Lending Data** - Would come from `tokenLending` table (requires authenticated users)
-2. **Order History** - Would come from `orderHistory` and `orderHistoryItem` tables (requires user orders)
-3. **Stats & Comparison Data** - Would be computed from aggregated order history
+1. **Stats Data** - Currently static values; would be computed from aggregated order history in production
+2. **Comparison/Graph Data** - Currently static values; would be computed from aggregated order history in production
 
-These are intentionally left as mockups for demonstration purposes.
+These are intentionally left as mockups because they represent computed aggregations that would be calculated dynamically from the order history data in a production application.
 
 ## Database Schema Used
 
 The seeding uses the following tables defined in `/src/db/schema.ts`:
 
+- `user` - Stores user accounts (demo user created for test data)
 - `restaurant` - Stores restaurant information
 - `menuItem` - Stores menu items associated with restaurants
+- `tokenLending` - Stores token lending relationships between users
+- `orderHistory` - Stores order records for users
+- `orderHistoryItem` - Stores individual items in each order
 
 ## Testing the Implementation
 
@@ -84,19 +105,24 @@ The seeding function checks if restaurants already exist before inserting. This 
 
 ## Future Enhancements
 
-To fully implement database-driven test data:
+To fully implement database-driven computed data:
 
-1. **User-specific test data**: Create test users and associated lending/order data during seeding
-2. **Order history seeding**: Generate sample orders for demonstration
-3. **Stats computation**: Create functions to compute stats from order history
-4. **Comparison data**: Generate comparison charts from aggregated orders
+1. **Stats computation**: Create functions to compute real-time stats from order history
+2. **Comparison data**: Generate comparison charts from aggregated orders dynamically
+3. **Multi-user support**: Extend seeding to create multiple test users with different data
+4. **Authentication integration**: Connect to real authentication system instead of demo user
 
 ## Files Modified
 
-- `/src/lib/seed-data.ts` (new)
-- `/src/lib/init-db.ts` (modified)
-- `/src/actions/get-restaurants.ts` (new)
-- `/src/app/dashboard/page.tsx` (modified)
-- `/src/app/dashboard/_components/dashboard-client.tsx` (new)
-- `/src/app/layout.tsx` (modified - temporarily disabled Google Fonts)
-- `/package.json` (modified - added @types/pg)
+**New Files:**
+- `/src/lib/seed-data.ts` - Database seeding logic for all test data
+- `/src/actions/get-restaurants.ts` - Fetch restaurants and menu items
+- `/src/actions/get-lending-data.ts` - Fetch token lending data
+- `/src/actions/get-history-data.ts` - Fetch order history data
+- `/src/app/dashboard/_components/dashboard-client.tsx` - Client component for dashboard
+
+**Modified Files:**
+- `/src/lib/init-db.ts` - Added seeding call during initialization
+- `/src/app/dashboard/page.tsx` - Converted to server component, fetch all data from DB
+- `/src/app/layout.tsx` - Temporarily disabled Google Fonts
+- `/package.json` - Added @types/pg dependency
