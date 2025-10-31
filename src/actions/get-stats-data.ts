@@ -34,8 +34,8 @@ export async function getStatsData(): Promise<StatsData> {
     .where(
       and(
         eq(orderHistory.userId, demoUserId),
-        gte(orderHistory.visitDate, oneMonthAgo)
-      )
+        gte(orderHistory.visitDate, oneMonthAgo),
+      ),
     );
 
   const lastMonthSpent = Number(lastMonthOrders[0]?.total ?? 0);
@@ -53,8 +53,8 @@ export async function getStatsData(): Promise<StatsData> {
       and(
         eq(orderHistory.userId, demoUserId),
         gte(orderHistory.visitDate, twoMonthsAgo),
-        sql`${orderHistory.visitDate} < ${oneMonthAgo}`
-      )
+        sql`${orderHistory.visitDate} < ${oneMonthAgo}`,
+      ),
     );
 
   const previousMonthSpent = Number(twoMonthsAgoOrders[0]?.total ?? 0);
@@ -62,7 +62,8 @@ export async function getStatsData(): Promise<StatsData> {
   // Calculate spending trend percentage
   let spendingTrend = 0;
   if (previousMonthSpent > 0) {
-    spendingTrend = ((lastMonthSpent - previousMonthSpent) / previousMonthSpent) * 100;
+    spendingTrend =
+      ((lastMonthSpent - previousMonthSpent) / previousMonthSpent) * 100;
   } else if (lastMonthSpent > 0) {
     spendingTrend = 100;
   }
@@ -90,7 +91,7 @@ export async function getStatsData(): Promise<StatsData> {
  */
 export async function getGraphData(
   startDate: Date,
-  endDate: Date
+  endDate: Date,
 ): Promise<GraphDataPoint[]> {
   const demoUserId = "demo-user-123";
 
@@ -105,8 +106,8 @@ export async function getGraphData(
       and(
         eq(orderHistory.userId, demoUserId),
         gte(orderHistory.visitDate, startDate),
-        sql`${orderHistory.visitDate} <= ${endDate}`
-      )
+        sql`${orderHistory.visitDate} <= ${endDate}`,
+      ),
     )
     .groupBy(sql`DATE(${orderHistory.visitDate})`)
     .orderBy(sql`DATE(${orderHistory.visitDate})`);
@@ -122,8 +123,8 @@ export async function getGraphData(
       and(
         eq(tokenLending.userId, demoUserId),
         gte(tokenLending.lastLendingDate, startDate),
-        sql`${tokenLending.lastLendingDate} <= ${endDate}`
-      )
+        sql`${tokenLending.lastLendingDate} <= ${endDate}`,
+      ),
     )
     .groupBy(sql`DATE(${tokenLending.lastLendingDate})`)
     .orderBy(sql`DATE(${tokenLending.lastLendingDate})`);
@@ -152,7 +153,9 @@ export async function getGraphData(
     }
   }
 
-  return Array.from(dateMap.values()).sort((a, b) => a.date.localeCompare(b.date));
+  return Array.from(dateMap.values()).sort((a, b) =>
+    a.date.localeCompare(b.date),
+  );
 }
 
 /**

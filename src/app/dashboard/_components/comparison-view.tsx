@@ -1,13 +1,34 @@
 "use client";
 
-import {use, useMemo, useState} from "react";
-import {Plus, X} from "lucide-react";
-import {CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis,} from "recharts";
+import { use, useMemo, useState } from "react";
+import { Plus, X } from "lucide-react";
+import {
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
-import {Badge} from "@/components/ui/badge";
-import {Button} from "@/components/ui/button";
-import {Card, CardContent, CardDescription, CardHeader, CardTitle,} from "@/components/ui/card";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export type Restaurant = {
   id: string;
@@ -80,7 +101,7 @@ export function ComparisonView({
       const transformed: any = { date: point.date };
 
       selectedRestaurants.forEach((restaurantId) => {
-          // Verwende die Daten direkt ohne Transformation
+        // Verwende die Daten direkt ohne Transformation
         transformed[restaurantId] = point[restaurantId] as number;
       });
 
@@ -151,7 +172,7 @@ export function ComparisonView({
   const removeRestaurant = (restaurantId: string) => {
     if (selectedRestaurants.length > 1) {
       setSelectedRestaurants(
-        selectedRestaurants.filter((id) => id !== restaurantId)
+        selectedRestaurants.filter((id) => id !== restaurantId),
       );
     }
   };
@@ -161,7 +182,7 @@ export function ComparisonView({
   };
 
   const availableRestaurants = restaurants.filter(
-    (r) => !selectedRestaurants.includes(r.id)
+    (r) => !selectedRestaurants.includes(r.id),
   );
 
   return (
@@ -267,10 +288,7 @@ export function ComparisonView({
                       {getRestaurantName(restaurantId)}
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      {
-                        restaurants.find((r) => r.id === restaurantId)
-                          ?.cuisine
-                      }
+                      {restaurants.find((r) => r.id === restaurantId)?.cuisine}
                     </span>
                   </div>
                 </div>
@@ -317,11 +335,12 @@ export function ComparisonView({
           )}
 
           {/* All Restaurants Selected Message */}
-          {availableRestaurants.length === 0 && selectedRestaurants.length > 1 && (
-            <div className="p-3 rounded-lg bg-muted/50 text-center text-sm text-muted-foreground">
-              Alle Restaurants werden bereits verglichen
-            </div>
-          )}
+          {availableRestaurants.length === 0 &&
+            selectedRestaurants.length > 1 && (
+              <div className="p-3 rounded-lg bg-muted/50 text-center text-sm text-muted-foreground">
+                Alle Restaurants werden bereits verglichen
+              </div>
+            )}
         </CardContent>
       </Card>
     </div>

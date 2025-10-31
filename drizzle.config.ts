@@ -9,7 +9,7 @@ const databaseUrl = process.env.DATABASE_URL;
 
 if (!databaseUrl) {
   throw new Error(
-    "DATABASE_URL is not defined. Please set it before running Drizzle commands."
+    "DATABASE_URL is not defined. Please set it before running Drizzle commands.",
   );
 }
 

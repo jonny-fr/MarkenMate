@@ -143,32 +143,40 @@
   }
 
   /* Button & Link Styles */
-  button, [role="button"], a[href] {
+  button,
+  [role="button"],
+  a[href] {
     border-radius: calc(var(--radius) + 2px);
     transition: all 0.2s ease-in-out;
   }
 
   /* Card & Container Styles */
-  [role="region"], .card, .container {
+  [role="region"],
+  .card,
+  .container {
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-md);
   }
   /* Card-spezifisches Styling - Dezenter Rahmen */
-  [data-slot="card"], .card {
-    border: 1px solid var(--card-border, #D6CFC6);
+  [data-slot="card"],
+  .card {
+    border: 1px solid var(--card-border, #d6cfc6);
     border-radius: var(--radius-lg);
     box-shadow: 0 2px 8px rgba(58, 46, 37, 0.06);
   }
 
-
   /* Input Styles */
-  input, textarea, select {
+  input,
+  textarea,
+  select {
     @apply bg-input text-foreground;
     border-radius: var(--radius);
     box-shadow: inset var(--shadow-sm);
   }
 
-  input:focus, textarea:focus, select:focus {
+  input:focus,
+  textarea:focus,
+  select:focus {
     @apply ring-2 ring-ring;
   }
 }

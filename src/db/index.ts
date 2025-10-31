@@ -5,7 +5,9 @@ import { Pool } from "pg";
 const databaseUrl = process.env.DATABASE_URL;
 
 if (!databaseUrl) {
-  throw new Error("DATABASE_URL is not defined. Please set it in your environment.");
+  throw new Error(
+    "DATABASE_URL is not defined. Please set it in your environment.",
+  );
 }
 
 const sslMode = (process.env.DATABASE_SSL ?? "disable").toLowerCase();

@@ -59,8 +59,8 @@ export function LendingView({
               ...user,
               balance: user.balance + delta,
             }
-          : user
-      )
+          : user,
+      ),
     );
   };
 
@@ -72,15 +72,15 @@ export function LendingView({
               ...user,
               balance: 0,
             }
-          : user
-      )
+          : user,
+      ),
     );
   };
 
   // Sortiere Benutzer so, dass die mit nicht-Null-Balance oben sind
   const sortedUsers = useMemo(
     () => [...users].sort((a, b) => Math.abs(b.balance) - Math.abs(a.balance)),
-    [users]
+    [users],
   );
 
   const getTotalColor = (total: number) => {
@@ -127,9 +127,7 @@ export function LendingView({
             <CardTitle className="text-base">Schulden</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-red-600">
-              {stats.owed}
-            </div>
+            <div className="text-3xl font-bold text-red-600">{stats.owed}</div>
             <p className="text-xs text-muted-foreground mt-1">
               Marken zu begleichen
             </p>
@@ -143,11 +141,10 @@ export function LendingView({
           </CardHeader>
           <CardContent>
             <div className={`text-3xl font-bold ${getTotalColor(stats.total)}`}>
-              {stats.total > 0 ? "+" : ""}{stats.total}
+              {stats.total > 0 ? "+" : ""}
+              {stats.total}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Nettostand
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">Nettostand</p>
           </CardContent>
         </Card>
       </div>
@@ -221,7 +218,7 @@ export function LendingView({
                           : "secondary"
                     }
                     className={`min-w-12 justify-center px-3 py-1 text-base font-semibold ${getBalanceBadgeClass(
-                      user.balance
+                      user.balance,
                     )}`}
                   >
                     {user.balance < 0 ? "-" : user.balance > 0 ? "+" : ""}
@@ -284,7 +281,8 @@ export function LendingView({
               variant="outline"
               className={`px-3 py-1 text-base font-semibold ${getTotalColor(stats.total)}`}
             >
-              {stats.total > 0 ? "+" : ""}{stats.total}
+              {stats.total > 0 ? "+" : ""}
+              {stats.total}
             </Badge>
           </div>
         )}

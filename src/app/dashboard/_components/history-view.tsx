@@ -2,10 +2,7 @@
 
 import { use } from "react";
 import { ChevronDown } from "lucide-react";
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 
 export type HistoryItem = {
   id: string;

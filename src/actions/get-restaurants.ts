@@ -55,6 +55,8 @@ export type RestaurantWithDishes = {
     name: string;
     priceEuro: string;
     priceTokens: number;
+    category: string;
+    type: string;
   }>;
 };
 
@@ -88,6 +90,8 @@ export async function getRestaurants(): Promise<RestaurantWithDishes[]> {
             name: dish.dishName,
             priceEuro: `€${price.toFixed(2).replace(".", ",")}`,
             priceTokens: tokenPrice,
+            category: dish.category,
+            type: dish.type,
           };
         }),
       };
