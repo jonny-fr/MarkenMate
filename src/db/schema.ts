@@ -1,13 +1,16 @@
 import {
   boolean,
+  check,
   integer,
   numeric,
+  pgEnum,
   pgTable,
   serial,
   text,
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
 /**
  * Authentication schema.
@@ -108,23 +111,45 @@ export const demoData = pgTable("demo_data", {
  * Restaurant management schema
  */
 
+// Enums for type safety
+export const menuItemTypeEnum = pgEnum("menu_item_type", [
+  "drink",
+  "main_course",
+  "dessert",
+]);
+
+export const acceptanceStatusEnum = pgEnum("acceptance_status", [
+  "pending",
+  "accepted",
+  "declined",
+]);
+
 // Restaurants table
-export const restaurant = pgTable("restaurant", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  location: text("location").notNull(),
-  tag: text("tag").notNull(), // restaurant type (e.g., Italian, Chinese, etc.)
-  phoneNumber: varchar("phone_number", { length: 50 }),
-  openingHours: text("opening_hours"), // JSON string or text format
-  rating: numeric("rating", { precision: 3, scale: 2 }), // e.g., 4.50
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
-    .defaultNow()
-    .$onUpdate(() => new Date())
-    .notNull(),
-});
+export const restaurant = pgTable(
+  "restaurant",
+  {
+    id: serial("id").primaryKey(),
+    name: text("name").notNull(),
+    location: text("location").notNull(),
+    tag: text("tag").notNull(), // restaurant type (e.g., Italian, Chinese, etc.)
+    phoneNumber: varchar("phone_number", { length: 50 }),
+    openingHours: text("opening_hours"), // JSON string or text format
+    rating: numeric("rating", { precision: 3, scale: 2 }), // e.g., 4.50
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    check(
+      "rating_range",
+      sql`${table.rating} IS NULL OR (${table.rating} >= 0 AND ${table.rating} <= 5)`,
+    ),
+  ],
+);
 
 // Menu items (Speisekarte)
 export const menuItem = pgTable("menu_item", {
@@ -133,7 +158,7 @@ export const menuItem = pgTable("menu_item", {
     .notNull()
     .references(() => restaurant.id, { onDelete: "cascade" }),
   dishName: text("dish_name").notNull(),
-  type: text("type").notNull(), // 'drink', 'main_course', 'dessert'
+  type: menuItemTypeEnum("type").notNull(), // 'drink', 'main_course', 'dessert'
   category: text("category").notNull(), // e.g., 'pasta', 'pizza', 'salad'
   price: numeric("price", { precision: 10, scale: 2 }).notNull(), // price as shown on menu
   givesRefund: boolean("gives_refund").default(false).notNull(), // whether item provides token refund
@@ -158,7 +183,9 @@ export const tokenLending = pgTable("token_lending", {
     .defaultNow()
     .notNull(),
   totalTokensLent: integer("total_tokens_lent").default(0).notNull(), // cumulative count of lent tokens
-  acceptanceStatus: text("acceptance_status").default("pending").notNull(), // 'pending', 'accepted', 'declined'
+  acceptanceStatus: acceptanceStatusEnum("acceptance_status")
+    .default("pending")
+    .notNull(), // 'pending', 'accepted', 'declined'
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -202,18 +229,27 @@ export const orderHistoryItem = pgTable("order_history_item", {
 });
 
 // Favorites (for both restaurants and dishes)
-export const favorite = pgTable("favorite", {
-  id: serial("id").primaryKey(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-  restaurantId: integer("restaurant_id").references(() => restaurant.id, {
-    onDelete: "cascade",
-  }), // null if favorite is a dish
-  menuItemId: integer("menu_item_id").references(() => menuItem.id, {
-    onDelete: "cascade",
-  }), // null if favorite is a restaurant
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-});
+export const favorite = pgTable(
+  "favorite",
+  {
+    id: serial("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    restaurantId: integer("restaurant_id").references(() => restaurant.id, {
+      onDelete: "cascade",
+    }), // null if favorite is a dish
+    menuItemId: integer("menu_item_id").references(() => menuItem.id, {
+      onDelete: "cascade",
+    }), // null if favorite is a restaurant
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    check(
+      "favorite_type_check",
+      sql`(${table.restaurantId} IS NOT NULL AND ${table.menuItemId} IS NULL) OR (${table.restaurantId} IS NULL AND ${table.menuItemId} IS NOT NULL)`,
+    ),
+  ],
+);

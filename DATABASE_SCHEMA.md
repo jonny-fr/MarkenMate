@@ -28,6 +28,7 @@ Stores restaurant information.
   - `phoneNumber`: Contact phone number (varchar 50)
   - `openingHours`: Operating hours (text) - flexible format (JSON string or plain text)
   - `rating`: Restaurant rating (numeric 3,2) - e.g., 4.50
+    - **Constraint**: Rating must be NULL or between 0.00 and 5.00
   - `createdAt`, `updatedAt`: Timestamps
 
 ### 3. Menu Item Table (Speisekarte)
@@ -37,7 +38,7 @@ Stores menu items for each restaurant with pricing and categorization.
   - `id`: Primary key (serial)
   - `restaurantId`: Foreign key → restaurant.id (cascade delete)
   - `dishName`: Name of the dish (text, required)
-  - `type`: Item type (text, required) - e.g., 'drink', 'main_course', 'dessert'
+  - `type`: Item type (enum, required) - **Enum**: 'drink', 'main_course', 'dessert'
   - `category`: Sub-category (text, required) - e.g., 'pasta', 'pizza', 'salad'
   - `price`: Menu price (numeric 10,2, required) - base price that converts to token costs
   - `givesRefund`: Whether item provides token refund (boolean, default false)
@@ -56,8 +57,8 @@ Tracks token lending/borrowing between users.
   - `lastLendingDate`: Date of last transaction (timestamp, auto-set)
   - `totalTokensLent`: Cumulative count of all tokens lent (integer, default 0)
     - Used for calculating "top 5 probable friends" recommendation
-  - `acceptanceStatus`: Status of lending (text, default 'pending')
-    - Values: 'pending', 'accepted', 'declined'
+  - `acceptanceStatus`: Status of lending (enum, default 'pending')
+    - **Enum**: 'pending', 'accepted', 'declined'
   - `createdAt`, `updatedAt`: Timestamps
 
 **Algorithm Note**: The "quick display of 5 probable friends" can be calculated using `totalTokensLent` and `acceptanceStatus` fields with a formula like:
@@ -101,8 +102,9 @@ Allows users to favorite restaurants or dishes.
   - `restaurantId`: Foreign key → restaurant.id (cascade delete, nullable)
   - `menuItemId`: Foreign key → menuItem.id (cascade delete, nullable)
   - `createdAt`: Timestamp
+  - **Constraint**: Exactly one of `restaurantId` or `menuItemId` must be NOT NULL
 
-**Design**: Either `restaurantId` OR `menuItemId` will be set (one will be null). This allows favoriting both restaurants and individual dishes.
+**Design**: Either `restaurantId` OR `menuItemId` will be set (one will be null). This allows favoriting both restaurants and individual dishes. A check constraint ensures data integrity.
 
 ## Relationships
 
@@ -119,6 +121,27 @@ orderHistory (1) ──< (N) orderHistoryItem
 
 menuItem (1) ──< (N) favorite
 ```
+
+## Data Integrity & Constraints
+
+The schema includes several constraints to ensure data quality:
+
+### PostgreSQL Enums
+- **menu_item_type**: Restricts menu item types to 'drink', 'main_course', or 'dessert'
+- **acceptance_status**: Restricts lending status to 'pending', 'accepted', or 'declined'
+
+### Check Constraints
+1. **restaurant.rating**: Must be NULL or between 0.00 and 5.00
+2. **favorite**: Exactly one of restaurantId or menuItemId must be NOT NULL (XOR constraint)
+
+### Foreign Key Cascades
+All foreign key relationships use `ON DELETE CASCADE` to maintain referential integrity:
+- Deleting a user removes all their lending records, order history, and favorites
+- Deleting a restaurant removes all its menu items, order history, and favorites
+- Deleting a menu item removes favorites that reference it
+- Deleting an order removes all its line items
+
+These constraints prevent invalid data from entering the system and ensure consistency.
 
 ## Applying Schema Changes
 
