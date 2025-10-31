@@ -244,7 +244,7 @@ export async function seedTestData() {
 
     console.info("[seed] Menu items created");
 
-    // Insert token lending data
+    // Insert token lending data with different dates
     await db.insert(tokenLending).values([
       {
         userId: demoUser.id,
@@ -252,6 +252,7 @@ export async function seedTestData() {
         tokenCount: 4,
         totalTokensLent: 4,
         acceptanceStatus: "accepted",
+        lastLendingDate: new Date("2025-10-20"),
       },
       {
         userId: demoUser.id,
@@ -259,6 +260,7 @@ export async function seedTestData() {
         tokenCount: -3,
         totalTokensLent: -3,
         acceptanceStatus: "accepted",
+        lastLendingDate: new Date("2025-10-18"),
       },
       {
         userId: demoUser.id,
@@ -266,6 +268,7 @@ export async function seedTestData() {
         tokenCount: 6,
         totalTokensLent: 6,
         acceptanceStatus: "pending",
+        lastLendingDate: new Date("2025-10-22"),
       },
       {
         userId: demoUser.id,
@@ -273,6 +276,7 @@ export async function seedTestData() {
         tokenCount: -2,
         totalTokensLent: -2,
         acceptanceStatus: "accepted",
+        lastLendingDate: new Date("2025-09-28"),
       },
       {
         userId: demoUser.id,
@@ -280,6 +284,32 @@ export async function seedTestData() {
         tokenCount: 5,
         totalTokensLent: 5,
         acceptanceStatus: "accepted",
+        lastLendingDate: new Date("2025-09-25"),
+      },
+      // Add more historical lending transactions
+      {
+        userId: demoUser.id,
+        personName: "Thomas Berg",
+        tokenCount: 3,
+        totalTokensLent: 3,
+        acceptanceStatus: "accepted",
+        lastLendingDate: new Date("2025-09-23"),
+      },
+      {
+        userId: demoUser.id,
+        personName: "Lisa Meier",
+        tokenCount: -1,
+        totalTokensLent: -1,
+        acceptanceStatus: "accepted",
+        lastLendingDate: new Date("2025-08-15"),
+      },
+      {
+        userId: demoUser.id,
+        personName: "Felix Braun",
+        tokenCount: 2,
+        totalTokensLent: 2,
+        acceptanceStatus: "accepted",
+        lastLendingDate: new Date("2025-08-20"),
       },
     ]);
 
@@ -633,6 +663,92 @@ export async function seedTestData() {
         type: "drink",
         category: "smoothie",
         price: "4.70",
+      },
+    ]);
+
+    // Add more historical orders for meaningful graph data
+
+    // September orders
+    await db.insert(orderHistory).values([
+      {
+        userId: demoUser.id,
+        restaurantId: pastaLoft.id,
+        visitDate: new Date("2025-09-23"),
+        totalPrice: "15.40",
+      },
+      {
+        userId: demoUser.id,
+        restaurantId: burgerWerk.id,
+        visitDate: new Date("2025-09-25"),
+        totalPrice: "16.10",
+      },
+      {
+        userId: demoUser.id,
+        restaurantId: greenBowl.id,
+        visitDate: new Date("2025-09-27"),
+        totalPrice: "13.60",
+      },
+      {
+        userId: demoUser.id,
+        restaurantId: noonDeli.id,
+        visitDate: new Date("2025-09-30"),
+        totalPrice: "11.20",
+      },
+    ]);
+
+    // August orders
+    await db.insert(orderHistory).values([
+      {
+        userId: demoUser.id,
+        restaurantId: burgerWerk.id,
+        visitDate: new Date("2025-08-15"),
+        totalPrice: "21.80",
+      },
+      {
+        userId: demoUser.id,
+        restaurantId: pastaLoft.id,
+        visitDate: new Date("2025-08-20"),
+        totalPrice: "23.80",
+      },
+      {
+        userId: demoUser.id,
+        restaurantId: greenBowl.id,
+        visitDate: new Date("2025-08-25"),
+        totalPrice: "17.60",
+      },
+      {
+        userId: demoUser.id,
+        restaurantId: noonDeli.id,
+        visitDate: new Date("2025-08-30"),
+        totalPrice: "14.20",
+      },
+    ]);
+
+    // July orders
+    await db.insert(orderHistory).values([
+      {
+        userId: demoUser.id,
+        restaurantId: pastaLoft.id,
+        visitDate: new Date("2025-07-10"),
+        totalPrice: "31.90",
+      },
+      {
+        userId: demoUser.id,
+        restaurantId: greenBowl.id,
+        visitDate: new Date("2025-07-15"),
+        totalPrice: "21.40",
+      },
+      {
+        userId: demoUser.id,
+        restaurantId: burgerWerk.id,
+        visitDate: new Date("2025-07-20"),
+        totalPrice: "26.00",
+      },
+      {
+        userId: demoUser.id,
+        restaurantId: noonDeli.id,
+        visitDate: new Date("2025-07-25"),
+        totalPrice: "18.60",
       },
     ]);
 
