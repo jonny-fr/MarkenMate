@@ -2,6 +2,7 @@ import "server-only";
 import { db } from "@/db";
 import { orderHistory, orderHistoryItem, restaurant } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { getServerSession } from "@/lib/auth-server";
 
 export type HistoryItem = {
   id: string;
@@ -17,12 +18,16 @@ export type HistoryItem = {
 };
 
 /**
- * Fetches order history data for the demo user.
- * In a production app, this would fetch data for the authenticated user.
+ * Fetches order history data for the authenticated user.
  */
 export async function getHistoryData(): Promise<HistoryItem[]> {
-  // For demo purposes, we fetch data for the demo user
-  const demoUserId = "demo-user-123";
+  // Get the authenticated user's session
+  const session = await getServerSession();
+  if (!session?.user?.id) {
+    // Return empty array if user is not authenticated
+    return [];
+  }
+  const userId = session.user.id;
 
   const orders = await db
     .select({
@@ -34,7 +39,7 @@ export async function getHistoryData(): Promise<HistoryItem[]> {
     })
     .from(orderHistory)
     .leftJoin(restaurant, eq(orderHistory.restaurantId, restaurant.id))
-    .where(eq(orderHistory.userId, demoUserId))
+    .where(eq(orderHistory.userId, userId))
     .orderBy(orderHistory.visitDate);
 
   const historyItems = await Promise.all(
