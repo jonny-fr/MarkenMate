@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { orderHistory, orderHistoryItem } from "@/db/schema";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { getServerSession } from "@/lib/auth-server";
 
 const orderItemSchema = z.object({
   menuItemId: z.number(),
@@ -30,9 +31,15 @@ export async function saveOrder(input: SaveOrderInput): Promise<{
   orderId?: number;
 }> {
   try {
-    // For demo purposes, use demo user ID
-    // In production, get this from the authenticated session
-    const userId = "demo-user-123";
+    // Get the authenticated user's session
+    const session = await getServerSession();
+    if (!session?.user?.id) {
+      return {
+        success: false,
+        message: "Nicht authentifiziert",
+      };
+    }
+    const userId = session.user.id;
 
     // Validate input
     const validatedData = saveOrderSchema.parse(input);
