@@ -14,7 +14,8 @@ The database consists of the following tables:
   - `email`: Unique email address
   - `emailVerified`: Email verification status
   - `image`: Profile image URL
-  - `role`: User role ('user' or 'admin') - **NEW FIELD**
+  - `role`: User role (enum, default 'user') - **NEW FIELD**
+    - **Enum**: 'user' | 'admin'
   - `createdAt`, `updatedAt`: Timestamps
 
 ### 2. Restaurant Table
@@ -65,11 +66,21 @@ Tracks token lending/borrowing relationships between users.
   - `createdAt`, `updatedAt`: Timestamps
 
 **Algorithm Note**: The "quick display of 5 probable friends" can be calculated by:
-1. Aggregating all records by `personName`
-2. Calculating: `score = SUM(totalTokensLent) * (COUNT(acceptanceStatus='accepted') / COUNT(*))`
-3. Sorting by score descending and taking top 5
+1. Aggregating all records by `personName` for the current user
+2. For each person, calculate:
+   ```
+   acceptedCount = COUNT(acceptanceStatus='accepted')
+   totalCount = COUNT(*)
+   acceptanceRate = acceptedCount / totalCount (or 0 if totalCount = 0)
+   score = SUM(totalTokensLent) * acceptanceRate
+   ```
+3. Sort by score descending and take top 5
+4. Handle edge cases: Users with no history return empty list
 
-**Implementation Note**: The `totalTokensLent` field should be updated by application logic when creating new lending records to maintain consistency.
+**Implementation Note**: The `totalTokensLent` field should be updated by:
+- **Option A**: Application logic in a transaction when creating new lending records
+- **Option B**: PostgreSQL trigger that automatically maintains the cumulative sum
+- **Option C**: Calculate dynamically with a view (trade-off: query performance)
 
 ### 5. Order History Tables
 Tracks user orders with historical pricing preservation.
@@ -133,6 +144,7 @@ menuItem (1) ──< (N) favorite
 The schema includes several constraints to ensure data quality:
 
 ### PostgreSQL Enums
+- **user_role**: Restricts user roles to 'user' or 'admin'
 - **menu_item_type**: Restricts menu item types to 'drink', 'main_course', or 'dessert'
 - **acceptance_status**: Restricts lending status to 'pending', 'accepted', or 'declined'
 
@@ -206,8 +218,11 @@ Users with `role = 'admin'` in the `user` table have administrative access to ma
 ### 3. Cumulative Token Count Field
 **Decision**: `tokenLending.totalTokensLent` is a denormalized cumulative field  
 **Rationale**: Performance optimization for the "top 5 friends" recommendation algorithm  
-**Trade-off**: Must be maintained by application logic; could use a database trigger as alternative  
-**Best Practice**: Update this field transactionally when creating new lending records
+**Trade-off**: Must be maintained by application or trigger; three implementation options available:
+- Application logic (most control)
+- Database trigger (automatic)
+- Dynamic calculation via view (simplest, but slower)  
+**Best Practice**: Choose based on application architecture and performance requirements
 
 ### 4. Multiple Lending Records per Person
 **Decision**: Allow multiple `tokenLending` records for the same person  
