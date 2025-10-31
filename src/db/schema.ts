@@ -1,11 +1,33 @@
 import {
   boolean,
+  check,
   integer,
+  numeric,
+  pgEnum,
   pgTable,
   serial,
   text,
   timestamp,
+  varchar,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
+
+/**
+ * Enums (must be declared before use)
+ */
+export const userRoleEnum = pgEnum("user_role", ["user", "admin"]);
+
+export const menuItemTypeEnum = pgEnum("menu_item_type", [
+  "drink",
+  "main_course",
+  "dessert",
+]);
+
+export const acceptanceStatusEnum = pgEnum("acceptance_status", [
+  "pending",
+  "accepted",
+  "declined",
+]);
 
 /**
  * Authentication schema.
@@ -20,6 +42,7 @@ export const user = pgTable("user", {
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").default(false).notNull(),
   image: text("image"),
+  role: userRoleEnum("role").default("user").notNull(), // 'user' or 'admin'
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -100,3 +123,142 @@ export const demoData = pgTable("demo_data", {
   limit: integer("limit").notNull(),
   reviewer: text("reviewer").notNull(),
 });
+
+/**
+ * Restaurant management schema
+ */
+
+// Restaurants table
+export const restaurant = pgTable(
+  "restaurant",
+  {
+    id: serial("id").primaryKey(),
+    name: text("name").notNull(),
+    location: text("location").notNull(),
+    tag: text("tag").notNull(), // restaurant type (e.g., Italian, Chinese, etc.)
+    phoneNumber: varchar("phone_number", { length: 50 }),
+    openingHours: text("opening_hours"), // JSON string or text format
+    rating: numeric("rating", { precision: 3, scale: 2 }), // e.g., 4.50
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    check(
+      "rating_range",
+      sql`${table.rating} IS NULL OR (${table.rating} >= 0 AND ${table.rating} <= 5)`,
+    ),
+  ],
+);
+
+// Menu items (Speisekarte)
+export const menuItem = pgTable("menu_item", {
+  id: serial("id").primaryKey(),
+  restaurantId: integer("restaurant_id")
+    .notNull()
+    .references(() => restaurant.id, { onDelete: "cascade" }),
+  dishName: text("dish_name").notNull(),
+  type: menuItemTypeEnum("type").notNull(), // 'drink', 'main_course', 'dessert'
+  category: text("category").notNull(), // e.g., 'pasta', 'pizza', 'salad'
+  price: numeric("price", { precision: 10, scale: 2 }).notNull(), // price as shown on menu
+  givesRefund: boolean("gives_refund").default(false).notNull(), // whether item provides token refund
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+});
+
+// Token lending (Markenverleih)
+// Note: This table tracks lending relationships between users
+// Each record represents a lending relationship with a specific person
+// Multiple records can exist for the same person (different transactions)
+export const tokenLending = pgTable("token_lending", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  personName: text("person_name").notNull(), // name of the person tokens are lent to/borrowed from
+  tokenCount: integer("token_count").notNull(), // positive = lent, negative = borrowed
+  lastLendingDate: timestamp("last_lending_date", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  totalTokensLent: integer("total_tokens_lent").default(0).notNull(), // cumulative count across all transactions with this person (maintained by application or trigger)
+  acceptanceStatus: acceptanceStatusEnum("acceptance_status")
+    .default("pending")
+    .notNull(), // 'pending', 'accepted', 'declined'
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+});
+
+// Order history
+export const orderHistory = pgTable("order_history", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  restaurantId: integer("restaurant_id")
+    .notNull()
+    .references(() => restaurant.id, { onDelete: "cascade" }),
+  visitDate: timestamp("visit_date", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  totalPrice: numeric("total_price", { precision: 10, scale: 2 }).notNull(), // total order price
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+// Order history items (individual products in an order)
+// Note: Uses text instead of enums for historical data preservation
+// This allows display of correct values even if menu structure changes
+export const orderHistoryItem = pgTable("order_history_item", {
+  id: serial("id").primaryKey(),
+  orderHistoryId: integer("order_history_id")
+    .notNull()
+    .references(() => orderHistory.id, { onDelete: "cascade" }),
+  dishName: text("dish_name").notNull(), // stored at time of order
+  type: text("type").notNull(), // stored at time of order (e.g., 'drink', 'main_course', 'dessert')
+  category: text("category").notNull(), // stored at time of order
+  price: numeric("price", { precision: 10, scale: 2 }).notNull(), // price at time of order
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+// Favorites (for both restaurants and dishes)
+export const favorite = pgTable(
+  "favorite",
+  {
+    id: serial("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    restaurantId: integer("restaurant_id").references(() => restaurant.id, {
+      onDelete: "cascade",
+    }), // null if favorite is a dish
+    menuItemId: integer("menu_item_id").references(() => menuItem.id, {
+      onDelete: "cascade",
+    }), // null if favorite is a restaurant
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    check(
+      "favorite_type_check",
+      sql`(${table.restaurantId} IS NOT NULL AND ${table.menuItemId} IS NULL) OR (${table.restaurantId} IS NULL AND ${table.menuItemId} IS NOT NULL)`,
+    ),
+  ],
+);
