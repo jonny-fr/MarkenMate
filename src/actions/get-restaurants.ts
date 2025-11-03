@@ -4,46 +4,9 @@ import "server-only";
 import { db } from "@/db";
 import { restaurant, menuItem, favorite } from "@/db/schema";
 import { eq } from "drizzle-orm";
-
-/**
- * Conversion rate for calculating token prices from euro prices.
- * 1 token ≈ €4.50 (configurable for business logic changes)
- */
-const EURO_PER_TOKEN = 4.5;
-
-/**
- * Check if a restaurant is currently open based on opening hours.
- * @param openingHoursJson - JSON string of opening hours
- * @returns true if restaurant is open, false otherwise
- */
-function isRestaurantOpen(openingHoursJson: string | null): boolean {
-  if (!openingHoursJson) return false;
-
-  try {
-    const hours = JSON.parse(openingHoursJson);
-    const now = new Date();
-    const dayNames = [
-      "sunday",
-      "monday",
-      "tuesday",
-      "wednesday",
-      "thursday",
-      "friday",
-      "saturday",
-    ];
-    const todayHours = hours[dayNames[now.getDay()]];
-
-    // If closed or no hours defined
-    if (!todayHours || todayHours === "closed") return false;
-
-    // For demo purposes, return true if there are hours defined
-    // In production, you'd parse the time range and check against current time
-    return true;
-  } catch {
-    // If parsing fails, default to closed
-    return false;
-  }
-}
+import { TokenCalculator } from "@/domain/services/token-calculator";
+import { RestaurantOpeningService } from "@/domain/services/restaurant-opening-service";
+import { Price } from "@/domain/value-objects/price";
 
 export type RestaurantWithDishes = {
   id: string;
@@ -107,23 +70,27 @@ export async function getRestaurants(
         .from(menuItem)
         .where(eq(menuItem.restaurantId, rest.id));
 
+      const openingHours = RestaurantOpeningService.parseOpeningHours(
+        rest.openingHours,
+      );
+
       return {
         id: `${rest.id}`,
         name: rest.name,
         cuisine: ` · ${rest.tag}`,
         address: rest.location,
         rating: Number.parseFloat(rest.rating ?? "0"),
-        isOpen: isRestaurantOpen(rest.openingHours),
+        isOpen: RestaurantOpeningService.isOpen(openingHours),
         isFavorited: favoriteRestaurantIds.has(rest.id),
         dishes: dishes.map((dish) => {
-          const price = Number.parseFloat(dish.price);
-          const tokenPrice = Math.max(1, Math.round(price / EURO_PER_TOKEN));
+          const price = Price.create(Number.parseFloat(dish.price));
+          const tokenCount = TokenCalculator.calculateTokenPrice(price);
 
           return {
             id: `${dish.id}`,
             name: dish.dishName,
-            priceEuro: `€${price.toFixed(2).replace(".", ",")}`,
-            priceTokens: tokenPrice,
+            priceEuro: price.toEuroString(),
+            priceTokens: tokenCount.value,
             category: dish.category,
             type: dish.type,
             isFavorited: favoriteMenuItemIds.has(dish.id),
