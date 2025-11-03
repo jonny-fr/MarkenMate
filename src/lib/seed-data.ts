@@ -1,13 +1,8 @@
 import "server-only";
 import { db } from "@/db";
-import {
-  user,
-  restaurant,
-  menuItem,
-  tokenLending,
-  orderHistory,
-  orderHistoryItem,
-} from "@/db/schema";
+import { restaurant, menuItem, user } from "@/db/schema";
+import { eq } from "drizzle-orm";
+import { auth } from "@/lib/auth";
 
 /**
  * Seeds the database with test data on first application start.
@@ -47,37 +42,24 @@ const OPENING_HOURS = {
 };
 
 /**
- * Seeds the database with test data on first application start.
+ * Seeds the database with restaurant and menu data on first application start.
+ * This function is production-ready and only seeds restaurant/menu data, not user-specific data.
  * This function is idempotent - it checks if data already exists before seeding.
  */
 export async function seedTestData() {
   try {
-    // Check if test data already exists by checking for any restaurants
+    // Check if restaurant data already exists
     const existingRestaurants = await db
       .select({ id: restaurant.id })
       .from(restaurant)
       .limit(1);
 
     if (existingRestaurants.length > 0) {
-      console.info("[seed] Test data already exists, skipping seed");
+      console.info("[seed] Restaurant data already exists, skipping seed");
       return { success: true, alreadySeeded: true };
     }
 
-    console.info("[seed] Starting test data seeding...");
-
-    // Create a demo user for test data
-    const [demoUser] = await db
-      .insert(user)
-      .values({
-        id: "demo-user-123",
-        name: "Demo User",
-        email: "demo@markenmate.test",
-        emailVerified: true,
-        role: "user",
-      })
-      .returning();
-
-    console.info("[seed] Demo user created");
+    console.info("[seed] Starting restaurant and menu data seeding...");
 
     // Insert restaurants
     const [pastaLoft] = await db
@@ -243,521 +225,83 @@ export async function seedTestData() {
     ]);
 
     console.info("[seed] Menu items created");
-
-    // Insert token lending data with different dates
-    await db.insert(tokenLending).values([
-      {
-        userId: demoUser.id,
-        personName: "Lena Graf",
-        tokenCount: 4,
-        totalTokensLent: 4,
-        acceptanceStatus: "accepted",
-        lastLendingDate: new Date("2025-10-20"),
-      },
-      {
-        userId: demoUser.id,
-        personName: "Amir Safar",
-        tokenCount: -3,
-        totalTokensLent: -3,
-        acceptanceStatus: "accepted",
-        lastLendingDate: new Date("2025-10-18"),
-      },
-      {
-        userId: demoUser.id,
-        personName: "Selina Wolf",
-        tokenCount: 6,
-        totalTokensLent: 6,
-        acceptanceStatus: "pending",
-        lastLendingDate: new Date("2025-10-22"),
-      },
-      {
-        userId: demoUser.id,
-        personName: "Max Müller",
-        tokenCount: -2,
-        totalTokensLent: -2,
-        acceptanceStatus: "accepted",
-        lastLendingDate: new Date("2025-09-28"),
-      },
-      {
-        userId: demoUser.id,
-        personName: "Anna Schmidt",
-        tokenCount: 5,
-        totalTokensLent: 5,
-        acceptanceStatus: "accepted",
-        lastLendingDate: new Date("2025-09-25"),
-      },
-      // Add more historical lending transactions
-      {
-        userId: demoUser.id,
-        personName: "Thomas Berg",
-        tokenCount: 3,
-        totalTokensLent: 3,
-        acceptanceStatus: "accepted",
-        lastLendingDate: new Date("2025-09-23"),
-      },
-      {
-        userId: demoUser.id,
-        personName: "Lisa Meier",
-        tokenCount: -1,
-        totalTokensLent: -1,
-        acceptanceStatus: "accepted",
-        lastLendingDate: new Date("2025-08-15"),
-      },
-      {
-        userId: demoUser.id,
-        personName: "Felix Braun",
-        tokenCount: 2,
-        totalTokensLent: 2,
-        acceptanceStatus: "accepted",
-        lastLendingDate: new Date("2025-08-20"),
-      },
-    ]);
-
-    console.info("[seed] Token lending data created");
-
-    // Insert order history with items
-    // Order 1: Pasta Loft - Recent
-    const [order1] = await db
-      .insert(orderHistory)
-      .values({
-        userId: demoUser.id,
-        restaurantId: pastaLoft.id,
-        visitDate: new Date("2025-10-23"),
-        totalPrice: "23.80",
-      })
-      .returning();
-
-    await db.insert(orderHistoryItem).values([
-      {
-        orderHistoryId: order1.id,
-        dishName: "Trüffel Tagliatelle",
-        type: "main_course",
-        category: "pasta",
-        price: "11.90",
-      },
-      {
-        orderHistoryId: order1.id,
-        dishName: "Ofenlasagne",
-        type: "main_course",
-        category: "pasta",
-        price: "9.50",
-      },
-      {
-        orderHistoryId: order1.id,
-        dishName: "Wasser",
-        type: "drink",
-        category: "beverage",
-        price: "2.40",
-      },
-    ]);
-
-    // Order 2: Green Bowl - Recent
-    const [order2] = await db
-      .insert(orderHistory)
-      .values({
-        userId: demoUser.id,
-        restaurantId: greenBowl.id,
-        visitDate: new Date("2025-10-22"),
-        totalPrice: "17.60",
-      })
-      .returning();
-
-    await db.insert(orderHistoryItem).values([
-      {
-        orderHistoryId: order2.id,
-        dishName: "Protein Power Bowl",
-        type: "main_course",
-        category: "bowl",
-        price: "8.90",
-      },
-      {
-        orderHistoryId: order2.id,
-        dishName: "Seasonal Smoothie",
-        type: "drink",
-        category: "smoothie",
-        price: "4.70",
-      },
-    ]);
-
-    // Order 3: Burger Werk - Recent
-    const [order3] = await db
-      .insert(orderHistory)
-      .values({
-        userId: demoUser.id,
-        restaurantId: burgerWerk.id,
-        visitDate: new Date("2025-10-21"),
-        totalPrice: "16.10",
-      })
-      .returning();
-
-    await db.insert(orderHistoryItem).values([
-      {
-        orderHistoryId: order3.id,
-        dishName: "MarkenMate Signature Burger",
-        type: "main_course",
-        category: "burger",
-        price: "10.90",
-      },
-      {
-        orderHistoryId: order3.id,
-        dishName: "Loaded Sweet Fries",
-        type: "main_course",
-        category: "sides",
-        price: "5.20",
-      },
-    ]);
-
-    // Order 4: Noon Deli - Last week
-    const [order4] = await db
-      .insert(orderHistory)
-      .values({
-        userId: demoUser.id,
-        restaurantId: noonDeli.id,
-        visitDate: new Date("2025-10-16"),
-        totalPrice: "14.20",
-      })
-      .returning();
-
-    await db.insert(orderHistoryItem).values([
-      {
-        orderHistoryId: order4.id,
-        dishName: "Ciabatta Caprese",
-        type: "main_course",
-        category: "sandwich",
-        price: "6.40",
-      },
-      {
-        orderHistoryId: order4.id,
-        dishName: "Tagesuppe",
-        type: "main_course",
-        category: "soup",
-        price: "4.80",
-      },
-      {
-        orderHistoryId: order4.id,
-        dishName: "Panna Cotta",
-        type: "dessert",
-        category: "dessert",
-        price: "3.00",
-      },
-    ]);
-
-    // Order 5: Pasta Loft - Last week
-    const [order5] = await db
-      .insert(orderHistory)
-      .values({
-        userId: demoUser.id,
-        restaurantId: pastaLoft.id,
-        visitDate: new Date("2025-10-14"),
-        totalPrice: "31.90",
-      })
-      .returning();
-
-    await db.insert(orderHistoryItem).values([
-      {
-        orderHistoryId: order5.id,
-        dishName: "Trüffel Tagliatelle",
-        type: "main_course",
-        category: "pasta",
-        price: "11.90",
-      },
-      {
-        orderHistoryId: order5.id,
-        dishName: "Trüffel Tagliatelle",
-        type: "main_course",
-        category: "pasta",
-        price: "11.90",
-      },
-      {
-        orderHistoryId: order5.id,
-        dishName: "Burrata Bowl",
-        type: "main_course",
-        category: "bowl",
-        price: "10.40",
-      },
-      {
-        orderHistoryId: order5.id,
-        dishName: "Wasser",
-        type: "drink",
-        category: "beverage",
-        price: "2.40",
-      },
-      {
-        orderHistoryId: order5.id,
-        dishName: "Wasser",
-        type: "drink",
-        category: "beverage",
-        price: "2.40",
-      },
-    ]);
-
-    // Order 6: Green Bowl - Last week
-    const [order6] = await db
-      .insert(orderHistory)
-      .values({
-        userId: demoUser.id,
-        restaurantId: greenBowl.id,
-        visitDate: new Date("2025-10-12"),
-        totalPrice: "21.40",
-      })
-      .returning();
-
-    await db.insert(orderHistoryItem).values([
-      {
-        orderHistoryId: order6.id,
-        dishName: "Falafel Salad",
-        type: "main_course",
-        category: "salad",
-        price: "7.80",
-      },
-      {
-        orderHistoryId: order6.id,
-        dishName: "Protein Power Bowl",
-        type: "main_course",
-        category: "bowl",
-        price: "8.90",
-      },
-      {
-        orderHistoryId: order6.id,
-        dishName: "Seasonal Smoothie",
-        type: "drink",
-        category: "smoothie",
-        price: "4.70",
-      },
-    ]);
-
-    // Order 7: Burger Werk - Older
-    const [order7] = await db
-      .insert(orderHistory)
-      .values({
-        userId: demoUser.id,
-        restaurantId: burgerWerk.id,
-        visitDate: new Date("2025-10-05"),
-        totalPrice: "26.00",
-      })
-      .returning();
-
-    await db.insert(orderHistoryItem).values([
-      {
-        orderHistoryId: order7.id,
-        dishName: "MarkenMate Signature Burger",
-        type: "main_course",
-        category: "burger",
-        price: "10.90",
-      },
-      {
-        orderHistoryId: order7.id,
-        dishName: "MarkenMate Signature Burger",
-        type: "main_course",
-        category: "burger",
-        price: "10.90",
-      },
-      {
-        orderHistoryId: order7.id,
-        dishName: "Loaded Sweet Fries",
-        type: "main_course",
-        category: "sides",
-        price: "5.20",
-      },
-    ]);
-
-    // Order 8: Noon Deli - Older
-    const [order8] = await db
-      .insert(orderHistory)
-      .values({
-        userId: demoUser.id,
-        restaurantId: noonDeli.id,
-        visitDate: new Date("2025-09-28"),
-        totalPrice: "18.60",
-      })
-      .returning();
-
-    await db.insert(orderHistoryItem).values([
-      {
-        orderHistoryId: order8.id,
-        dishName: "Ciabatta Caprese",
-        type: "main_course",
-        category: "sandwich",
-        price: "6.40",
-      },
-      {
-        orderHistoryId: order8.id,
-        dishName: "Ciabatta Caprese",
-        type: "main_course",
-        category: "sandwich",
-        price: "6.40",
-      },
-      {
-        orderHistoryId: order8.id,
-        dishName: "Tagesuppe",
-        type: "main_course",
-        category: "soup",
-        price: "4.80",
-      },
-    ]);
-
-    // Order 9: Pasta Loft - Older
-    const [order9] = await db
-      .insert(orderHistory)
-      .values({
-        userId: demoUser.id,
-        restaurantId: pastaLoft.id,
-        visitDate: new Date("2025-09-20"),
-        totalPrice: "25.70",
-      })
-      .returning();
-
-    await db.insert(orderHistoryItem).values([
-      {
-        orderHistoryId: order9.id,
-        dishName: "Trüffel Tagliatelle",
-        type: "main_course",
-        category: "pasta",
-        price: "11.90",
-      },
-      {
-        orderHistoryId: order9.id,
-        dishName: "Ofenlasagne",
-        type: "main_course",
-        category: "pasta",
-        price: "9.50",
-      },
-      {
-        orderHistoryId: order9.id,
-        dishName: "Burrata Bowl",
-        type: "main_course",
-        category: "bowl",
-        price: "5.20",
-      },
-    ]);
-
-    // Order 10: Green Bowl - Older
-    const [order10] = await db
-      .insert(orderHistory)
-      .values({
-        userId: demoUser.id,
-        restaurantId: greenBowl.id,
-        visitDate: new Date("2025-09-10"),
-        totalPrice: "20.30",
-      })
-      .returning();
-
-    await db.insert(orderHistoryItem).values([
-      {
-        orderHistoryId: order10.id,
-        dishName: "Protein Power Bowl",
-        type: "main_course",
-        category: "bowl",
-        price: "8.90",
-      },
-      {
-        orderHistoryId: order10.id,
-        dishName: "Protein Power Bowl",
-        type: "main_course",
-        category: "bowl",
-        price: "8.90",
-      },
-      {
-        orderHistoryId: order10.id,
-        dishName: "Seasonal Smoothie",
-        type: "drink",
-        category: "smoothie",
-        price: "4.70",
-      },
-    ]);
-
-    // Add more historical orders for meaningful graph data
-
-    // September orders
-    await db.insert(orderHistory).values([
-      {
-        userId: demoUser.id,
-        restaurantId: pastaLoft.id,
-        visitDate: new Date("2025-09-23"),
-        totalPrice: "15.40",
-      },
-      {
-        userId: demoUser.id,
-        restaurantId: burgerWerk.id,
-        visitDate: new Date("2025-09-25"),
-        totalPrice: "16.10",
-      },
-      {
-        userId: demoUser.id,
-        restaurantId: greenBowl.id,
-        visitDate: new Date("2025-09-27"),
-        totalPrice: "13.60",
-      },
-      {
-        userId: demoUser.id,
-        restaurantId: noonDeli.id,
-        visitDate: new Date("2025-09-30"),
-        totalPrice: "11.20",
-      },
-    ]);
-
-    // August orders
-    await db.insert(orderHistory).values([
-      {
-        userId: demoUser.id,
-        restaurantId: burgerWerk.id,
-        visitDate: new Date("2025-08-15"),
-        totalPrice: "21.80",
-      },
-      {
-        userId: demoUser.id,
-        restaurantId: pastaLoft.id,
-        visitDate: new Date("2025-08-20"),
-        totalPrice: "23.80",
-      },
-      {
-        userId: demoUser.id,
-        restaurantId: greenBowl.id,
-        visitDate: new Date("2025-08-25"),
-        totalPrice: "17.60",
-      },
-      {
-        userId: demoUser.id,
-        restaurantId: noonDeli.id,
-        visitDate: new Date("2025-08-30"),
-        totalPrice: "14.20",
-      },
-    ]);
-
-    // July orders
-    await db.insert(orderHistory).values([
-      {
-        userId: demoUser.id,
-        restaurantId: pastaLoft.id,
-        visitDate: new Date("2025-07-10"),
-        totalPrice: "31.90",
-      },
-      {
-        userId: demoUser.id,
-        restaurantId: greenBowl.id,
-        visitDate: new Date("2025-07-15"),
-        totalPrice: "21.40",
-      },
-      {
-        userId: demoUser.id,
-        restaurantId: burgerWerk.id,
-        visitDate: new Date("2025-07-20"),
-        totalPrice: "26.00",
-      },
-      {
-        userId: demoUser.id,
-        restaurantId: noonDeli.id,
-        visitDate: new Date("2025-07-25"),
-        totalPrice: "18.60",
-      },
-    ]);
-
-    console.info("[seed] Order history data created");
-
-    console.info("[seed] Test data seeding completed successfully");
+    console.info("[seed] Restaurant and menu data seeding completed successfully");
     return { success: true, alreadySeeded: false };
   } catch (error) {
     console.error("[seed] Failed to seed test data:", error);
+    return { success: false, error: String(error) };
+  }
+}
+
+/**
+ * Seeds the admin user on first application start.
+ * Admin credentials:
+ * Email: admin@markenmate.app
+ * Password: Admin2024! (MUST be changed on first login)
+ */
+export async function seedAdminUser() {
+  try {
+    // Check if admin user already exists
+    const existingAdmin = await db
+      .select({ id: user.id })
+      .from(user)
+      .where(eq(user.email, "admin@markenmate.app"))
+      .limit(1);
+
+    if (existingAdmin.length > 0) {
+      console.info("[seed] Admin user already exists");
+      
+      // Check if the existing admin has a valid password hash
+      // If not (from old SHA-256 implementation), recreate the user
+      try {
+        const testLogin = await auth.api.signInEmail({
+          body: {
+            email: "admin@markenmate.app",
+            password: "Admin2024!",
+          },
+        });
+        
+        // If login works, admin is properly set up
+        console.info("[seed] Admin user password hash is valid, skipping");
+        return { success: true, alreadySeeded: true };
+      } catch (error) {
+        // Password hash is invalid, need to recreate user
+        console.warn("[seed] Admin user has invalid password hash, recreating...");
+        
+        // Delete old admin user (this will cascade delete account due to FK)
+        await db.delete(user).where(eq(user.id, existingAdmin[0].id));
+        console.info("[seed] Old admin user deleted");
+      }
+    }
+
+    console.info("[seed] Creating admin user...");
+
+    // Create admin user via better-auth to ensure proper password hashing
+    const result = await auth.api.signUpEmail({
+      body: {
+        email: "admin@markenmate.app",
+        password: "Admin2024!",
+        name: "Administrator",
+      },
+    });
+
+    // Update user to have admin role and mustChangePassword flag
+    await db
+      .update(user)
+      .set({
+        role: "admin",
+        mustChangePassword: true,
+        emailVerified: true,
+      })
+      .where(eq(user.id, result.user.id));
+
+    console.info("[seed] Admin user created successfully");
+    console.info("[seed] Admin email: admin@markenmate.app");
+    console.info("[seed] Admin password: Admin2024! (must be changed on first login)");
+
+    return { success: true, alreadySeeded: false };
+  } catch (error) {
+    console.error("[seed] Failed to seed admin user:", error);
     return { success: false, error: String(error) };
   }
 }

@@ -1,3 +1,5 @@
+"use server";
+
 import "server-only";
 import { db } from "@/db";
 import { orderHistory, tokenLending } from "@/db/schema";
@@ -16,12 +18,9 @@ export type GraphDataPoint = {
 };
 
 /**
- * Computes statistics from the database for the demo user.
- * In a production app, this would compute stats for the authenticated user.
+ * Computes statistics from the database for the authenticated user.
  */
-export async function getStatsData(): Promise<StatsData> {
-  const demoUserId = "demo-user-123";
-
+export async function getStatsData(userId: string): Promise<StatsData> {
   // Calculate last month spending
   const oneMonthAgo = new Date();
   oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
@@ -33,7 +32,7 @@ export async function getStatsData(): Promise<StatsData> {
     .from(orderHistory)
     .where(
       and(
-        eq(orderHistory.userId, demoUserId),
+        eq(orderHistory.userId, userId),
         gte(orderHistory.visitDate, oneMonthAgo),
       ),
     );
@@ -51,7 +50,7 @@ export async function getStatsData(): Promise<StatsData> {
     .from(orderHistory)
     .where(
       and(
-        eq(orderHistory.userId, demoUserId),
+        eq(orderHistory.userId, userId),
         gte(orderHistory.visitDate, twoMonthsAgo),
         sql`${orderHistory.visitDate} < ${oneMonthAgo}`,
       ),
@@ -74,7 +73,7 @@ export async function getStatsData(): Promise<StatsData> {
       total: sql<number>`SUM(${tokenLending.tokenCount})`,
     })
     .from(tokenLending)
-    .where(eq(tokenLending.userId, demoUserId));
+    .where(eq(tokenLending.userId, userId));
 
   const totalLendingBalance = Number(lendingRecords[0]?.total ?? 0);
 
@@ -90,11 +89,10 @@ export async function getStatsData(): Promise<StatsData> {
  * Groups data by date and aggregates spending and lending counts.
  */
 export async function getGraphData(
+  userId: string,
   startDate: Date,
   endDate: Date,
 ): Promise<GraphDataPoint[]> {
-  const demoUserId = "demo-user-123";
-
   // Get spending data grouped by date
   const spendingData = await db
     .select({
@@ -104,7 +102,7 @@ export async function getGraphData(
     .from(orderHistory)
     .where(
       and(
-        eq(orderHistory.userId, demoUserId),
+        eq(orderHistory.userId, userId),
         gte(orderHistory.visitDate, startDate),
         sql`${orderHistory.visitDate} <= ${endDate}`,
       ),
@@ -121,7 +119,7 @@ export async function getGraphData(
     .from(tokenLending)
     .where(
       and(
-        eq(tokenLending.userId, demoUserId),
+        eq(tokenLending.userId, userId),
         gte(tokenLending.lastLendingDate, startDate),
         sql`${tokenLending.lastLendingDate} <= ${endDate}`,
       ),
@@ -161,30 +159,30 @@ export async function getGraphData(
 /**
  * Helper functions to get graph data for different time periods
  */
-export async function getGraphDataWeek(): Promise<GraphDataPoint[]> {
+export async function getGraphDataWeek(userId: string): Promise<GraphDataPoint[]> {
   const end = new Date();
   const start = new Date();
   start.setDate(start.getDate() - 7);
-  return getGraphData(start, end);
+  return getGraphData(userId, start, end);
 }
 
-export async function getGraphDataMonth(): Promise<GraphDataPoint[]> {
+export async function getGraphDataMonth(userId: string): Promise<GraphDataPoint[]> {
   const end = new Date();
   const start = new Date();
   start.setMonth(start.getMonth() - 1);
-  return getGraphData(start, end);
+  return getGraphData(userId, start, end);
 }
 
-export async function getGraphDataQuarter(): Promise<GraphDataPoint[]> {
+export async function getGraphDataQuarter(userId: string): Promise<GraphDataPoint[]> {
   const end = new Date();
   const start = new Date();
   start.setMonth(start.getMonth() - 3);
-  return getGraphData(start, end);
+  return getGraphData(userId, start, end);
 }
 
-export async function getGraphDataYear(): Promise<GraphDataPoint[]> {
+export async function getGraphDataYear(userId: string): Promise<GraphDataPoint[]> {
   const end = new Date();
   const start = new Date();
   start.setFullYear(start.getFullYear() - 1);
-  return getGraphData(start, end);
+  return getGraphData(userId, start, end);
 }

@@ -1,32 +1,42 @@
+"use server";
+
 import "server-only";
 import { db } from "@/db";
-import { tokenLending } from "@/db/schema";
+import { tokenLending, user } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export type LendingUser = {
-  id: string;
+  id: number;
   name: string;
   balance: number;
+  status: "pending" | "accepted" | "declined";
   note?: string;
 };
 
 /**
- * Fetches token lending data for the demo user.
- * In a production app, this would fetch data for the authenticated user.
+ * Fetches token lending data for the authenticated user.
  */
-export async function getLendingData(): Promise<LendingUser[]> {
-  // For demo purposes, we fetch data for the demo user
-  const demoUserId = "demo-user-123";
-
+export async function getLendingData(userId: string): Promise<LendingUser[]> {
   const lendingRecords = await db
-    .select()
+    .select({
+      id: tokenLending.id,
+      personName: tokenLending.personName,
+      lendToUserId: tokenLending.lendToUserId,
+      tokenCount: tokenLending.tokenCount,
+      totalTokensLent: tokenLending.totalTokensLent,
+      acceptanceStatus: tokenLending.acceptanceStatus,
+      lendToUserName: user.name,
+      lendToUserEmail: user.email,
+    })
     .from(tokenLending)
-    .where(eq(tokenLending.userId, demoUserId));
+    .leftJoin(user, eq(tokenLending.lendToUserId, user.id))
+    .where(eq(tokenLending.userId, userId));
 
   return lendingRecords.map((record) => ({
-    id: `${record.id}`,
-    name: record.personName,
+    id: record.id,
+    name: record.lendToUserName || record.personName, // Use user.name if available, fallback to personName
     balance: record.tokenCount,
+    status: record.acceptanceStatus as "pending" | "accepted" | "declined",
     note: `${record.acceptanceStatus === "pending" ? "Ausstehend" : "Bestätigt"} - ${record.totalTokensLent} gesamt`,
   }));
 }

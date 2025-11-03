@@ -1,3 +1,5 @@
+"use server";
+
 import "server-only";
 import { db } from "@/db";
 import { orderHistory, restaurant } from "@/db/schema";
@@ -13,11 +15,11 @@ export type ComparisonDataPoint = {
  * Groups data by date and restaurant, computing various metrics.
  */
 async function getComparisonData(
+  userId: string,
   startDate: Date,
   endDate: Date,
   metric: "spending" | "frequency" | "avgPrice",
 ): Promise<ComparisonDataPoint[]> {
-  const demoUserId = "demo-user-123";
 
   // Get all restaurants to use as keys
   const restaurants = await db
@@ -42,7 +44,7 @@ async function getComparisonData(
       .from(orderHistory)
       .where(
         and(
-          eq(orderHistory.userId, demoUserId),
+          eq(orderHistory.userId, userId),
           gte(orderHistory.visitDate, startDate),
           sql`${orderHistory.visitDate} <= ${endDate}`,
         ),
@@ -79,7 +81,7 @@ async function getComparisonData(
       .from(orderHistory)
       .where(
         and(
-          eq(orderHistory.userId, demoUserId),
+          eq(orderHistory.userId, userId),
           gte(orderHistory.visitDate, startDate),
           sql`${orderHistory.visitDate} <= ${endDate}`,
         ),
@@ -116,7 +118,7 @@ async function getComparisonData(
       .from(orderHistory)
       .where(
         and(
-          eq(orderHistory.userId, demoUserId),
+          eq(orderHistory.userId, userId),
           gte(orderHistory.visitDate, startDate),
           sql`${orderHistory.visitDate} <= ${endDate}`,
         ),
@@ -148,29 +150,29 @@ async function getComparisonData(
 /**
  * Get comparison data for different metrics and time periods
  */
-export async function getComparisonDataSpending(): Promise<
+export async function getComparisonDataSpending(userId: string): Promise<
   ComparisonDataPoint[]
 > {
   const end = new Date();
   const start = new Date();
   start.setFullYear(start.getFullYear() - 1); // Last year of data
-  return getComparisonData(start, end, "spending");
+  return getComparisonData(userId, start, end, "spending");
 }
 
-export async function getComparisonDataFrequency(): Promise<
+export async function getComparisonDataFrequency(userId: string): Promise<
   ComparisonDataPoint[]
 > {
   const end = new Date();
   const start = new Date();
   start.setFullYear(start.getFullYear() - 1); // Last year of data
-  return getComparisonData(start, end, "frequency");
+  return getComparisonData(userId, start, end, "frequency");
 }
 
-export async function getComparisonDataAvgPrice(): Promise<
+export async function getComparisonDataAvgPrice(userId: string): Promise<
   ComparisonDataPoint[]
 > {
   const end = new Date();
   const start = new Date();
   start.setFullYear(start.getFullYear() - 1); // Last year of data
-  return getComparisonData(start, end, "avgPrice");
+  return getComparisonData(userId, start, end, "avgPrice");
 }

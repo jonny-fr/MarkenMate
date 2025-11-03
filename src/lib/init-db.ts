@@ -1,6 +1,6 @@
 import "server-only";
 import { pool } from "@/db";
-import { seedTestData } from "./seed-data";
+import { seedTestData, seedAdminUser } from "./seed-data";
 
 /**
  * Ensure the application can reach the database.
@@ -22,16 +22,17 @@ export async function initializeDatabase() {
       `);
 
       const tableNames = rows
-        .map(({ table_name }) => table_name)
-        .filter((name) => !name.startsWith("_drizzle_migrations"));
+        .map(({ table_name }: { table_name: string }) => table_name)
+        .filter((name: string) => !name.startsWith("_drizzle_migrations"));
 
       console.info(
         `[database] Connected (${tableNames.length} tables: ${tableNames.join(", ")})`,
       );
 
-      // Seed test data on first start
+      // Seed data on first start
       if (tableNames.length > 0) {
         await seedTestData();
+        await seedAdminUser();
       }
     } finally {
       client.release();

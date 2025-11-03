@@ -13,7 +13,10 @@ import { RestaurantsView } from "./restaurants-view";
 import { ComparisonView, type ComparisonDataPoint } from "./comparison-view";
 import { StatsView, type StatsData, type GraphDataPoint } from "./stats-view";
 import { HistoryView, type HistoryItem } from "./history-view";
+import { FavoritesView } from "./favorites-view";
+import { TicketsView } from "./tickets-view";
 import type { Restaurant } from "./restaurants-view";
+import type { FavoriteRestaurant, FavoriteMenuItem } from "./favorites-view";
 
 function LoadingCard({ label }: { label: string }) {
   return (
@@ -29,9 +32,13 @@ type ViewType =
   | "stats"
   | "history"
   | "comparison"
-  | "lending";
+  | "lending"
+  | "favorites"
+  | "tickets";
 
 interface DashboardClientProps {
+  userId: string;
+  userRole: "user" | "admin";
   restaurantsPromise: Promise<Restaurant[]>;
   lendingPromise: Promise<LendingUser[]>;
   statsPromise: Promise<StatsData>;
@@ -43,9 +50,27 @@ interface DashboardClientProps {
   comparisonDataSpending: Promise<ComparisonDataPoint[]>;
   comparisonDataFrequency: Promise<ComparisonDataPoint[]>;
   comparisonDataAvgPrice: Promise<ComparisonDataPoint[]>;
+  favoritesPromise: Promise<{
+    restaurants: FavoriteRestaurant[];
+    menuItems: FavoriteMenuItem[];
+  }>;
+  ticketsPromise: Promise<{
+    success: boolean;
+    tickets?: Array<{
+      id: number;
+      title: string;
+      description: string;
+      status: "open" | "in_progress" | "closed";
+      priority: "low" | "medium" | "high" | "urgent";
+      createdAt: Date;
+    }>;
+    error?: string;
+  }>;
 }
 
 export function DashboardClient({
+  userId,
+  userRole,
   restaurantsPromise,
   lendingPromise,
   statsPromise,
@@ -57,6 +82,8 @@ export function DashboardClient({
   comparisonDataSpending,
   comparisonDataFrequency,
   comparisonDataAvgPrice,
+  favoritesPromise,
+  ticketsPromise,
 }: DashboardClientProps) {
   const [currentView, setCurrentView] = useState<ViewType>("dashboard");
 
@@ -69,7 +96,7 @@ export function DashboardClient({
         } as CSSProperties
       }
     >
-      <AppSidebar variant="inset" onNavigateAction={setCurrentView} />
+      <AppSidebar variant="inset" onNavigateAction={setCurrentView} userRole={userRole} />
       <SidebarInset>
         <SiteHeader />
         <div className="flex flex-1 flex-col">
@@ -78,7 +105,7 @@ export function DashboardClient({
               {currentView === "restaurants" ? (
                 <div className="px-4 lg:px-6">
                   <Suspense fallback={<LoadingCard label="Restaurants" />}>
-                    <RestaurantsView dataPromise={restaurantsPromise} />
+                    <RestaurantsView userId={userId} dataPromise={restaurantsPromise} />
                   </Suspense>
                 </div>
               ) : currentView === "stats" ? (
@@ -102,7 +129,19 @@ export function DashboardClient({
               ) : currentView === "lending" ? (
                 <div className="px-4 lg:px-6">
                   <Suspense fallback={<LoadingCard label="Markenleihen" />}>
-                    <LendingView dataPromise={lendingPromise} />
+                    <LendingView userId={userId} dataPromise={lendingPromise} />
+                  </Suspense>
+                </div>
+              ) : currentView === "favorites" ? (
+                <div className="px-4 lg:px-6">
+                  <Suspense fallback={<LoadingCard label="Favoriten" />}>
+                    <FavoritesView userId={userId} dataPromise={favoritesPromise} />
+                  </Suspense>
+                </div>
+              ) : currentView === "tickets" ? (
+                <div className="px-4 lg:px-6">
+                  <Suspense fallback={<LoadingCard label="Tickets" />}>
+                    <TicketsView ticketsPromise={ticketsPromise} />
                   </Suspense>
                 </div>
               ) : currentView === "comparison" ? (
@@ -125,7 +164,7 @@ export function DashboardClient({
                     </div>
                     <div className="space-y-4">
                       <Suspense fallback={<LoadingCard label="Markenleihen" />}>
-                        <TokenLendingPanel dataPromise={lendingPromise} />
+                        <TokenLendingPanel userId={userId} dataPromise={lendingPromise} />
                       </Suspense>
                     </div>
                   </div>

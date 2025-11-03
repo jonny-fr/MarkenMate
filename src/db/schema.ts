@@ -29,6 +29,26 @@ export const acceptanceStatusEnum = pgEnum("acceptance_status", [
   "declined",
 ]);
 
+export const ticketStatusEnum = pgEnum("ticket_status", [
+  "open",
+  "in_progress",
+  "closed",
+]);
+
+export const ticketPriorityEnum = pgEnum("ticket_priority", [
+  "low",
+  "medium",
+  "high",
+  "urgent",
+]);
+
+export const logLevelEnum = pgEnum("log_level", [
+  "info",
+  "warn",
+  "error",
+  "debug",
+]);
+
 /**
  * Authentication schema.
  *
@@ -43,6 +63,7 @@ export const user = pgTable("user", {
   emailVerified: boolean("email_verified").default(false).notNull(),
   image: text("image"),
   role: userRoleEnum("role").default("user").notNull(), // 'user' or 'admin'
+  mustChangePassword: boolean("must_change_password").default(false).notNull(), // force password change on first login
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -184,7 +205,10 @@ export const tokenLending = pgTable("token_lending", {
   userId: text("user_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
-  personName: text("person_name").notNull(), // name of the person tokens are lent to/borrowed from
+  lendToUserId: text("lend_to_user_id").references(() => user.id, {
+    onDelete: "cascade",
+  }), // FK to user table - the person tokens are lent to (optional for backwards compatibility)
+  personName: text("person_name").notNull(), // name of the person tokens are lent to/borrowed from (display name, can be from user.name or free text)
   tokenCount: integer("token_count").notNull(), // positive = lent, negative = borrowed
   lastLendingDate: timestamp("last_lending_date", { withTimezone: true })
     .defaultNow()
@@ -262,3 +286,75 @@ export const favorite = pgTable(
     ),
   ],
 );
+
+/**
+ * Admin & Support System Schema
+ */
+
+// Support tickets
+export const ticket = pgTable("ticket", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  status: ticketStatusEnum("status").default("open").notNull(),
+  priority: ticketPriorityEnum("priority").default("medium").notNull(),
+  assignedToAdminId: text("assigned_to_admin_id").references(() => user.id, {
+    onDelete: "set null",
+  }), // admin who is handling the ticket
+  closedByAdminId: text("closed_by_admin_id").references(() => user.id, {
+    onDelete: "set null",
+  }), // admin who closed the ticket
+  closedAt: timestamp("closed_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+});
+
+// Ticket comments/messages
+export const ticketComment = pgTable("ticket_comment", {
+  id: serial("id").primaryKey(),
+  ticketId: integer("ticket_id")
+    .notNull()
+    .references(() => ticket.id, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  message: text("message").notNull(),
+  isInternal: boolean("is_internal").default(false).notNull(), // admin-only notes
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+// Application logs
+export const appLog = pgTable("app_log", {
+  id: serial("id").primaryKey(),
+  level: logLevelEnum("level").default("info").notNull(),
+  message: text("message").notNull(),
+  context: text("context"), // JSON string with additional context
+  userId: text("user_id").references(() => user.id, { onDelete: "set null" }), // optional user context
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+// Database backups metadata
+export const dbBackup = pgTable("db_backup", {
+  id: serial("id").primaryKey(),
+  filename: text("filename").notNull().unique(),
+  fileSize: integer("file_size").notNull(), // in bytes
+  createdByAdminId: text("created_by_admin_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  description: text("description"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});

@@ -3,9 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   typedRoutes: false,
   output: "standalone",
-  experimental: {
-    serverComponentsExternalPackages: ["pg"],
-  },
+  serverExternalPackages: ["pg"],
   webpack: (config, { isServer }) => {
     if (isServer) {
       const externals = Array.isArray(config.externals) ? config.externals : [];

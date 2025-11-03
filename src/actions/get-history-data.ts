@@ -1,8 +1,9 @@
+"use server";
+
 import "server-only";
 import { db } from "@/db";
 import { orderHistory, orderHistoryItem, restaurant } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { getServerSession } from "@/lib/auth-server";
 
 export type HistoryItem = {
   id: string;
@@ -20,15 +21,7 @@ export type HistoryItem = {
 /**
  * Fetches order history data for the authenticated user.
  */
-export async function getHistoryData(): Promise<HistoryItem[]> {
-  // Get the authenticated user's session
-  const session = await getServerSession();
-  if (!session?.user?.id) {
-    // Return empty array if user is not authenticated
-    return [];
-  }
-  const userId = session.user.id;
-
+export async function getHistoryData(userId: string): Promise<HistoryItem[]> {
   const orders = await db
     .select({
       id: orderHistory.id,

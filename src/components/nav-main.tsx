@@ -29,12 +29,15 @@ export function NavMain({
       | "stats"
       | "history"
       | "comparison"
-      | "lending",
+      | "lending"
+      | "favorites",
   ) => void;
 }) {
   const handleClick = (title: string) => {
     if (title === "Restaurants") {
       onNavigateAction?.("restaurants");
+    } else if (title === "Favoriten") {
+      onNavigateAction?.("favorites");
     } else if (title === "Restaurant-Vergleich") {
       onNavigateAction?.("comparison");
     } else if (title === "Markenleihen") {

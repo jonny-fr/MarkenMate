@@ -8,7 +8,11 @@ import {
   HandCoins,
   UtensilsCrossed,
   BarChart3,
+  Heart,
+  Shield,
+  MessageSquare,
 } from "lucide-react";
+import Link from "next/link";
 
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
@@ -36,6 +40,11 @@ const sidebarData = {
       icon: UtensilsCrossed,
     },
     {
+      title: "Favoriten",
+      url: "#favorites",
+      icon: Heart,
+    },
+    {
       title: "Restaurant-Vergleich",
       url: "#comparison",
       icon: ChartPie,
@@ -57,11 +66,17 @@ const sidebarData = {
       url: "#history",
       icon: Clock,
     },
+    {
+      title: "Support",
+      url: "#tickets",
+      icon: MessageSquare,
+    },
   ],
 };
 
 export function AppSidebar({
   onNavigateAction,
+  userRole,
   ...props
 }: ComponentProps<typeof Sidebar> & {
   onNavigateAction?: (
@@ -71,8 +86,11 @@ export function AppSidebar({
       | "stats"
       | "history"
       | "comparison"
-      | "lending",
+      | "lending"
+      | "favorites"
+      | "tickets",
   ) => void;
+  userRole?: "user" | "admin";
 }) {
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -107,6 +125,20 @@ export function AppSidebar({
           onNavigateAction={onNavigateAction}
           className="mt-auto"
         />
+        {userRole === "admin" && (
+          <div className="mt-4 border-t border-sidebar-border pt-4">
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href="/admin" className="flex items-center gap-2">
+                    <Shield className="size-4" />
+                    <span>Admin Panel</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </div>
+        )}
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={sidebarData.user} />

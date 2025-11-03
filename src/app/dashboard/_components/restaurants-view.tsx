@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { FavoriteButton } from "@/components/favorite-button";
 import { calculateTokens } from "@/lib/token-calculator";
 import { saveOrderAction, type OrderItem } from "@/actions/save-order-client";
 import { toast } from "sonner";
@@ -23,6 +24,7 @@ export type Restaurant = {
   address: string;
   rating: number;
   isOpen: boolean;
+  isFavorited: boolean;
   dishes: Array<{
     id: string;
     name: string;
@@ -30,6 +32,7 @@ export type Restaurant = {
     priceTokens: number;
     category?: string;
     type?: string;
+    isFavorited: boolean;
   }>;
 };
 
@@ -44,13 +47,17 @@ type OrderDish = {
   realPaidAmount: number; // The actual amount paid with tokens
 };
 
+interface RestaurantCardProps {
+  restaurant: Restaurant;
+  userId: string;
+  onAddDish: (dish: OrderDish) => void;
+}
+
 function RestaurantCard({
   restaurant,
+  userId,
   onAddDish,
-}: {
-  restaurant: Restaurant;
-  onAddDish: (dish: OrderDish) => void;
-}) {
+}: RestaurantCardProps) {
   return (
     <details className="group rounded-lg border border-border/60 bg-card/80 p-4 transition-all open:bg-card">
       <summary className="flex cursor-pointer list-none items-start justify-between gap-3 text-left">
@@ -73,7 +80,15 @@ function RestaurantCard({
         <ChevronDown className="size-4 transition-transform group-open:-rotate-180" />
       </summary>
       <div className="mt-4 space-y-3 text-sm">
-        <p className="text-muted-foreground">Gerichte & Markenpreise</p>
+        <div className="flex items-center justify-between">
+          <p className="text-muted-foreground">Gerichte & Markenpreise</p>
+          <FavoriteButton
+            userId={userId}
+            restaurantId={Number.parseInt(restaurant.id)}
+            isFavorited={restaurant.isFavorited}
+            className="h-7 w-7"
+          />
+        </div>
         <ul className="space-y-2">
           {restaurant.dishes.map((dish) => {
             const price = Number.parseFloat(
@@ -104,24 +119,32 @@ function RestaurantCard({
                       {tokenCalc.realGezahlt.toFixed(2).replace(".", ",")}
                     </span>
                   </div>
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    onClick={() =>
-                      onAddDish({
-                        menuItemId: Number.parseInt(dish.id),
-                        restaurantId: Number.parseInt(restaurant.id),
-                        restaurantName: restaurant.name,
-                        dishName: dish.name,
-                        type: dish.type || "main_course",
-                        category: dish.category || "general",
-                        price,
-                        realPaidAmount: tokenCalc.realGezahlt, // Include the real paid amount
-                      })
-                    }
-                  >
-                    <Plus className="size-4" />
-                  </Button>
+                  <div className="flex items-center gap-1">
+                    <FavoriteButton
+                      userId={userId}
+                      menuItemId={Number.parseInt(dish.id)}
+                      isFavorited={dish.isFavorited}
+                      className="h-7 w-7"
+                    />
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      onClick={() =>
+                        onAddDish({
+                          menuItemId: Number.parseInt(dish.id),
+                          restaurantId: Number.parseInt(restaurant.id),
+                          restaurantName: restaurant.name,
+                          dishName: dish.name,
+                          type: dish.type || "main_course",
+                          category: dish.category || "general",
+                          price,
+                          realPaidAmount: tokenCalc.realGezahlt,
+                        })
+                      }
+                    >
+                      <Plus className="size-4" />
+                    </Button>
+                  </div>
                 </div>
               </li>
             );
@@ -132,11 +155,15 @@ function RestaurantCard({
   );
 }
 
-export function RestaurantsView({
-  dataPromise,
-}: {
+interface RestaurantsViewProps {
+  userId: string;
   dataPromise: Promise<Restaurant[]>;
-}) {
+}
+
+export function RestaurantsView({
+  userId,
+  dataPromise,
+}: RestaurantsViewProps) {
   const restaurants = use(dataPromise);
   const [order, setOrder] = useState<OrderDish[]>([]);
   const [isPending, setIsPending] = useState(false);
@@ -243,6 +270,7 @@ export function RestaurantsView({
                 <RestaurantCard
                   key={restaurant.id}
                   restaurant={restaurant}
+                  userId={userId}
                   onAddDish={handleAddDish}
                 />
               ))
@@ -270,6 +298,7 @@ export function RestaurantsView({
                 <RestaurantCard
                   key={restaurant.id}
                   restaurant={restaurant}
+                  userId={userId}
                   onAddDish={handleAddDish}
                 />
               ))

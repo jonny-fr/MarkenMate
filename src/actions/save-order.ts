@@ -1,3 +1,5 @@
+"use server";
+
 import "server-only";
 import { db } from "@/db";
 import { orderHistory, orderHistoryItem } from "@/db/schema";
