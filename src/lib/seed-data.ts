@@ -225,7 +225,9 @@ export async function seedTestData() {
     ]);
 
     console.info("[seed] Menu items created");
-    console.info("[seed] Restaurant and menu data seeding completed successfully");
+    console.info(
+      "[seed] Restaurant and menu data seeding completed successfully",
+    );
     return { success: true, alreadySeeded: false };
   } catch (error) {
     console.error("[seed] Failed to seed test data:", error);
@@ -250,24 +252,26 @@ export async function seedAdminUser() {
 
     if (existingAdmin.length > 0) {
       console.info("[seed] Admin user already exists");
-      
+
       // Check if the existing admin has a valid password hash
       // If not (from old SHA-256 implementation), recreate the user
       try {
-        const testLogin = await auth.api.signInEmail({
+        const _testLogin = await auth.api.signInEmail({
           body: {
             email: "admin@markenmate.app",
             password: "Admin2024!",
           },
         });
-        
+
         // If login works, admin is properly set up
         console.info("[seed] Admin user password hash is valid, skipping");
         return { success: true, alreadySeeded: true };
-      } catch (error) {
+      } catch (_error) {
         // Password hash is invalid, need to recreate user
-        console.warn("[seed] Admin user has invalid password hash, recreating...");
-        
+        console.warn(
+          "[seed] Admin user has invalid password hash, recreating...",
+        );
+
         // Delete old admin user (this will cascade delete account due to FK)
         await db.delete(user).where(eq(user.id, existingAdmin[0].id));
         console.info("[seed] Old admin user deleted");
@@ -297,7 +301,9 @@ export async function seedAdminUser() {
 
     console.info("[seed] Admin user created successfully");
     console.info("[seed] Admin email: admin@markenmate.app");
-    console.info("[seed] Admin password: Admin2024! (must be changed on first login)");
+    console.info(
+      "[seed] Admin password: Admin2024! (must be changed on first login)",
+    );
 
     return { success: true, alreadySeeded: false };
   } catch (error) {

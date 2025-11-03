@@ -84,7 +84,7 @@ function RestaurantCard({
           <p className="text-muted-foreground">Gerichte & Markenpreise</p>
           <FavoriteButton
             userId={userId}
-            restaurantId={Number.parseInt(restaurant.id)}
+            restaurantId={Number.parseInt(restaurant.id, 10)}
             isFavorited={restaurant.isFavorited}
             className="h-7 w-7"
           />
@@ -122,7 +122,7 @@ function RestaurantCard({
                   <div className="flex items-center gap-1">
                     <FavoriteButton
                       userId={userId}
-                      menuItemId={Number.parseInt(dish.id)}
+                      menuItemId={Number.parseInt(dish.id, 10)}
                       isFavorited={dish.isFavorited}
                       className="h-7 w-7"
                     />
@@ -131,8 +131,8 @@ function RestaurantCard({
                       variant="outline"
                       onClick={() =>
                         onAddDish({
-                          menuItemId: Number.parseInt(dish.id),
-                          restaurantId: Number.parseInt(restaurant.id),
+                          menuItemId: Number.parseInt(dish.id, 10),
+                          restaurantId: Number.parseInt(restaurant.id, 10),
                           restaurantName: restaurant.name,
                           dishName: dish.name,
                           type: dish.type || "main_course",
@@ -160,10 +160,7 @@ interface RestaurantsViewProps {
   dataPromise: Promise<Restaurant[]>;
 }
 
-export function RestaurantsView({
-  userId,
-  dataPromise,
-}: RestaurantsViewProps) {
+export function RestaurantsView({ userId, dataPromise }: RestaurantsViewProps) {
   const restaurants = use(dataPromise);
   const [order, setOrder] = useState<OrderDish[]>([]);
   const [isPending, setIsPending] = useState(false);
@@ -209,7 +206,7 @@ export function RestaurantsView({
     setIsPending(true);
 
     try {
-      const restaurantId = Number.parseInt(restaurantIds[0]);
+      const restaurantId = Number.parseInt(restaurantIds[0], 10);
 
       // Calculate total order price
       const totalOrderPrice = order.reduce((sum, item) => sum + item.price, 0);

@@ -34,12 +34,6 @@ import {
 import { getUserFavorites } from "@/actions/get-user-favorites";
 import { getUserTickets } from "@/actions/tickets";
 import { DashboardClient } from "./_components/dashboard-client";
-import type { Restaurant } from "./_components/restaurants-view";
-import type { LendingUser } from "./_components/token-lending-panel";
-import type { ComparisonDataPoint } from "./_components/comparison-view";
-import type { StatsData, GraphDataPoint } from "./_components/stats-view";
-import type { HistoryItem } from "./_components/history-view";
-import type { FavoriteRestaurant, FavoriteMenuItem } from "./_components/favorites-view";
 
 // Force dynamic rendering since this page requires database access
 export const dynamic = "force-dynamic";
@@ -61,7 +55,7 @@ export default async function Page() {
   const { db: database } = await import("@/db");
   const { user: userTable } = await import("@/db/schema");
   const { eq } = await import("drizzle-orm");
-  
+
   const [userDetails] = await database
     .select({ role: userTable.role })
     .from(userTable)

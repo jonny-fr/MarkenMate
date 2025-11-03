@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Check, Loader2, User, X } from "lucide-react";
+import { Loader2, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { searchUsers, type UserSearchResult } from "@/actions/search-users";
-import { cn } from "@/lib/utils";
 
 interface UserSearchComboboxProps {
   currentUserId: string;

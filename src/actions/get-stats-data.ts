@@ -159,28 +159,36 @@ export async function getGraphData(
 /**
  * Helper functions to get graph data for different time periods
  */
-export async function getGraphDataWeek(userId: string): Promise<GraphDataPoint[]> {
+export async function getGraphDataWeek(
+  userId: string,
+): Promise<GraphDataPoint[]> {
   const end = new Date();
   const start = new Date();
   start.setDate(start.getDate() - 7);
   return getGraphData(userId, start, end);
 }
 
-export async function getGraphDataMonth(userId: string): Promise<GraphDataPoint[]> {
+export async function getGraphDataMonth(
+  userId: string,
+): Promise<GraphDataPoint[]> {
   const end = new Date();
   const start = new Date();
   start.setMonth(start.getMonth() - 1);
   return getGraphData(userId, start, end);
 }
 
-export async function getGraphDataQuarter(userId: string): Promise<GraphDataPoint[]> {
+export async function getGraphDataQuarter(
+  userId: string,
+): Promise<GraphDataPoint[]> {
   const end = new Date();
   const start = new Date();
   start.setMonth(start.getMonth() - 3);
   return getGraphData(userId, start, end);
 }
 
-export async function getGraphDataYear(userId: string): Promise<GraphDataPoint[]> {
+export async function getGraphDataYear(
+  userId: string,
+): Promise<GraphDataPoint[]> {
   const end = new Date();
   const start = new Date();
   start.setFullYear(start.getFullYear() - 1);

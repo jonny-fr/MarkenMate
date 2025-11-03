@@ -20,7 +20,6 @@ async function getComparisonData(
   endDate: Date,
   metric: "spending" | "frequency" | "avgPrice",
 ): Promise<ComparisonDataPoint[]> {
-
   // Get all restaurants to use as keys
   const restaurants = await db
     .select({ id: restaurant.id, name: restaurant.name })
@@ -150,27 +149,27 @@ async function getComparisonData(
 /**
  * Get comparison data for different metrics and time periods
  */
-export async function getComparisonDataSpending(userId: string): Promise<
-  ComparisonDataPoint[]
-> {
+export async function getComparisonDataSpending(
+  userId: string,
+): Promise<ComparisonDataPoint[]> {
   const end = new Date();
   const start = new Date();
   start.setFullYear(start.getFullYear() - 1); // Last year of data
   return getComparisonData(userId, start, end, "spending");
 }
 
-export async function getComparisonDataFrequency(userId: string): Promise<
-  ComparisonDataPoint[]
-> {
+export async function getComparisonDataFrequency(
+  userId: string,
+): Promise<ComparisonDataPoint[]> {
   const end = new Date();
   const start = new Date();
   start.setFullYear(start.getFullYear() - 1); // Last year of data
   return getComparisonData(userId, start, end, "frequency");
 }
 
-export async function getComparisonDataAvgPrice(userId: string): Promise<
-  ComparisonDataPoint[]
-> {
+export async function getComparisonDataAvgPrice(
+  userId: string,
+): Promise<ComparisonDataPoint[]> {
   const end = new Date();
   const start = new Date();
   start.setFullYear(start.getFullYear() - 1); // Last year of data

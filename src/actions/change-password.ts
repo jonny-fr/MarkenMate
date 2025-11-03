@@ -10,7 +10,9 @@ import { auth } from "@/lib/auth";
 
 const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, "Aktuelles Passwort erforderlich"),
-  newPassword: z.string().min(8, "Neues Passwort muss mindestens 8 Zeichen lang sein"),
+  newPassword: z
+    .string()
+    .min(8, "Neues Passwort muss mindestens 8 Zeichen lang sein"),
 });
 
 export async function changePasswordAction(formData: FormData) {
@@ -29,7 +31,10 @@ export async function changePasswordAction(formData: FormData) {
     });
 
     if (!validationResult.success) {
-      console.error("[change-password] Validation failed:", validationResult.error);
+      console.error(
+        "[change-password] Validation failed:",
+        validationResult.error,
+      );
       return {
         success: false,
         error: validationResult.error.issues[0]?.message || "Ungültige Eingabe",
@@ -38,7 +43,10 @@ export async function changePasswordAction(formData: FormData) {
 
     const { currentPassword, newPassword } = validationResult.data;
 
-    console.log("[change-password] Starting password change for user:", session.user.id);
+    console.log(
+      "[change-password] Starting password change for user:",
+      session.user.id,
+    );
 
     // Get user email for better-auth
     const [userDetails] = await db
@@ -64,14 +72,19 @@ export async function changePasswordAction(formData: FormData) {
       });
       console.log("[change-password] Current password verified");
     } catch (error) {
-      console.error("[change-password] Current password verification failed:", error);
+      console.error(
+        "[change-password] Current password verification failed:",
+        error,
+      );
       return { success: false, error: "Aktuelles Passwort ist falsch" };
     }
 
     // Create a temporary user with the new password to get proper hash
-    console.log("[change-password] Creating temporary user to hash new password");
+    console.log(
+      "[change-password] Creating temporary user to hash new password",
+    );
     const tempEmail = `temp-${Date.now()}@temp.temp`;
-    
+
     try {
       const tempUser = await auth.api.signUpEmail({
         body: {
@@ -109,7 +122,6 @@ export async function changePasswordAction(formData: FormData) {
       await db.delete(user).where(eq(user.id, tempUser.user.id));
 
       console.log("[change-password] Temp user cleaned up");
-
     } catch (error) {
       console.error("[change-password] Error during password update:", error);
       // Try to clean up temp user if it exists

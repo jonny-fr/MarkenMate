@@ -1,7 +1,15 @@
 "use client";
 
 import { use, useMemo, useState } from "react";
-import { Minus, Plus, MoreVertical, Trash2, Users, Check, X } from "lucide-react";
+import {
+  Minus,
+  Plus,
+  MoreVertical,
+  Trash2,
+  Users,
+  Check,
+  X,
+} from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -86,9 +94,7 @@ export function TokenLendingPanel({
 
   const handleDeleteLending = async (lendingId: number) => {
     if (
-      !confirm(
-        "Sind Sie sicher, dass Sie diese Verleihung löschen möchten?",
-      )
+      !confirm("Sind Sie sicher, dass Sie diese Verleihung löschen möchten?")
     ) {
       return;
     }

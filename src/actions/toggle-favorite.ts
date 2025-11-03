@@ -21,10 +21,10 @@ export async function toggleFavoriteAction(formData: FormData) {
     const data = toggleFavoriteSchema.parse({
       userId: rawData.userId,
       restaurantId: rawData.restaurantId
-        ? Number.parseInt(rawData.restaurantId as string)
+        ? Number.parseInt(rawData.restaurantId as string, 10)
         : undefined,
       menuItemId: rawData.menuItemId
-        ? Number.parseInt(rawData.menuItemId as string)
+        ? Number.parseInt(rawData.menuItemId as string, 10)
         : undefined,
     });
 

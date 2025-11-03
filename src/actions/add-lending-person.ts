@@ -23,7 +23,7 @@ export async function addLendingPersonAction(formData: FormData) {
       lendToUserId: rawData.lendToUserId,
       personName: rawData.personName,
       tokenCount: rawData.tokenCount
-        ? Number.parseInt(rawData.tokenCount as string)
+        ? Number.parseInt(rawData.tokenCount as string, 10)
         : 0,
     });
 

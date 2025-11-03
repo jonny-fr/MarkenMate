@@ -3,7 +3,13 @@ import { getServerSession } from "@/lib/auth-server";
 import { db } from "@/db";
 import { user, appLog } from "@/db/schema";
 import { eq, desc, gte } from "drizzle-orm";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { FileText } from "lucide-react";
 
@@ -102,7 +108,9 @@ export default async function AdminLogsPage() {
                         {new Date(log.createdAt).toLocaleString("de-DE")}
                       </span>
                     </div>
-                    <p className="text-sm font-medium break-words">{log.message}</p>
+                    <p className="text-sm font-medium break-words">
+                      {log.message}
+                    </p>
                     {log.context && (
                       <details className="text-xs text-muted-foreground">
                         <summary className="cursor-pointer hover:text-foreground">

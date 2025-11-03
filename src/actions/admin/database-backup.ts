@@ -68,7 +68,11 @@ export async function createDatabaseBackup() {
       // Clean up temp file
       await unlink(tempFilePath);
 
-      await logger.info("Database backup created", { filename }, session.user.id);
+      await logger.info(
+        "Database backup created",
+        { filename },
+        session.user.id,
+      );
 
       return {
         success: true,
@@ -90,7 +94,10 @@ export async function createDatabaseBackup() {
     await logger.error("Database backup failed", { error: String(error) });
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Fehler beim Erstellen des Backups",
+      error:
+        error instanceof Error
+          ? error.message
+          : "Fehler beim Erstellen des Backups",
     };
   }
 }
@@ -157,7 +164,11 @@ export async function restoreDatabaseBackup(formData: FormData) {
       // Clean up temp file
       await unlink(tempFilePath);
 
-      await logger.info("Database restored from backup", { filename }, session.user.id);
+      await logger.info(
+        "Database restored from backup",
+        { filename },
+        session.user.id,
+      );
 
       return { success: true };
     } catch (error) {
@@ -175,7 +186,10 @@ export async function restoreDatabaseBackup(formData: FormData) {
     await logger.error("Database restore failed", { error: String(error) });
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Fehler beim Wiederherstellen des Backups",
+      error:
+        error instanceof Error
+          ? error.message
+          : "Fehler beim Wiederherstellen des Backups",
     };
   }
 }

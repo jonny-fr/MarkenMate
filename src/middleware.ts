@@ -39,11 +39,10 @@ export async function middleware(request: NextRequest) {
   }
 
   // Force password change for users with mustChangePassword flag
-  if (
-    userDetails.mustChangePassword &&
-    pathname !== "/admin/change-password"
-  ) {
-    return NextResponse.redirect(new URL("/admin/change-password", request.url));
+  if (userDetails.mustChangePassword && pathname !== "/admin/change-password") {
+    return NextResponse.redirect(
+      new URL("/admin/change-password", request.url),
+    );
   }
 
   // Restrict admin routes to admin users only

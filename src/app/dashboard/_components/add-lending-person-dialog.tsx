@@ -21,7 +21,9 @@ interface AddLendingPersonDialogProps {
   userId: string;
 }
 
-export function AddLendingPersonDialog({ userId }: AddLendingPersonDialogProps) {
+export function AddLendingPersonDialog({
+  userId,
+}: AddLendingPersonDialogProps) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState("");
@@ -111,7 +113,9 @@ export function AddLendingPersonDialog({ userId }: AddLendingPersonDialogProps) 
               type="number"
               placeholder="0"
               value={tokenCount}
-              onChange={(e) => setTokenCount(Number.parseInt(e.target.value) || 0)}
+              onChange={(e) =>
+                setTokenCount(Number.parseInt(e.target.value, 10) || 0)
+              }
               disabled={isSubmitting}
               min="0"
             />

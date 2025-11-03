@@ -3,7 +3,7 @@
 import "server-only";
 import { db } from "@/db";
 import { user } from "@/db/schema";
-import { ilike, ne } from "drizzle-orm";
+import { ne } from "drizzle-orm";
 
 export type UserSearchResult = {
   id: string;
@@ -24,7 +24,7 @@ export async function searchUsers(
   }
 
   try {
-    const searchPattern = `%${query.trim()}%`;
+    const _searchPattern = `%${query.trim()}%`;
 
     const results = await db
       .select({
