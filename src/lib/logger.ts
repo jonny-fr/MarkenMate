@@ -20,7 +20,7 @@ export async function cleanupOldLogs() {
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
     await db.execute(
-      sql`DELETE FROM app_log WHERE created_at < ${sevenDaysAgo.toISOString()}`
+      sql`DELETE FROM app_log WHERE created_at < ${sevenDaysAgo.toISOString()}`,
     );
 
     await logger.info("Old logs cleaned up", {

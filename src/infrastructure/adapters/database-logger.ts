@@ -11,7 +11,7 @@ export class DatabaseLogger implements ILogger {
   async info(
     message: string,
     context?: LogContext,
-    userId?: string
+    userId?: string,
   ): Promise<void> {
     await this.log("info", message, context, userId);
   }
@@ -19,7 +19,7 @@ export class DatabaseLogger implements ILogger {
   async warn(
     message: string,
     context?: LogContext,
-    userId?: string
+    userId?: string,
   ): Promise<void> {
     await this.log("warn", message, context, userId);
   }
@@ -27,7 +27,7 @@ export class DatabaseLogger implements ILogger {
   async error(
     message: string,
     context?: LogContext,
-    userId?: string
+    userId?: string,
   ): Promise<void> {
     await this.log("error", message, context, userId);
   }
@@ -35,7 +35,7 @@ export class DatabaseLogger implements ILogger {
   async debug(
     message: string,
     context?: LogContext,
-    userId?: string
+    userId?: string,
   ): Promise<void> {
     await this.log("debug", message, context, userId);
   }
@@ -43,7 +43,7 @@ export class DatabaseLogger implements ILogger {
   async audit(
     action: string,
     context: LogContext,
-    userId: string
+    userId: string,
   ): Promise<void> {
     await this.log("info", `AUDIT: ${action}`, context, userId);
   }
@@ -52,7 +52,7 @@ export class DatabaseLogger implements ILogger {
     level: "info" | "warn" | "error" | "debug",
     message: string,
     context?: LogContext,
-    userId?: string
+    userId?: string,
   ): Promise<void> {
     try {
       await db.insert(appLog).values({
