@@ -2,9 +2,20 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "@/lib/auth-server";
 import { db } from "@/db";
 import { user, ticket, appLog } from "@/db/schema";
-import { eq, sql, desc } from "drizzle-orm";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Ticket as TicketIcon, AlertCircle, CheckCircle } from "lucide-react";
+import { sql, desc } from "drizzle-orm";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Users,
+  Ticket as TicketIcon,
+  AlertCircle,
+  CheckCircle,
+} from "lucide-react";
 
 export default async function AdminDashboardPage() {
   const session = await getServerSession();
@@ -68,7 +79,9 @@ export default async function AdminDashboardPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Offene Tickets</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Offene Tickets
+            </CardTitle>
             <TicketIcon className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -96,14 +109,14 @@ export default async function AdminDashboardPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tickets gesamt</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Tickets gesamt
+            </CardTitle>
             <CheckCircle className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{ticketStats.totalTickets}</div>
-            <p className="text-xs text-muted-foreground">
-              Alle Anfragen
-            </p>
+            <p className="text-xs text-muted-foreground">Alle Anfragen</p>
           </CardContent>
         </Card>
       </div>
@@ -112,13 +125,13 @@ export default async function AdminDashboardPage() {
       <Card>
         <CardHeader>
           <CardTitle>Aktuelle Logs</CardTitle>
-          <CardDescription>
-            Die letzten 10 Systemereignisse
-          </CardDescription>
+          <CardDescription>Die letzten 10 Systemereignisse</CardDescription>
         </CardHeader>
         <CardContent>
           {recentLogs.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Keine Logs vorhanden</p>
+            <p className="text-sm text-muted-foreground">
+              Keine Logs vorhanden
+            </p>
           ) : (
             <div className="space-y-2">
               {recentLogs.map((log) => (

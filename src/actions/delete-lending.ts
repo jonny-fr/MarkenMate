@@ -17,7 +17,7 @@ export async function deleteLendingAction(formData: FormData) {
 
     const data = deleteLendingSchema.parse({
       lendingId: rawData.lendingId
-        ? Number.parseInt(rawData.lendingId as string)
+        ? Number.parseInt(rawData.lendingId as string, 10)
         : undefined,
     });
 
@@ -35,9 +35,7 @@ export async function deleteLendingAction(formData: FormData) {
     }
 
     // Delete lending record
-    await db
-      .delete(tokenLending)
-      .where(eq(tokenLending.id, data.lendingId));
+    await db.delete(tokenLending).where(eq(tokenLending.id, data.lendingId));
 
     revalidatePath("/", "layout");
     return {

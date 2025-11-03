@@ -1,10 +1,9 @@
 "use client";
 
 import { use } from "react";
-import { MapPin, Trash2 } from "lucide-react";
+import { MapPin } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -13,7 +12,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { FavoriteButton } from "@/components/favorite-button";
-import { toast } from "sonner";
 
 export type FavoriteRestaurant = {
   id: number;
@@ -46,8 +44,6 @@ interface FavoritesViewProps {
 export function FavoritesView({ userId, dataPromise }: FavoritesViewProps) {
   const data = use(dataPromise);
   const { restaurants, menuItems } = data;
-
-
 
   return (
     <div className="space-y-6">

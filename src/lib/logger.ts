@@ -38,19 +38,35 @@ export const logger = {
     }
   },
 
-  async info(message: string, context?: Record<string, unknown>, userId?: string) {
+  async info(
+    message: string,
+    context?: Record<string, unknown>,
+    userId?: string,
+  ) {
     return this.log(message, { level: "info", context, userId });
   },
 
-  async warn(message: string, context?: Record<string, unknown>, userId?: string) {
+  async warn(
+    message: string,
+    context?: Record<string, unknown>,
+    userId?: string,
+  ) {
     return this.log(message, { level: "warn", context, userId });
   },
 
-  async error(message: string, context?: Record<string, unknown>, userId?: string) {
+  async error(
+    message: string,
+    context?: Record<string, unknown>,
+    userId?: string,
+  ) {
     return this.log(message, { level: "error", context, userId });
   },
 
-  async debug(message: string, context?: Record<string, unknown>, userId?: string) {
+  async debug(
+    message: string,
+    context?: Record<string, unknown>,
+    userId?: string,
+  ) {
     return this.log(message, { level: "debug", context, userId });
   },
 };

@@ -18,7 +18,7 @@ export async function acceptLendingAction(formData: FormData) {
 
     const data = acceptLendingSchema.parse({
       lendingId: rawData.lendingId
-        ? Number.parseInt(rawData.lendingId as string)
+        ? Number.parseInt(rawData.lendingId as string, 10)
         : undefined,
       status: rawData.status,
     });

@@ -3,7 +3,7 @@
 import "server-only";
 import { db } from "@/db";
 import { restaurant, menuItem, favorite } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 /**
  * Conversion rate for calculating token prices from euro prices.
@@ -69,11 +69,16 @@ export type RestaurantWithDishes = {
  * Calculates token prices based on menu item prices.
  * Also includes favorite status for given userId.
  */
-export async function getRestaurants(userId?: string): Promise<RestaurantWithDishes[]> {
+export async function getRestaurants(
+  userId?: string,
+): Promise<RestaurantWithDishes[]> {
   const restaurants = await db.select().from(restaurant);
 
   // Fetch all favorites for this user if userId provided
-  let userFavorites: { restaurantId: number | null; menuItemId: number | null }[] = [];
+  let userFavorites: {
+    restaurantId: number | null;
+    menuItemId: number | null;
+  }[] = [];
   if (userId) {
     userFavorites = await db
       .select({
@@ -85,10 +90,14 @@ export async function getRestaurants(userId?: string): Promise<RestaurantWithDis
   }
 
   const favoriteRestaurantIds = new Set(
-    userFavorites.filter((f) => f.restaurantId !== null).map((f) => f.restaurantId!),
+    userFavorites
+      .filter((f) => f.restaurantId !== null)
+      .map((f) => f.restaurantId!),
   );
   const favoriteMenuItemIds = new Set(
-    userFavorites.filter((f) => f.menuItemId !== null).map((f) => f.menuItemId!),
+    userFavorites
+      .filter((f) => f.menuItemId !== null)
+      .map((f) => f.menuItemId!),
   );
 
   const restaurantsWithDishes = await Promise.all(

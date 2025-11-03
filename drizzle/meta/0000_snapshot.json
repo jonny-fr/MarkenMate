@@ -95,12 +95,8 @@
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -161,12 +157,8 @@
           "name": "app_log_user_id_user_id_fk",
           "tableFrom": "app_log",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -225,12 +217,8 @@
           "name": "db_backup_created_by_admin_id_user_id_fk",
           "tableFrom": "db_backup",
           "tableTo": "user",
-          "columnsFrom": [
-            "created_by_admin_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_by_admin_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -240,9 +228,7 @@
         "db_backup_filename_unique": {
           "name": "db_backup_filename_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "filename"
-          ]
+          "columns": ["filename"]
         }
       },
       "policies": {},
@@ -346,12 +332,8 @@
           "name": "favorite_user_id_user_id_fk",
           "tableFrom": "favorite",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -359,12 +341,8 @@
           "name": "favorite_restaurant_id_restaurant_id_fk",
           "tableFrom": "favorite",
           "tableTo": "restaurant",
-          "columnsFrom": [
-            "restaurant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["restaurant_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -372,12 +350,8 @@
           "name": "favorite_menu_item_id_menu_item_id_fk",
           "tableFrom": "favorite",
           "tableTo": "menu_item",
-          "columnsFrom": [
-            "menu_item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["menu_item_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -462,12 +436,8 @@
           "name": "menu_item_restaurant_id_restaurant_id_fk",
           "tableFrom": "menu_item",
           "tableTo": "restaurant",
-          "columnsFrom": [
-            "restaurant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["restaurant_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -527,12 +497,8 @@
           "name": "order_history_user_id_user_id_fk",
           "tableFrom": "order_history",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -540,12 +506,8 @@
           "name": "order_history_restaurant_id_restaurant_id_fk",
           "tableFrom": "order_history",
           "tableTo": "restaurant",
-          "columnsFrom": [
-            "restaurant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["restaurant_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -610,12 +572,8 @@
           "name": "order_history_item_order_history_id_order_history_id_fk",
           "tableFrom": "order_history_item",
           "tableTo": "order_history",
-          "columnsFrom": [
-            "order_history_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["order_history_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -761,12 +719,8 @@
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -776,9 +730,7 @@
         "session_token_unique": {
           "name": "session_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -868,12 +820,8 @@
           "name": "ticket_user_id_user_id_fk",
           "tableFrom": "ticket",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -881,12 +829,8 @@
           "name": "ticket_assigned_to_admin_id_user_id_fk",
           "tableFrom": "ticket",
           "tableTo": "user",
-          "columnsFrom": [
-            "assigned_to_admin_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["assigned_to_admin_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -894,12 +838,8 @@
           "name": "ticket_closed_by_admin_id_user_id_fk",
           "tableFrom": "ticket",
           "tableTo": "user",
-          "columnsFrom": [
-            "closed_by_admin_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["closed_by_admin_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -959,12 +899,8 @@
           "name": "ticket_comment_ticket_id_ticket_id_fk",
           "tableFrom": "ticket_comment",
           "tableTo": "ticket",
-          "columnsFrom": [
-            "ticket_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["ticket_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -972,12 +908,8 @@
           "name": "ticket_comment_user_id_user_id_fk",
           "tableFrom": "ticket_comment",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1065,12 +997,8 @@
           "name": "token_lending_user_id_user_id_fk",
           "tableFrom": "token_lending",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1078,12 +1006,8 @@
           "name": "token_lending_lend_to_user_id_user_id_fk",
           "tableFrom": "token_lending",
           "tableTo": "user",
-          "columnsFrom": [
-            "lend_to_user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["lend_to_user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1166,9 +1090,7 @@
         "user_email_unique": {
           "name": "user_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -1231,57 +1153,32 @@
     "public.acceptance_status": {
       "name": "acceptance_status",
       "schema": "public",
-      "values": [
-        "pending",
-        "accepted",
-        "declined"
-      ]
+      "values": ["pending", "accepted", "declined"]
     },
     "public.log_level": {
       "name": "log_level",
       "schema": "public",
-      "values": [
-        "info",
-        "warn",
-        "error",
-        "debug"
-      ]
+      "values": ["info", "warn", "error", "debug"]
     },
     "public.menu_item_type": {
       "name": "menu_item_type",
       "schema": "public",
-      "values": [
-        "drink",
-        "main_course",
-        "dessert"
-      ]
+      "values": ["drink", "main_course", "dessert"]
     },
     "public.ticket_priority": {
       "name": "ticket_priority",
       "schema": "public",
-      "values": [
-        "low",
-        "medium",
-        "high",
-        "urgent"
-      ]
+      "values": ["low", "medium", "high", "urgent"]
     },
     "public.ticket_status": {
       "name": "ticket_status",
       "schema": "public",
-      "values": [
-        "open",
-        "in_progress",
-        "closed"
-      ]
+      "values": ["open", "in_progress", "closed"]
     },
     "public.user_role": {
       "name": "user_role",
       "schema": "public",
-      "values": [
-        "user",
-        "admin"
-      ]
+      "values": ["user", "admin"]
     }
   },
   "schemas": {},

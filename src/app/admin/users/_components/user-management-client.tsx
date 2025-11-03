@@ -20,7 +20,9 @@ interface UserManagementClientProps {
   users: User[];
 }
 
-export function UserManagementClient({ users: initialUsers }: UserManagementClientProps) {
+export function UserManagementClient({
+  users: initialUsers,
+}: UserManagementClientProps) {
   const [users, setUsers] = useState(initialUsers);
   const [loadingUserId, setLoadingUserId] = useState<string | null>(null);
 
@@ -36,7 +38,9 @@ export function UserManagementClient({ users: initialUsers }: UserManagementClie
       if (result.success) {
         setUsers((prev) =>
           prev.map((u) =>
-            u.id === userId ? { ...u, role: result.newRole as "user" | "admin" } : u,
+            u.id === userId
+              ? { ...u, role: result.newRole as "user" | "admin" }
+              : u,
           ),
         );
         toast.success("Rolle erfolgreich geändert");
@@ -66,13 +70,16 @@ export function UserManagementClient({ users: initialUsers }: UserManagementClie
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <p className="font-medium">{user.name}</p>
-                  <Badge variant={user.role === "admin" ? "default" : "secondary"}>
+                  <Badge
+                    variant={user.role === "admin" ? "default" : "secondary"}
+                  >
                     {user.role === "admin" ? "Administrator" : "Benutzer"}
                   </Badge>
                 </div>
                 <p className="text-sm text-muted-foreground">{user.email}</p>
                 <p className="text-xs text-muted-foreground">
-                  Erstellt: {new Date(user.createdAt).toLocaleDateString("de-DE")}
+                  Erstellt:{" "}
+                  {new Date(user.createdAt).toLocaleDateString("de-DE")}
                 </p>
               </div>
               <Button

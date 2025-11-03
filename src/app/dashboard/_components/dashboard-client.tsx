@@ -96,7 +96,11 @@ export function DashboardClient({
         } as CSSProperties
       }
     >
-      <AppSidebar variant="inset" onNavigateAction={setCurrentView} userRole={userRole} />
+      <AppSidebar
+        variant="inset"
+        onNavigateAction={setCurrentView}
+        userRole={userRole}
+      />
       <SidebarInset>
         <SiteHeader />
         <div className="flex flex-1 flex-col">
@@ -105,7 +109,10 @@ export function DashboardClient({
               {currentView === "restaurants" ? (
                 <div className="px-4 lg:px-6">
                   <Suspense fallback={<LoadingCard label="Restaurants" />}>
-                    <RestaurantsView userId={userId} dataPromise={restaurantsPromise} />
+                    <RestaurantsView
+                      userId={userId}
+                      dataPromise={restaurantsPromise}
+                    />
                   </Suspense>
                 </div>
               ) : currentView === "stats" ? (
@@ -135,7 +142,10 @@ export function DashboardClient({
               ) : currentView === "favorites" ? (
                 <div className="px-4 lg:px-6">
                   <Suspense fallback={<LoadingCard label="Favoriten" />}>
-                    <FavoritesView userId={userId} dataPromise={favoritesPromise} />
+                    <FavoritesView
+                      userId={userId}
+                      dataPromise={favoritesPromise}
+                    />
                   </Suspense>
                 </div>
               ) : currentView === "tickets" ? (
@@ -164,7 +174,10 @@ export function DashboardClient({
                     </div>
                     <div className="space-y-4">
                       <Suspense fallback={<LoadingCard label="Markenleihen" />}>
-                        <TokenLendingPanel userId={userId} dataPromise={lendingPromise} />
+                        <TokenLendingPanel
+                          userId={userId}
+                          dataPromise={lendingPromise}
+                        />
                       </Suspense>
                     </div>
                   </div>

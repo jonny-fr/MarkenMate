@@ -161,7 +161,7 @@ export function ComparisonView({
         day: "numeric",
       }),
     }));
-  }, [timeInterval, category, selectedRestaurants]);
+  }, [getIntervalData, getTransformedData]);
 
   const addRestaurant = (restaurantId: string) => {
     if (!selectedRestaurants.includes(restaurantId)) {

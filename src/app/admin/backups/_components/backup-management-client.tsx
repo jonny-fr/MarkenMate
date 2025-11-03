@@ -3,8 +3,17 @@
 import { use, useState } from "react";
 import { Download, Upload, History, AlertCircle, Database } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { createDatabaseBackup, restoreDatabaseBackup } from "@/actions/admin/database-backup";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  createDatabaseBackup,
+  restoreDatabaseBackup,
+} from "@/actions/admin/database-backup";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 
@@ -31,7 +40,9 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 }
 
-export function BackupManagementClient({ backupHistoryPromise }: BackupManagementClientProps) {
+export function BackupManagementClient({
+  backupHistoryPromise,
+}: BackupManagementClientProps) {
   const historyResult = use(backupHistoryPromise);
   const [isCreatingBackup, setIsCreatingBackup] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
@@ -40,7 +51,7 @@ export function BackupManagementClient({ backupHistoryPromise }: BackupManagemen
     setIsCreatingBackup(true);
     try {
       const result = await createDatabaseBackup();
-      
+
       if (result.success && result.data && result.filename) {
         // Trigger download
         const link = document.createElement("a");
@@ -49,7 +60,7 @@ export function BackupManagementClient({ backupHistoryPromise }: BackupManagemen
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        
+
         toast.success("Backup erfolgreich erstellt und heruntergeladen");
         // Reload page to refresh backup history
         window.location.reload();
@@ -64,7 +75,9 @@ export function BackupManagementClient({ backupHistoryPromise }: BackupManagemen
     }
   };
 
-  const handleRestoreBackup = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleRestoreBackup = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -74,7 +87,7 @@ export function BackupManagementClient({ backupHistoryPromise }: BackupManagemen
     }
 
     const confirmRestore = window.confirm(
-      "WARNUNG: Das Wiederherstellen eines Backups überschreibt ALLE aktuellen Daten. Möchten Sie fortfahren?"
+      "WARNUNG: Das Wiederherstellen eines Backups überschreibt ALLE aktuellen Daten. Möchten Sie fortfahren?",
     );
 
     if (!confirmRestore) return;
@@ -98,7 +111,9 @@ export function BackupManagementClient({ backupHistoryPromise }: BackupManagemen
             window.location.reload();
           }, 2000);
         } else {
-          toast.error(result.error || "Fehler beim Wiederherstellen des Backups");
+          toast.error(
+            result.error || "Fehler beim Wiederherstellen des Backups",
+          );
         }
         setIsRestoring(false);
       };
@@ -124,7 +139,8 @@ export function BackupManagementClient({ backupHistoryPromise }: BackupManagemen
             Backup-Verwaltung
           </CardTitle>
           <CardDescription>
-            Erstellen Sie Backups Ihrer PostgreSQL-Datenbank oder spielen Sie diese ein
+            Erstellen Sie Backups Ihrer PostgreSQL-Datenbank oder spielen Sie
+            diese ein
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -156,8 +172,9 @@ export function BackupManagementClient({ backupHistoryPromise }: BackupManagemen
                   Wichtiger Hinweis
                 </p>
                 <p className="text-amber-800 dark:text-amber-200">
-                  Das Wiederherstellen eines Backups überschreibt alle aktuellen Daten in der
-                  Datenbank. Erstellen Sie vorher ein Backup des aktuellen Zustands.
+                  Das Wiederherstellen eines Backups überschreibt alle aktuellen
+                  Daten in der Datenbank. Erstellen Sie vorher ein Backup des
+                  aktuellen Zustands.
                 </p>
               </div>
             </div>
@@ -206,7 +223,9 @@ export function BackupManagementClient({ backupHistoryPromise }: BackupManagemen
                       {backup.adminName && ` von ${backup.adminName}`}
                     </p>
                   </div>
-                  <Badge variant="secondary">{formatFileSize(backup.fileSize)}</Badge>
+                  <Badge variant="secondary">
+                    {formatFileSize(backup.fileSize)}
+                  </Badge>
                 </div>
               ))}
             </div>

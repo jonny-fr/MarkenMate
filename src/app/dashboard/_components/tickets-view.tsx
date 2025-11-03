@@ -3,9 +3,22 @@
 import { use, useState } from "react";
 import { Plus, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { createTicket } from "@/actions/tickets";
@@ -21,7 +34,11 @@ interface Ticket {
 }
 
 interface TicketsViewProps {
-  ticketsPromise: Promise<{ success: boolean; tickets?: Ticket[]; error?: string }>;
+  ticketsPromise: Promise<{
+    success: boolean;
+    tickets?: Ticket[];
+    error?: string;
+  }>;
 }
 
 const statusLabels = {
@@ -57,10 +74,10 @@ function CreateTicketDialog() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
-    
+
     const formData = new FormData(e.currentTarget);
     const result = await createTicket(formData);
-    
+
     if (result.success) {
       toast.success("Ticket erfolgreich erstellt");
       setOpen(false);
@@ -129,7 +146,11 @@ function CreateTicketDialog() {
             </div>
           )}
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+            >
               Abbrechen
             </Button>
             <Button type="submit">Ticket erstellen</Button>
@@ -148,7 +169,9 @@ export function TicketsView({ ticketsPromise }: TicketsViewProps) {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">Support-Tickets</h2>
+            <h2 className="text-2xl font-bold tracking-tight">
+              Support-Tickets
+            </h2>
             <p className="text-muted-foreground">
               Verwalten Sie Ihre Support-Anfragen
             </p>
@@ -194,7 +217,9 @@ export function TicketsView({ ticketsPromise }: TicketsViewProps) {
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>In Bearbeitung</CardDescription>
-            <CardTitle className="text-3xl">{inProgressTickets.length}</CardTitle>
+            <CardTitle className="text-3xl">
+              {inProgressTickets.length}
+            </CardTitle>
           </CardHeader>
         </Card>
         <Card>
@@ -213,7 +238,8 @@ export function TicketsView({ ticketsPromise }: TicketsViewProps) {
               Sie haben noch keine Tickets erstellt.
             </p>
             <p className="mt-2 text-sm text-muted-foreground">
-              Klicken Sie auf "Ticket erstellen" um ein neues Support-Ticket anzulegen.
+              Klicken Sie auf "Ticket erstellen" um ein neues Support-Ticket
+              anzulegen.
             </p>
           </CardContent>
         </Card>
@@ -233,7 +259,10 @@ export function TicketsView({ ticketsPromise }: TicketsViewProps) {
                     <Badge className={statusColors[ticket.status]}>
                       {statusLabels[ticket.status]}
                     </Badge>
-                    <Badge variant="outline" className={priorityColors[ticket.priority]}>
+                    <Badge
+                      variant="outline"
+                      className={priorityColors[ticket.priority]}
+                    >
                       {priorityLabels[ticket.priority]}
                     </Badge>
                   </div>
@@ -241,7 +270,8 @@ export function TicketsView({ ticketsPromise }: TicketsViewProps) {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  Erstellt am {new Date(ticket.createdAt).toLocaleDateString("de-DE", {
+                  Erstellt am{" "}
+                  {new Date(ticket.createdAt).toLocaleDateString("de-DE", {
                     day: "2-digit",
                     month: "2-digit",
                     year: "numeric",

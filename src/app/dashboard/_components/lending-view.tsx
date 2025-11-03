@@ -1,7 +1,15 @@
 "use client";
 
 import { use, useMemo, useState } from "react";
-import { Minus, Plus, MoreVertical, Trash2, Users, Check, X } from "lucide-react";
+import {
+  Minus,
+  Plus,
+  MoreVertical,
+  Trash2,
+  Users,
+  Check,
+  X,
+} from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -37,10 +45,7 @@ interface LendingViewProps {
   dataPromise: Promise<LendingUser[]>;
 }
 
-export function LendingView({
-  userId,
-  dataPromise,
-}: LendingViewProps) {
+export function LendingView({ userId, dataPromise }: LendingViewProps) {
   const initialUsers = use(dataPromise);
   const [users, setUsers] = useState(initialUsers);
   const [isUpdating, setIsUpdating] = useState<number | null>(null);
@@ -91,9 +96,7 @@ export function LendingView({
 
   const handleDeleteLending = async (lendingId: number) => {
     if (
-      !confirm(
-        "Sind Sie sicher, dass Sie diese Verleihung löschen möchten?",
-      )
+      !confirm("Sind Sie sicher, dass Sie diese Verleihung löschen möchten?")
     ) {
       return;
     }
@@ -239,9 +242,7 @@ export function LendingView({
                     className="flex items-center justify-between gap-2 rounded-lg border border-amber-200 bg-background p-3 dark:border-amber-900"
                   >
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-foreground">
-                        {user.name}
-                      </p>
+                      <p className="font-medium text-foreground">{user.name}</p>
                       <p className="text-xs text-muted-foreground">
                         {user.balance} Marken verliehen
                       </p>

@@ -4,13 +4,15 @@ import { z } from "zod";
 import { getServerSession } from "@/lib/auth-server";
 import { db } from "@/db";
 import { ticket, user } from "@/db/schema";
-import { eq, desc, or } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 // Create ticket (for all users)
 const createTicketSchema = z.object({
   title: z.string().min(3, "Titel muss mindestens 3 Zeichen lang sein"),
-  description: z.string().min(10, "Beschreibung muss mindestens 10 Zeichen lang sein"),
+  description: z
+    .string()
+    .min(10, "Beschreibung muss mindestens 10 Zeichen lang sein"),
   priority: z.enum(["low", "medium", "high", "urgent"]),
 });
 

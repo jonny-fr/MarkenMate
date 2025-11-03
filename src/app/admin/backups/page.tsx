@@ -3,9 +3,6 @@ import { getServerSession } from "@/lib/auth-server";
 import { db } from "@/db";
 import { user } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Database, Download, Upload, AlertTriangle, History } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { getBackupHistory } from "@/actions/admin/database-backup";
 import { BackupManagementClient } from "./_components/backup-management-client";
 
@@ -39,7 +36,9 @@ export default async function AdminBackupsPage() {
         </p>
       </div>
 
-      <BackupManagementClient backupHistoryPromise={Promise.resolve(backupHistory)} />
+      <BackupManagementClient
+        backupHistoryPromise={Promise.resolve(backupHistory)}
+      />
     </div>
   );
 }

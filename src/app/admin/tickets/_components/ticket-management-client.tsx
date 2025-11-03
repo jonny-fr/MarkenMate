@@ -49,7 +49,9 @@ export function TicketManagementClient({
   tickets: initialTickets,
 }: TicketManagementClientProps) {
   const [tickets, setTickets] = useState(initialTickets);
-  const [filter, setFilter] = useState<"all" | "open" | "in_progress" | "closed">("all");
+  const [filter, setFilter] = useState<
+    "all" | "open" | "in_progress" | "closed"
+  >("all");
 
   const handleStatusChange = async (ticketId: number, newStatus: string) => {
     try {
@@ -62,7 +64,9 @@ export function TicketManagementClient({
       if (result.success) {
         setTickets((prev) =>
           prev.map((t) =>
-            t.id === ticketId ? { ...t, status: newStatus as typeof t.status } : t,
+            t.id === ticketId
+              ? { ...t, status: newStatus as typeof t.status }
+              : t,
           ),
         );
         toast.success("Status erfolgreich aktualisiert");
@@ -167,23 +171,30 @@ export function TicketManagementClient({
                       {ticket.description}
                     </p>
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                      <span>Von: {ticket.userName} ({ticket.userEmail})</span>
                       <span>
-                        Erstellt: {new Date(ticket.createdAt).toLocaleString("de-DE")}
+                        Von: {ticket.userName} ({ticket.userEmail})
+                      </span>
+                      <span>
+                        Erstellt:{" "}
+                        {new Date(ticket.createdAt).toLocaleString("de-DE")}
                       </span>
                     </div>
                   </div>
                   <div className="flex flex-col gap-2">
                     <Select
                       value={ticket.status}
-                      onValueChange={(value) => handleStatusChange(ticket.id, value)}
+                      onValueChange={(value) =>
+                        handleStatusChange(ticket.id, value)
+                      }
                     >
                       <SelectTrigger className="w-[180px]">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="open">Offen</SelectItem>
-                        <SelectItem value="in_progress">In Bearbeitung</SelectItem>
+                        <SelectItem value="in_progress">
+                          In Bearbeitung
+                        </SelectItem>
                         <SelectItem value="closed">Geschlossen</SelectItem>
                       </SelectContent>
                     </Select>

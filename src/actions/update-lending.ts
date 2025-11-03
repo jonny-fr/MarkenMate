@@ -18,10 +18,10 @@ export async function updateLendingAction(formData: FormData) {
 
     const data = updateLendingSchema.parse({
       lendingId: rawData.lendingId
-        ? Number.parseInt(rawData.lendingId as string)
+        ? Number.parseInt(rawData.lendingId as string, 10)
         : undefined,
       tokenCount: rawData.tokenCount
-        ? Number.parseInt(rawData.tokenCount as string)
+        ? Number.parseInt(rawData.tokenCount as string, 10)
         : 0,
     });
 

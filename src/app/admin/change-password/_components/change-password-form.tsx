@@ -5,12 +5,18 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { changePasswordAction } from "@/actions/change-password";
 import { toast } from "sonner";
 
 export function ChangePasswordForm() {
-  const router = useRouter();
+  const _router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -60,7 +66,8 @@ export function ChangePasswordForm() {
       <CardHeader>
         <CardTitle>Neues Passwort festlegen</CardTitle>
         <CardDescription>
-          Ihr aktuelles Passwort ist temporär. Bitte wählen Sie ein neues, sicheres Passwort.
+          Ihr aktuelles Passwort ist temporär. Bitte wählen Sie ein neues,
+          sicheres Passwort.
         </CardDescription>
       </CardHeader>
       <CardContent>

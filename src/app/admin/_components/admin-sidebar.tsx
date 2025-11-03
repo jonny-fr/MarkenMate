@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Users, Database, FileText, Ticket, LayoutDashboard, LogOut } from "lucide-react";
+import {
+  Users,
+  Database,
+  FileText,
+  Ticket,
+  LayoutDashboard,
+  LogOut,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { logout } from "@/actions/logout";
@@ -85,7 +92,11 @@ export function AdminSidebar({ userName }: AdminSidebarProps) {
         {/* Footer */}
         <div className="p-4 space-y-2">
           <Link href="/dashboard">
-            <Button variant="outline" className="w-full justify-start" size="sm">
+            <Button
+              variant="outline"
+              className="w-full justify-start"
+              size="sm"
+            >
               <LayoutDashboard className="size-4 mr-2" />
               Zum Dashboard
             </Button>
