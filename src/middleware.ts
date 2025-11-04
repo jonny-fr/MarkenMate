@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/db";
 import { user } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { applySecurityHeaders } from "@/lib/security-headers";
 
 /**
  * Middleware for authentication and authorization.
@@ -52,7 +53,9 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  return NextResponse.next();
+  // Apply security headers to response
+  const response = NextResponse.next();
+  return applySecurityHeaders(response);
 }
 
 export const config = {

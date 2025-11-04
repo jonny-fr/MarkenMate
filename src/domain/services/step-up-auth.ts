@@ -47,10 +47,10 @@ export class StepUpAuthService {
    */
   static createToken(
     userId: string,
-    ttlMs: number = this.DEFAULT_TTL_MS,
+    ttlMs: number = StepUpAuthService.DEFAULT_TTL_MS,
   ): Omit<StepUpToken, "used"> {
     return {
-      token: this.generateToken(),
+      token: StepUpAuthService.generateToken(),
       userId,
       expiresAt: new Date(Date.now() + ttlMs),
     };
