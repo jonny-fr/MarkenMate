@@ -1,0 +1,60 @@
+# Gitleaks configuration for MarkenMate
+# https://github.com/gitleaks/gitleaks
+
+title = "MarkenMate Secret Scanning Configuration"
+
+[extend]
+# useDefault will extend the base configuration with the default gitleaks config:
+# https://github.com/gitleaks/gitleaks/blob/master/config/gitleaks.toml
+useDefault = true
+
+[allowlist]
+description = "Allowlist for MarkenMate"
+paths = [
+    # Example files that are not actual secrets
+    '''^\.env\.example$''',
+    '''^\.env\.example\..*$''',
+    # Documentation files
+    '''\.md$''',
+]
+
+regexes = [
+    # Dummy/placeholder values
+    '''dummy''',
+    '''example''',
+    '''placeholder''',
+    '''your-secret-here''',
+    '''changeme''',
+    '''local-dev-secret''',
+    # Test values
+    '''test-secret''',
+    '''test-key''',
+]
+
+[[rules]]
+id = "postgresql-connection-string"
+description = "PostgreSQL Connection String"
+regex = '''postgresql://[a-zA-Z0-9_-]+:[a-zA-Z0-9_@.-]+@[a-zA-Z0-9.-]+:[0-9]+/[a-zA-Z0-9_-]+'''
+tags = ["database", "postgresql"]
+
+[[rules]]
+id = "better-auth-secret"
+description = "Better Auth Secret Key"
+regex = '''BETTER_AUTH_SECRET\s*=\s*['""]?([a-zA-Z0-9+/=]{32,})['""]?'''
+tags = ["auth", "secret"]
+
+[[rules]]
+id = "jwt-secret"
+description = "JWT Secret"
+regex = '''jwt[_-]?secret['""]?\s*[:=]\s*['""]?([a-zA-Z0-9+/=]{32,})['""]?'''
+tags = ["jwt", "secret"]
+
+[[rules]]
+id = "api-key"
+description = "Generic API Key"
+regex = '''api[_-]?key['""]?\s*[:=]\s*['""]?([a-zA-Z0-9]{20,})['""]?'''
+tags = ["api", "key"]
+
+[allowlist.commits]
+# Allow specific commits if needed (by commit hash)
+commits = []

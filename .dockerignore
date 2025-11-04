@@ -1,30 +1,70 @@
+# Dependencies
 node_modules
+.pnpm-store
+
+# Build artifacts
 dist
 build
+.next
+*.tsbuildinfo
+
+# Version control
 .git
-.vscode
-.DS_Store
 .gitignore
 .gitattributes
+.github
+
+# IDE and editor files
+.vscode
 .idea
-.env
-.env.example
-.env.local
-.next
-.env.development.local
-.env.test.local
-.env.production.local
-coverage
-.nyc_output
-*.tsbuildinfo
-pnpm-debug.log
-npm-debug.log
-yarn-error.log
 *.swp
 *.swo
 *~
-docs
-README.md
-AGENTS.md
-biome.json
+.DS_Store
 .editorconfig
+
+# Environment files (SECURITY: Never include secrets in Docker images)
+.env
+.env.*
+!.env.example
+
+# Test and coverage
+coverage
+.nyc_output
+test
+tests
+*.test.*
+*.spec.*
+
+# Logs
+*.log
+pnpm-debug.log
+npm-debug.log
+yarn-error.log
+logs
+
+# Documentation (not needed in production)
+docs
+*.md
+!README.md
+AGENTS.md
+LICENSE
+
+# Configuration files (not needed in production)
+biome.json
+.eslintrc*
+.prettierrc*
+tsconfig.json
+
+# Temporary files
+tmp
+temp
+*.tmp
+*.temp
+
+# Development files
+docker-compose.dev.yml
+Dockerfile.dev
+
+# Scripts (if any development scripts exist)
+scripts/*.dev.*
