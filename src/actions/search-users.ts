@@ -3,7 +3,7 @@
 import "server-only";
 import { db } from "@/db";
 import { user } from "@/db/schema";
-import { ne, or, ilike } from "drizzle-orm";
+import { ne, or, and, ilike } from "drizzle-orm";
 import { z } from "zod";
 import { sanitizeString } from "@/lib/input-sanitization";
 
@@ -66,6 +66,7 @@ export async function searchUsers(
       validationResult.data;
 
     // Perform database search with sanitized input
+    // SECURITY: Filter at database level for performance and security
     const results = await db
       .select({
         id: user.id,
@@ -74,17 +75,17 @@ export async function searchUsers(
       })
       .from(user)
       .where(
-        or(
-          ilike(user.name, `%${sanitizedQuery}%`),
-          ilike(user.email, `%${sanitizedQuery}%`),
+        and(
+          ne(user.id, validUserId), // Exclude current user at DB level
+          or(
+            ilike(user.name, `%${sanitizedQuery}%`),
+            ilike(user.email, `%${sanitizedQuery}%`),
+          ),
         ),
       )
-      .limit(10); // Limit to 10 results for performance
+      .limit(5); // Return top 5 matches
 
-    // Filter out current user
-    const filteredResults = results.filter((u) => u.id !== validUserId);
-
-    return filteredResults.slice(0, 5); // Return top 5 matches
+    return results;
   } catch (error) {
     console.error("[search-users] Error:", error);
     // Don't leak internal error details

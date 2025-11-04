@@ -69,7 +69,9 @@ export async function searchUsersAdmin(query: string) {
 
     const sanitizedQuery = validationResult.data.query;
 
-    // Use parameterized query with sanitized input
+    // SECURITY: Use parameterized query with sanitized input
+    // The sanitizedQuery has wildcards (%, _) removed and dangerous chars stripped
+    // Drizzle ORM's ilike() properly parameterizes the value to prevent injection
     const users = await db
       .select({
         id: user.id,
