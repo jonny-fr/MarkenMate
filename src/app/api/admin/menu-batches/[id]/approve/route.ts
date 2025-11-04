@@ -11,6 +11,7 @@ import {
 } from "@/db/schema";
 import { eq, inArray, and } from "drizzle-orm";
 import { sql } from "drizzle-orm";
+import { z } from "zod";
 
 /**
  * API Route to approve batch and publish to menu
@@ -22,6 +23,7 @@ export async function POST(
   context: { params: Promise<{ id: string }> },
 ) {
   try {
+    console.log("[approve] incoming request");
     const { id } = await context.params;
     const batchId = Number.parseInt(id, 10);
 
@@ -58,7 +60,46 @@ export async function POST(
       );
     }
 
-    const { itemActions } = await request.json();
+    const body = await request.json();
+
+    const schema = z.object({
+      itemActions: z.record(
+        z.string(),
+        z.enum(["ACCEPT", "EDIT", "REJECT", "PENDING"]),
+      ),
+      editedItems: z
+        .record(
+          z.string(),
+          z.object({
+            dishName: z.string().min(1).optional(),
+            priceEur: z
+              .string()
+              .refine((v) => !Number.isNaN(Number.parseFloat(v)), {
+                message: "Invalid price",
+              })
+              .optional(),
+            category: z.string().nullable().optional(),
+            description: z.string().nullable().optional(),
+            options: z
+              .string()
+              .nullable()
+              .optional()
+              .refine((v) => {
+                if (!v) return true;
+                try {
+                  JSON.parse(v);
+                  return true;
+                } catch {
+                  return false;
+                }
+              }, "Options must be valid JSON"),
+          }),
+        )
+        .optional()
+        .default({}),
+    });
+
+    const { itemActions, editedItems } = schema.parse(body);
 
     if (!itemActions || typeof itemActions !== "object") {
       return NextResponse.json(
@@ -90,7 +131,7 @@ export async function POST(
 
     // Get accepted items
     const acceptedItemIds = Object.entries(itemActions)
-      .filter(([, action]) => action === "ACCEPT")
+      .filter(([, action]) => action === "ACCEPT" || action === "EDIT")
       .map(([id]) => Number.parseInt(id, 10));
 
     if (acceptedItemIds.length === 0) {
@@ -125,8 +166,15 @@ export async function POST(
     let updatedCount = 0;
 
     for (const item of acceptedItems) {
+      const edits = editedItems[String(item.id)];
+      const effectiveDishName = edits?.dishName ?? item.dishName;
+      const effectivePrice = edits?.priceEur ?? item.priceEur;
+      const effectiveCategory = edits?.category ?? item.category ?? "Sonstige";
+      const effectiveDescription = edits?.description ?? item.description;
+      const effectiveOptions = edits?.options ?? item.options;
+
       // Check if dish already exists (case-insensitive comparison)
-      const normalizedName = item.dishName.toLowerCase();
+      const normalizedName = effectiveDishName.toLowerCase();
       const existingItems = await db
         .select()
         .from(menuItem)
@@ -141,15 +189,15 @@ export async function POST(
         await db
           .update(menuItem)
           .set({
-            price: item.priceEur,
-            category: item.category || existing.category,
+            price: effectivePrice,
+            category: effectiveCategory || existing.category,
           })
           .where(eq(menuItem.id, existing.id));
         updatedCount++;
       } else {
         // Insert new - map category to type
         let type: "drink" | "main_course" | "dessert" = "main_course";
-        const categoryLower = item.category?.toLowerCase() || "";
+        const categoryLower = (effectiveCategory || "").toLowerCase();
 
         if (
           categoryLower.includes("getränk") ||
@@ -165,10 +213,10 @@ export async function POST(
 
         await db.insert(menuItem).values({
           restaurantId: batch.restaurantId,
-          dishName: item.dishName,
+          dishName: effectiveDishName,
           type,
-          category: item.category || "Sonstige",
-          price: item.priceEur,
+          category: effectiveCategory || "Sonstige",
+          price: effectivePrice,
           givesRefund: false,
         });
         insertedCount++;
@@ -177,7 +225,10 @@ export async function POST(
       // Update item action
       await db
         .update(menuParseItem)
-        .set({ action: "ACCEPT" })
+        .set({
+          action: (itemActions[String(item.id)] === "EDIT" ? "EDIT" : "ACCEPT") as any,
+          editedData: edits ? JSON.stringify(edits) : null,
+        })
         .where(eq(menuParseItem.id, item.id));
     }
 

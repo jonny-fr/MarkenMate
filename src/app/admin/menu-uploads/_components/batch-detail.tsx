@@ -16,6 +16,8 @@ interface BatchDetailProps {
     parseLog: string | null;
     errorMessage: string | null;
     uploadedByName: string | null;
+    restaurantName?: string | null;
+    restaurantLocation?: string | null;
     createdAt: Date;
     updatedAt: Date;
   };
@@ -106,6 +108,15 @@ export function BatchDetail({ batch }: BatchDetailProps) {
           <dt className="text-sm text-muted-foreground">File Size</dt>
           <dd className="font-medium">
             {(batch.fileSize / 1024 / 1024).toFixed(2)} MB
+          </dd>
+        </div>
+
+        <div>
+          <dt className="text-sm text-muted-foreground">Assigned Restaurant</dt>
+          <dd className="font-medium">
+            {batch.restaurantName
+              ? `${batch.restaurantName}${batch.restaurantLocation ? `, ${batch.restaurantLocation}` : ""}`
+              : "—"}
           </dd>
         </div>
 

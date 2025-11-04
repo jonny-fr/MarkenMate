@@ -12,6 +12,8 @@ import {
 import { Check, X, Edit } from "lucide-react";
 import { toast } from "sonner";
 import { CreateRestaurantDialog } from "./create-restaurant-dialog";
+import { EditItemDialog, type EditedItemData } from "./edit-item-dialog";
+import { useRouter } from "next/navigation";
 
 interface Restaurant {
   id: number;
@@ -50,6 +52,7 @@ export function ReviewActions({
   restaurants,
   currentRestaurantId,
 }: ReviewActionsProps) {
+  const router = useRouter();
   const [selectedRestaurantId, setSelectedRestaurantId] = useState<
     string | undefined
   >(currentRestaurantId?.toString());
@@ -62,9 +65,40 @@ export function ReviewActions({
       {} as Record<number, string>,
     ),
   );
+  const [localItems, setLocalItems] = useState(items);
+  const [editedItems, setEditedItems] = useState<Record<number, EditedItemData>>({});
+  const [editingItemId, setEditingItemId] = useState<number | null>(null);
+  const [isAssigning, setIsAssigning] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
+  const [isRejecting, setIsRejecting] = useState(false);
 
   const handleItemAction = (itemId: number, action: string) => {
     setItemActions((prev) => ({ ...prev, [itemId]: action }));
+  };
+
+  const persistItemAction = async (
+    itemId: number,
+    action: "ACCEPT" | "REJECT" | "EDIT",
+    editedData?: EditedItemData,
+  ) => {
+    try {
+      const res = await fetch(
+        `/api/admin/menu-batches/${batchId}/items/${itemId}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action, editedData }),
+        },
+      );
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.message || "Failed");
+      toast.success("Gespeichert");
+    } catch (e) {
+      toast.error("Aktion fehlgeschlagen");
+      console.error(e);
+      // Revert optimistic UI on failure
+      setItemActions((prev) => ({ ...prev, [itemId]: "PENDING" }));
+    }
   };
 
   const handleAssignRestaurant = async () => {
@@ -74,6 +108,7 @@ export function ReviewActions({
     }
 
     try {
+      setIsAssigning(true);
       const response = await fetch(
         `/api/admin/menu-batches/${batchId}/assign`,
         {
@@ -82,6 +117,7 @@ export function ReviewActions({
           body: JSON.stringify({
             restaurantId: Number.parseInt(selectedRestaurantId, 10),
           }),
+          cache: "no-store",
         },
       );
 
@@ -89,12 +125,15 @@ export function ReviewActions({
 
       if (result.success) {
         toast.success("Restaurant assigned successfully");
+        router.refresh();
       } else {
         toast.error(result.message || "Failed to assign restaurant");
       }
     } catch (error) {
       toast.error("Failed to assign restaurant");
       console.error(error);
+    } finally {
+      setIsAssigning(false);
     }
   };
 
@@ -106,7 +145,7 @@ export function ReviewActions({
 
     // Count accepted items
     const acceptedCount = Object.values(itemActions).filter(
-      (action) => action === "ACCEPT",
+      (action) => action === "ACCEPT" || action === "EDIT",
     ).length;
 
     if (acceptedCount === 0) {
@@ -115,12 +154,14 @@ export function ReviewActions({
     }
 
     try {
+      setIsApproving(true);
       const response = await fetch(
         `/api/admin/menu-batches/${batchId}/approve`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ itemActions }),
+          body: JSON.stringify({ itemActions, editedItems }),
+          cache: "no-store",
         },
       );
 
@@ -135,6 +176,8 @@ export function ReviewActions({
     } catch (error) {
       toast.error("Failed to approve batch");
       console.error(error);
+    } finally {
+      setIsApproving(false);
     }
   };
 
@@ -143,12 +186,14 @@ export function ReviewActions({
     if (!reason) return;
 
     try {
+      setIsRejecting(true);
       const response = await fetch(
         `/api/admin/menu-batches/${batchId}/reject`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ reason }),
+          cache: "no-store",
         },
       );
 
@@ -163,6 +208,8 @@ export function ReviewActions({
     } catch (error) {
       toast.error("Failed to reject batch");
       console.error(error);
+    } finally {
+      setIsRejecting(false);
     }
   };
 
@@ -200,9 +247,9 @@ export function ReviewActions({
               </Select>
             </div>
 
-            <Button onClick={handleAssignRestaurant}>
+            <Button onClick={handleAssignRestaurant} disabled={!selectedRestaurantId || isAssigning}>
               <Check className="size-4" />
-              Assign
+              {isAssigning ? "Assigning..." : "Assign"}
             </Button>
 
             <CreateRestaurantDialog
@@ -238,7 +285,7 @@ export function ReviewActions({
               </tr>
             </thead>
             <tbody>
-              {items.map((item) => (
+              {localItems.map((item) => (
                 <tr key={item.id} className="border-b last:border-b-0">
                   <td className="p-4">
                     <div className="font-medium">{item.dishName}</div>
@@ -275,14 +322,20 @@ export function ReviewActions({
                               ? "default"
                               : "outline"
                           }
-                          onClick={() => handleItemAction(item.id, "ACCEPT")}
+                          onClick={() => {
+                            handleItemAction(item.id, "ACCEPT");
+                            void persistItemAction(item.id, "ACCEPT");
+                          }}
                         >
                           <Check className="size-4" />
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handleItemAction(item.id, "EDIT")}
+                          onClick={() => {
+                            setEditingItemId(item.id);
+                            handleItemAction(item.id, "EDIT");
+                          }}
                         >
                           <Edit className="size-4" />
                         </Button>
@@ -293,7 +346,23 @@ export function ReviewActions({
                               ? "destructive"
                               : "outline"
                           }
-                          onClick={() => handleItemAction(item.id, "REJECT")}
+                          onClick={async () => {
+                            if (!confirm("Diesen Eintrag wirklich löschen?")) return;
+                            try {
+                              const res = await fetch(
+                                `/api/admin/menu-batches/${batchId}/items/${item.id}`,
+                                { method: "DELETE" },
+                              );
+                              const json = await res.json();
+                              if (!res.ok || !json.success)
+                                throw new Error(json.message || "Failed");
+                              setLocalItems((prev) => prev.filter((i) => i.id !== item.id));
+                              toast.success("Eintrag gelöscht");
+                            } catch (e) {
+                              toast.error("Löschen fehlgeschlagen");
+                              console.error(e);
+                            }
+                          }}
                         >
                           <X className="size-4" />
                         </Button>
@@ -310,11 +379,40 @@ export function ReviewActions({
       {/* Batch Actions */}
       {canReview && (
         <div className="flex justify-end gap-4">
-          <Button variant="outline" onClick={handleReject}>
+          <Button variant="outline" onClick={handleReject} disabled={isRejecting}>
             Reject Batch
           </Button>
-          <Button onClick={handleApprove}>Approve & Publish</Button>
+          <Button onClick={handleApprove} disabled={isApproving}>
+            {isApproving ? "Publishing..." : "Approve & Publish"}
+          </Button>
         </div>
+      )}
+      {editingItemId !== null && (
+        <EditItemDialog
+          open={editingItemId !== null}
+          onOpenChange={(open) => !open && setEditingItemId(null)}
+          item={localItems.find((i) => i.id === editingItemId)!}
+          initialValue={editedItems[editingItemId]}
+          onSave={async (id: number, data: EditedItemData) => {
+            setEditedItems((prev) => ({ ...prev, [id]: data }));
+            setItemActions((prev) => ({ ...prev, [id]: "EDIT" }));
+            setLocalItems((prev) =>
+              prev.map((it) =>
+                it.id === id
+                  ? {
+                      ...it,
+                      dishName: data.dishName ?? it.dishName,
+                      priceEur: data.priceEur ?? it.priceEur,
+                      category: data.category ?? it.category,
+                      description: data.description ?? it.description,
+                      options: data.options ?? it.options,
+                    }
+                  : it,
+              ),
+            );
+            await persistItemAction(id, "EDIT", data);
+          }}
+        />
       )}
     </div>
   );

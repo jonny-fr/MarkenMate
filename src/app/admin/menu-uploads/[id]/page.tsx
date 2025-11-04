@@ -22,12 +22,15 @@ async function getBatchDetails(batchId: number) {
       parseLog: menuParseBatch.parseLog,
       errorMessage: menuParseBatch.errorMessage,
       restaurantId: menuParseBatch.restaurantId,
+      restaurantName: restaurant.name,
+      restaurantLocation: restaurant.location,
       uploadedByName: user.name,
       createdAt: menuParseBatch.createdAt,
       updatedAt: menuParseBatch.updatedAt,
     })
     .from(menuParseBatch)
     .leftJoin(user, eq(user.id, menuParseBatch.uploadedByAdminId))
+    .leftJoin(restaurant, eq(restaurant.id, menuParseBatch.restaurantId))
     .where(eq(menuParseBatch.id, batchId))
     .limit(1);
 

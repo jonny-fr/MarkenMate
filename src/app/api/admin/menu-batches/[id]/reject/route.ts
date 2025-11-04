@@ -15,6 +15,7 @@ export async function POST(
   context: { params: Promise<{ id: string }> },
 ) {
   try {
+    console.log("[reject] incoming request");
     const { id } = await context.params;
     const batchId = Number.parseInt(id, 10);
 
