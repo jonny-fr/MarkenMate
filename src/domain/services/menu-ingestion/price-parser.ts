@@ -28,7 +28,7 @@ export class PriceParser {
     // Matches: optional € symbol, digits with optional comma/dot separator, optional € or EUR suffix
     const patterns = [
       // With comma (German standard): 8,50 | 8,50 € | € 8,50
-      /(?:€\s*)?(\d{1,6})[\s,](\d{2})\s*(?:€|EUR)?/i,
+      /(?:€\s*)?(\d{1,6}),(\d{2})\s*(?:€|EUR)?/i,
       // With dot (also accepted): 8.50 | 8.50 € | € 8.50
       /(?:€\s*)?(\d{1,6})\.(\d{2})\s*(?:€|EUR)?/i,
       // Whole numbers: 8 € | € 8

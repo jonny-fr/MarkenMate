@@ -120,7 +120,7 @@ export function ReviewActions({
 
       if (result.success) {
         toast.success("Batch approved successfully");
-        window.location.reload();
+        window.location.href = "/admin/menu-uploads";
       } else {
         toast.error(result.message || "Failed to approve batch");
       }
@@ -145,7 +145,7 @@ export function ReviewActions({
 
       if (result.success) {
         toast.success("Batch rejected");
-        window.location.reload();
+        window.location.href = "/admin/menu-uploads";
       } else {
         toast.error(result.message || "Failed to reject batch");
       }

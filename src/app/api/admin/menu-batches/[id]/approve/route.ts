@@ -125,17 +125,16 @@ export async function POST(
     let updatedCount = 0;
 
     for (const item of acceptedItems) {
-      // Check if dish already exists
-      const [existing] = await db
+      // Check if dish already exists (case-insensitive comparison)
+      const normalizedName = item.dishName.toLowerCase();
+      const existingItems = await db
         .select()
         .from(menuItem)
-        .where(
-          and(
-            eq(menuItem.restaurantId, batch.restaurantId),
-            sql`LOWER(${menuItem.dishName}) = LOWER(${item.dishName})`,
-          ),
-        )
-        .limit(1);
+        .where(eq(menuItem.restaurantId, batch.restaurantId));
+
+      const existing = existingItems.find(
+        (existing) => existing.dishName.toLowerCase() === normalizedName,
+      );
 
       if (existing) {
         // Update existing

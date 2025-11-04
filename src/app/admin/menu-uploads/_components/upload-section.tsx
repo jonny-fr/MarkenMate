@@ -62,8 +62,8 @@ export function UploadSection() {
         if (fileInputRef.current) {
           fileInputRef.current.value = "";
         }
-        // Refresh the page to show new batch
-        window.location.reload();
+        // Navigate to the new batch's review page
+        window.location.href = `/admin/menu-uploads/${result.batchId}`;
       } else {
         toast.error(result.message || "Upload failed");
         if (result.error) {

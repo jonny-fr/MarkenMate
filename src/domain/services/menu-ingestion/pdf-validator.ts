@@ -47,7 +47,16 @@ export class PdfValidator {
     }
 
     // Sanitize filename - remove path traversal attempts
-    const sanitizedFilename = filename.replace(/[^a-zA-Z0-9._-]/g, "_");
+    let sanitizedFilename = filename.replace(/[^a-zA-Z0-9._-]/g, "_");
+
+    // Handle edge cases
+    if (sanitizedFilename.startsWith(".")) {
+      sanitizedFilename = `file${sanitizedFilename}`;
+    }
+    if (sanitizedFilename === "" || sanitizedFilename === "." || sanitizedFilename === "..") {
+      sanitizedFilename = "unknown.pdf";
+    }
+
     if (sanitizedFilename !== filename) {
       warnings.push("Filename was sanitized to remove special characters");
     }

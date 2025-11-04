@@ -171,20 +171,27 @@ export class MenuParserOrchestrator {
 
     // Store parsed items in database
     if (items.length > 0) {
-      await db.insert(menuParseItem).values(
-        items.map((item, index) => ({
-          batchId,
-          dishName: item.dishName,
-          dishNameNormalized: item.dishNameNormalized,
-          description: item.description || null,
-          priceEur: item.priceEur?.toString() || "0",
-          priceConfidence: item.priceConfidence?.toString() || null,
-          category: item.category || null,
-          pageNumber: item.pageNumber || 1,
-          rawText: item.rawText,
-          action: "PENDING" as const,
-        })),
+      // Only insert items that have a price
+      const validItems = items.filter((item): item is typeof item & { priceEur: number } => 
+        item.priceEur !== undefined
       );
+
+      if (validItems.length > 0) {
+        await db.insert(menuParseItem).values(
+          validItems.map((item) => ({
+            batchId,
+            dishName: item.dishName,
+            dishNameNormalized: item.dishNameNormalized,
+            description: item.description || null,
+            priceEur: item.priceEur.toString(),
+            priceConfidence: item.priceConfidence !== undefined ? item.priceConfidence.toString() : null,
+            category: item.category || null,
+            pageNumber: item.pageNumber || 1,
+            rawText: item.rawText,
+            action: "PENDING" as const,
+          })),
+        );
+      }
     }
 
     return parseResult;
