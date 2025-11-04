@@ -79,8 +79,9 @@ export const login = async (
       await recordRateLimitAttempt(userRecord.id, "LOGIN_ATTEMPT");
     }
 
+    // SECURITY: Log error without exposing PII (GDPR compliance)
     console.error("[login] Failed login attempt:", {
-      email: data.email,
+      userId: userRecord?.id, // Use ID instead of email
       error: err instanceof Error ? err.message : "Unknown error",
     });
 

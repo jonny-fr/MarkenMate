@@ -135,9 +135,11 @@ export async function checkRateLimit(
   } catch (error) {
     console.error("[rate-limit] Error checking rate limit:", error);
     // SECURITY: Fail closed - deny access on errors
+    // Use exponential backoff to prevent DoS through repeated errors
+    const errorBackoff = Math.min(300, 60 * Math.pow(2, 0)); // Start at 60s, cap at 5 min
     return {
       allowed: false,
-      retryAfter: 60, // 1 minute default
+      retryAfter: errorBackoff,
     };
   }
 }

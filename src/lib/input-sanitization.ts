@@ -233,8 +233,12 @@ export function sanitizeSQLIdentifier(identifier: string): string {
     throw new Error("SQL identifier too long");
   }
 
-  // Prevent SQL keywords
-  const sqlKeywords = ["SELECT", "INSERT", "UPDATE", "DELETE", "DROP", "CREATE", "ALTER"];
+  // Prevent SQL keywords (comprehensive list)
+  const sqlKeywords = [
+    "SELECT", "INSERT", "UPDATE", "DELETE", "DROP", "CREATE", "ALTER",
+    "UNION", "EXEC", "EXECUTE", "DECLARE", "TRUNCATE", "MERGE", "WITH",
+    "GRANT", "REVOKE", "COMMIT", "ROLLBACK", "BEGIN", "END"
+  ];
   if (sqlKeywords.includes(sanitized.toUpperCase())) {
     throw new Error("SQL keyword not allowed as identifier");
   }
