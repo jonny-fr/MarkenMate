@@ -11,8 +11,33 @@ import { AdminGuards } from "@/domain/services/admin-guards";
 import { AuditLogger } from "@/infrastructure/audit-logger";
 import { correlationContext } from "@/infrastructure/correlation-context";
 import { validateAndConsumeStepUpToken } from "./step-up-auth";
+import { sanitizeString } from "@/lib/input-sanitization";
 
-// Search users
+// Validation schema for search query
+const searchQuerySchema = z.object({
+  query: z
+    .string()
+    .min(1, "Suchbegriff muss mindestens 1 Zeichen lang sein")
+    .max(100, "Suchbegriff darf maximal 100 Zeichen lang sein")
+    .transform((val) =>
+      sanitizeString(val, {
+        maxLength: 100,
+        allowSpecialChars: false,
+        allowNewlines: false,
+      }),
+    )
+    .refine(
+      (val) => {
+        // Prevent LIKE pattern injection
+        return !val.includes("%") && !val.includes("_");
+      },
+      {
+        message: "Ungültige Zeichen im Suchbegriff",
+      },
+    ),
+});
+
+// Search users with input validation and sanitization
 export async function searchUsersAdmin(query: string) {
   try {
     const session = await getServerSession();
@@ -32,6 +57,21 @@ export async function searchUsersAdmin(query: string) {
       return { success: false, error: "Keine Berechtigung" };
     }
 
+    // SECURITY: Validate and sanitize search query to prevent SQL injection
+    const validationResult = searchQuerySchema.safeParse({ query });
+
+    if (!validationResult.success) {
+      return {
+        success: false,
+        error: "Ungültiger Suchbegriff",
+      };
+    }
+
+    const sanitizedQuery = validationResult.data.query;
+
+    // SECURITY: Use parameterized query with sanitized input
+    // The sanitizedQuery has wildcards (%, _) removed and dangerous chars stripped
+    // Drizzle ORM's ilike() properly parameterizes the value to prevent injection
     const users = await db
       .select({
         id: user.id,
@@ -41,13 +81,17 @@ export async function searchUsersAdmin(query: string) {
       })
       .from(user)
       .where(
-        or(ilike(user.name, `%${query}%`), ilike(user.email, `%${query}%`)),
+        or(
+          ilike(user.name, `%${sanitizedQuery}%`),
+          ilike(user.email, `%${sanitizedQuery}%`),
+        ),
       )
       .limit(10);
 
     return { success: true, users };
   } catch (error) {
     console.error("[search-users-admin] Error:", error);
+    // Don't leak internal error details to client
     return { success: false, error: "Fehler bei der Suche" };
   }
 }

@@ -49,9 +49,11 @@ export function sanitizeString(
 
   // Remove control characters except allowed ones
   if (!allowNewlines) {
+    // biome-ignore lint/suspicious/noControlCharactersInRegex: Required for security sanitization of control characters
     sanitized = sanitized.replace(/[\x00-\x1F\x7F]/g, "");
   } else {
     // Allow newlines but remove other control chars
+    // biome-ignore lint/suspicious/noControlCharactersInRegex: Required for security sanitization of control characters
     sanitized = sanitized.replace(/[\x00-\x09\x0B-\x0C\x0E-\x1F\x7F]/g, "");
   }
 
@@ -95,7 +97,11 @@ export function sanitizeNumber(
     integer?: boolean;
   } = {},
 ): number {
-  const { min = Number.MIN_SAFE_INTEGER, max = Number.MAX_SAFE_INTEGER, integer = false } = options;
+  const {
+    min = Number.MIN_SAFE_INTEGER,
+    max = Number.MAX_SAFE_INTEGER,
+    integer = false,
+  } = options;
 
   const num = typeof input === "string" ? Number.parseFloat(input) : input;
 
@@ -152,7 +158,12 @@ export const createStringSchema = (options: {
   pattern?: RegExp;
   allowSpecialChars?: boolean;
 }) => {
-  const { minLength = 1, maxLength = 1000, pattern, allowSpecialChars = false } = options;
+  const {
+    minLength = 1,
+    maxLength = 1000,
+    pattern,
+    allowSpecialChars = false,
+  } = options;
 
   return z
     .string()
@@ -172,7 +183,9 @@ export const createEmailSchema = () => {
     .transform((val) => sanitizeEmail(val));
 };
 
-export const createPasswordSchema = (options: { minLength?: number; maxLength?: number } = {}) => {
+export const createPasswordSchema = (
+  options: { minLength?: number; maxLength?: number } = {},
+) => {
   const { minLength = 8, maxLength = 128 } = options;
 
   return z
@@ -185,7 +198,8 @@ export const createPasswordSchema = (options: { minLength?: number; maxLength?: 
         return /[a-zA-Z]/.test(val) && /[0-9]/.test(val);
       },
       {
-        message: "Passwort muss mindestens einen Buchstaben und eine Zahl enthalten",
+        message:
+          "Passwort muss mindestens einen Buchstaben und eine Zahl enthalten",
       },
     );
 };
@@ -235,9 +249,26 @@ export function sanitizeSQLIdentifier(identifier: string): string {
 
   // Prevent SQL keywords (comprehensive list)
   const sqlKeywords = [
-    "SELECT", "INSERT", "UPDATE", "DELETE", "DROP", "CREATE", "ALTER",
-    "UNION", "EXEC", "EXECUTE", "DECLARE", "TRUNCATE", "MERGE", "WITH",
-    "GRANT", "REVOKE", "COMMIT", "ROLLBACK", "BEGIN", "END"
+    "SELECT",
+    "INSERT",
+    "UPDATE",
+    "DELETE",
+    "DROP",
+    "CREATE",
+    "ALTER",
+    "UNION",
+    "EXEC",
+    "EXECUTE",
+    "DECLARE",
+    "TRUNCATE",
+    "MERGE",
+    "WITH",
+    "GRANT",
+    "REVOKE",
+    "COMMIT",
+    "ROLLBACK",
+    "BEGIN",
+    "END",
   ];
   if (sqlKeywords.includes(sanitized.toUpperCase())) {
     throw new Error("SQL keyword not allowed as identifier");

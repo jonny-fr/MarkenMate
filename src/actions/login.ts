@@ -9,7 +9,10 @@ import {
   recordRateLimitAttempt,
   formatRetryAfter,
 } from "@/lib/enhanced-rate-limit";
-import { createEmailSchema, createPasswordSchema } from "@/lib/input-sanitization";
+import {
+  createEmailSchema,
+  createPasswordSchema,
+} from "@/lib/input-sanitization";
 import { db } from "@/db";
 import { user } from "@/db/schema";
 import { eq } from "drizzle-orm";
