@@ -1,6 +1,6 @@
 {
-  "id": "83872382-2db8-44d8-adf7-d43b782d4c0c",
-  "prevId": "3330136d-a11a-43c2-95b5-e7adee260a9e",
+  "id": "bb8fd559-a282-46c0-aea6-178955d4e48b",
+  "prevId": "83872382-2db8-44d8-adf7-d43b782d4c0c",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -94,6 +94,61 @@
         "account_user_id_user_id_fk": {
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
+          "tableTo": "user",
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.account_action": {
+      "name": "account_action",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "action": {
+          "name": "action",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "last_action_at": {
+          "name": "last_action_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "account_action_user_id_user_id_fk": {
+          "name": "account_action_user_id_user_id_fk",
+          "tableFrom": "account_action",
           "tableTo": "user",
           "columnsFrom": ["user_id"],
           "columnsTo": ["id"],

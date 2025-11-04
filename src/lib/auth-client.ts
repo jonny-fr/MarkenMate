@@ -14,9 +14,10 @@ import { createAuthClient } from "better-auth/react";
 
 // For production: Use current origin (localhost:8080 when accessed via browser)
 // For development: Use current origin (localhost:3000)
-const baseURL = typeof window !== "undefined" 
-  ? window.location.origin 
-  : "http://localhost:3000"; // SSR fallback (rarely used)
+const baseURL =
+  typeof window !== "undefined"
+    ? window.location.origin
+    : "http://localhost:3000"; // SSR fallback (rarely used)
 
 export const { signIn, signUp, signOut, useSession, getSession } =
   createAuthClient({

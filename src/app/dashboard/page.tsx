@@ -82,9 +82,15 @@ export default async function Page() {
   const graphDataYear = Promise.resolve(getGraphDataYear(userId));
 
   // Compute comparison data from database
-  const comparisonDataSpending = Promise.resolve(getComparisonDataSpending(userId));
-  const comparisonDataFrequency = Promise.resolve(getComparisonDataFrequency(userId));
-  const comparisonDataAvgPrice = Promise.resolve(getComparisonDataAvgPrice(userId));
+  const comparisonDataSpending = Promise.resolve(
+    getComparisonDataSpending(userId),
+  );
+  const comparisonDataFrequency = Promise.resolve(
+    getComparisonDataFrequency(userId),
+  );
+  const comparisonDataAvgPrice = Promise.resolve(
+    getComparisonDataAvgPrice(userId),
+  );
 
   // Fetch favorites and tickets
   const favoritesPromise = Promise.resolve(getUserFavorites(userId));

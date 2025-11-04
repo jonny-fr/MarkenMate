@@ -5,7 +5,10 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { LendingStateMachine, type LendingState } from "@/domain/services/lending-state-machine";
+import {
+  LendingStateMachine,
+  type LendingState,
+} from "@/domain/services/lending-state-machine";
 
 describe("LendingStateMachine", () => {
   describe("State Transitions", () => {
@@ -73,7 +76,9 @@ describe("LendingStateMachine", () => {
     });
 
     it("should reject extremely large numbers", () => {
-      const result = LendingStateMachine.validateTokenCount(Number.MAX_SAFE_INTEGER + 1);
+      const result = LendingStateMachine.validateTokenCount(
+        Number.MAX_SAFE_INTEGER + 1,
+      );
       expect(result.valid).toBe(false);
     });
   });
@@ -195,7 +200,10 @@ describe("LendingStateMachine", () => {
         version: 1,
       };
 
-      const result = LendingStateMachine.validateBorrowerAction(state, "user-2");
+      const result = LendingStateMachine.validateBorrowerAction(
+        state,
+        "user-2",
+      );
       expect(result.valid).toBe(true);
     });
 
@@ -211,7 +219,10 @@ describe("LendingStateMachine", () => {
         version: 1,
       };
 
-      const result = LendingStateMachine.validateBorrowerAction(state, "user-3");
+      const result = LendingStateMachine.validateBorrowerAction(
+        state,
+        "user-3",
+      );
       expect(result.valid).toBe(false);
       expect(result.error).toContain("borrower");
     });
@@ -228,7 +239,10 @@ describe("LendingStateMachine", () => {
         version: 1,
       };
 
-      const result = LendingStateMachine.validateBorrowerAction(state, "user-2");
+      const result = LendingStateMachine.validateBorrowerAction(
+        state,
+        "user-2",
+      );
       expect(result.valid).toBe(false);
       expect(result.error).toContain("legacy");
     });

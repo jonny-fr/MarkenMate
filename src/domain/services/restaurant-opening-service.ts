@@ -19,7 +19,10 @@ export class RestaurantOpeningService {
    * @param currentTime - Current time to check (defaults to now)
    * @returns true if restaurant is open, false otherwise
    */
-  static isOpen(openingHours: OpeningHours | null, currentTime: Date = new Date()): boolean {
+  static isOpen(
+    openingHours: OpeningHours | null,
+    currentTime: Date = new Date(),
+  ): boolean {
     if (!openingHours) {
       return false;
     }

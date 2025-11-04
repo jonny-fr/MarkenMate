@@ -62,7 +62,8 @@ export async function deleteLendingAction(formData: FormData) {
       );
       return {
         success: false,
-        message: "Keine Berechtigung - Nur der Verleiher kann diese Verleihung löschen",
+        message:
+          "Keine Berechtigung - Nur der Verleiher kann diese Verleihung löschen",
       };
     }
 
@@ -85,7 +86,7 @@ export async function deleteLendingAction(formData: FormData) {
     revalidatePath("/", "layout"); // Revalidate entire app
     revalidatePath("/dashboard"); // Revalidate dashboard page
     revalidatePath("/dashboard", "page"); // Revalidate dashboard page specifically
-    
+
     return {
       success: true,
       message: "Verleihung gelöscht",
@@ -93,7 +94,7 @@ export async function deleteLendingAction(formData: FormData) {
   } catch (error) {
     console.error("Error deleting lending:", error);
 
-    // Don't expose internal errors to client
+    // Prevent exposure of internal errors to client
     const message =
       error instanceof Error && error.name === "ForbiddenError"
         ? "Keine Berechtigung"

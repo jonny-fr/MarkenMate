@@ -149,8 +149,16 @@ export function DashboardClient({
                 </div>
               ) : currentView === "lending" ? (
                 <div className="px-4 lg:px-6">
-                  <Suspense key={`lending-${refreshKey}`} fallback={<LoadingCard label="Markenleihen" />}>
-                    <LendingView key={`lending-view-${refreshKey}`} userId={userId} dataPromise={lendingPromise} onRefresh={handleRefresh} />
+                  <Suspense
+                    key={`lending-${refreshKey}`}
+                    fallback={<LoadingCard label="Markenleihen" />}
+                  >
+                    <LendingView
+                      key={`lending-view-${refreshKey}`}
+                      userId={userId}
+                      dataPromise={lendingPromise}
+                      onRefresh={handleRefresh}
+                    />
                   </Suspense>
                 </div>
               ) : currentView === "favorites" ? (
@@ -187,7 +195,10 @@ export function DashboardClient({
                       <ChartAreaInteractive />
                     </div>
                     <div className="space-y-4">
-                      <Suspense key={`lending-panel-${refreshKey}`} fallback={<LoadingCard label="Markenleihen" />}>
+                      <Suspense
+                        key={`lending-panel-${refreshKey}`}
+                        fallback={<LoadingCard label="Markenleihen" />}
+                      >
                         <TokenLendingPanel
                           key={`lending-panel-view-${refreshKey}`}
                           userId={userId}

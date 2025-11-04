@@ -41,14 +41,16 @@ export function SiteHeader() {
           </span>
         </div>
         <div className="ml-auto flex items-center gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             className="hidden sm:flex"
             onClick={handleRefresh}
             disabled={isRefreshing || isPending}
           >
-            <RefreshCcw className={`size-4 ${isRefreshing || isPending ? "animate-spin" : ""}`} />
+            <RefreshCcw
+              className={`size-4 ${isRefreshing || isPending ? "animate-spin" : ""}`}
+            />
             Aktualisieren
           </Button>
         </div>

@@ -23,7 +23,7 @@ import { user } from "../src/db/schema";
 import { eq, asc } from "drizzle-orm";
 
 async function setMasterAdmin() {
-  console.log("🔍 Finding first admin user...");
+  console.log("[INFO] Finding first admin user...");
 
   // Get the first admin (by creation date)
   const admins = await db
@@ -43,22 +43,22 @@ async function setMasterAdmin() {
   const firstAdmin = admins[0];
 
   if (!firstAdmin) {
-    console.log("❌ No admin found in database.");
+    console.log("[ERROR] No admin found in database.");
     console.log(
-      "💡 Create an admin user first, then run this script again.",
+      "[INFO] Create an admin user first, then run this script again.",
     );
     return;
   }
 
   if (firstAdmin.isMasterAdmin) {
-    console.log("✅ Master admin already set:");
-    console.log(`   Name:  ${firstAdmin.name}`);
-    console.log(`   Email: ${firstAdmin.email}`);
-    console.log(`   ID:    ${firstAdmin.id}`);
+    console.log("[INFO] Master admin already set:");
+    console.log(`       Name:  ${firstAdmin.name}`);
+    console.log(`       Email: ${firstAdmin.email}`);
+    console.log(`       ID:    ${firstAdmin.id}`);
     return;
   }
 
-  console.log("📝 Setting master admin flag...");
+  console.log("[INFO] Setting master admin flag...");
 
   // Set as master admin
   await db
@@ -66,21 +66,21 @@ async function setMasterAdmin() {
     .set({ isMasterAdmin: true })
     .where(eq(user.id, firstAdmin.id));
 
-  console.log("✅ Master admin successfully set:");
-  console.log(`   Name:  ${firstAdmin.name}`);
-  console.log(`   Email: ${firstAdmin.email}`);
-  console.log(`   ID:    ${firstAdmin.id}`);
+  console.log("[INFO] Master admin successfully set:");
+  console.log(`       Name:  ${firstAdmin.name}`);
+  console.log(`       Email: ${firstAdmin.email}`);
+  console.log(`       ID:    ${firstAdmin.id}`);
   console.log(
-    "\n⚠️  This user is now protected and cannot be demoted through normal means.",
+    "\n[WARN] This user is now protected and cannot be demoted through normal means.",
   );
 }
 
 setMasterAdmin()
   .then(() => {
-    console.log("\n✓ Script completed successfully");
+    console.log("\n[INFO] Script completed successfully");
     process.exit(0);
   })
   .catch((error) => {
-    console.error("\n❌ Error setting master admin:", error);
+    console.error("\n[ERROR] Error setting master admin:", error);
     process.exit(1);
   });

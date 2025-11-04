@@ -13,7 +13,10 @@ export class TokenCalculator {
    * Rounds to nearest integer, minimum 1 token
    */
   static calculateTokenPrice(price: Price): TokenCount {
-    const tokenValue = Math.max(1, Math.round(price.value / this.EURO_PER_TOKEN));
+    const tokenValue = Math.max(
+      1,
+      Math.round(price.value / this.EURO_PER_TOKEN),
+    );
     return TokenCount.create(tokenValue);
   }
 

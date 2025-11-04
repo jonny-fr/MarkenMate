@@ -122,7 +122,7 @@ export async function addLendingPersonAction(formData: FormData) {
       revalidatePath("/", "layout"); // Revalidate entire app
       revalidatePath("/dashboard"); // Revalidate dashboard page
       revalidatePath("/dashboard", "page"); // Revalidate dashboard page specifically
-      
+
       return {
         success: true,
         message: "Person hinzugefügt",

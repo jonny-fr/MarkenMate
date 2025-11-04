@@ -42,7 +42,7 @@ export interface IAuthorizationService {
    */
   requireAccessToResource(
     userId: string,
-    resourceOwnerId: string
+    resourceOwnerId: string,
   ): Promise<void>;
 
   /**

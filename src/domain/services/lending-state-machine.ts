@@ -123,8 +123,7 @@ export class LendingStateMachine {
     if (state.acceptanceStatus === "pending") {
       return {
         allowed: false,
-        reason:
-          "Cannot update pending lending. Accept or decline it first.",
+        reason: "Cannot update pending lending. Accept or decline it first.",
       };
     }
 
@@ -182,16 +181,14 @@ export class LendingStateMachine {
     if (!state.lendToUserId) {
       return {
         valid: false,
-        error:
-          "Cannot accept/decline legacy lending without linked user",
+        error: "Cannot accept/decline legacy lending without linked user",
       };
     }
 
     if (state.lendToUserId !== currentUserId) {
       return {
         valid: false,
-        error:
-          "Only the borrower can accept or decline this lending request",
+        error: "Only the borrower can accept or decline this lending request",
       };
     }
 

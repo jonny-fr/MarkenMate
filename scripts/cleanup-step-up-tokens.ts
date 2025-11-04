@@ -17,7 +17,7 @@ import { stepUpToken } from "../src/db/schema";
 import { lt } from "drizzle-orm";
 
 async function cleanupExpiredTokens() {
-  console.log("🧹 Cleaning up expired step-up tokens...");
+  console.log("[INFO] Cleaning up expired step-up tokens...");
 
   const now = new Date();
 
@@ -26,15 +26,15 @@ async function cleanupExpiredTokens() {
     .where(lt(stepUpToken.expiresAt, now))
     .returning({ id: stepUpToken.id });
 
-  console.log(`✅ Deleted ${result.length} expired tokens`);
+  console.log(`[INFO] Deleted ${result.length} expired tokens`);
 }
 
 cleanupExpiredTokens()
   .then(() => {
-    console.log("✓ Cleanup completed successfully");
+    console.log("[INFO] Cleanup completed successfully");
     process.exit(0);
   })
   .catch((error) => {
-    console.error("❌ Error during cleanup:", error);
+    console.error("[ERROR] Error during cleanup:", error);
     process.exit(1);
   });

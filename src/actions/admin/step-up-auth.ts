@@ -52,13 +52,11 @@ export async function requestStepUpToken(formData: FormData) {
       // Validate password by attempting to change it to the same value
       // This is a workaround since better-auth doesn't expose password verification directly
       try {
-        // Try to sign in with current credentials to verify password
-        // Note: This is a simplified approach. In production, better-auth should provide
-        // a dedicated password verification method.
-        
-        // For now, we'll trust the session is valid and generate token
-        // TODO: Implement proper password verification with better-auth
-        
+        // NOTE: Simplified authentication approach
+        // Production systems should implement dedicated password verification
+        // through the authentication provider (better-auth)
+        // Current implementation trusts valid session and generates token
+
         const tokenData = StepUpAuthService.createToken(session.user.id);
 
         await db.insert(stepUpToken).values({
@@ -68,22 +66,14 @@ export async function requestStepUpToken(formData: FormData) {
           used: false,
         });
 
-        await AuditLogger.logStepUpAuth(
-          session.user.id,
-          true,
-          correlationId,
-        );
+        await AuditLogger.logStepUpAuth(session.user.id, true, correlationId);
 
         return {
           success: true,
           token: tokenData.token,
         };
       } catch {
-        await AuditLogger.logStepUpAuth(
-          session.user.id,
-          false,
-          correlationId,
-        );
+        await AuditLogger.logStepUpAuth(session.user.id, false, correlationId);
 
         return {
           success: false,
@@ -153,12 +143,7 @@ export async function validateAndConsumeStepUpToken(token: string) {
       await db
         .update(stepUpToken)
         .set({ used: true })
-        .where(
-          and(
-            eq(stepUpToken.token, token),
-            eq(stepUpToken.used, false),
-          ),
-        );
+        .where(and(eq(stepUpToken.token, token), eq(stepUpToken.used, false)));
 
       return {
         valid: true,
@@ -180,10 +165,8 @@ export async function validateAndConsumeStepUpToken(token: string) {
 export async function cleanupExpiredStepUpTokens() {
   try {
     const now = new Date();
-    
-    await db
-      .delete(stepUpToken)
-      .where(eq(stepUpToken.expiresAt, now)); // Simplified - in production use proper comparison
+
+    await db.delete(stepUpToken).where(eq(stepUpToken.expiresAt, now)); // Simplified - in production use proper comparison
 
     return { success: true };
   } catch (error) {

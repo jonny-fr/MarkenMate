@@ -45,7 +45,7 @@ export class AuthorizationService implements IAuthorizationService {
 
   async requireOwnership(
     userId: string,
-    resourceOwnerId: string
+    resourceOwnerId: string,
   ): Promise<void> {
     await this.requireAuthenticated(userId);
 
@@ -56,7 +56,7 @@ export class AuthorizationService implements IAuthorizationService {
 
   async requireAccessToResource(
     userId: string,
-    resourceOwnerId: string
+    resourceOwnerId: string,
   ): Promise<void> {
     await this.requireAuthenticated(userId);
 
@@ -84,7 +84,10 @@ export class AuthorizationService implements IAuthorizationService {
     return userRecord?.role === "admin";
   }
 
-  async ownsResource(userId: string, resourceOwnerId: string): Promise<boolean> {
+  async ownsResource(
+    userId: string,
+    resourceOwnerId: string,
+  ): Promise<boolean> {
     return userId === resourceOwnerId;
   }
 }

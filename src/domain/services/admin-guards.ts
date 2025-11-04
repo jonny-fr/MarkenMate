@@ -20,7 +20,7 @@ export interface AdminUser {
 
 export class AdminGuards {
   /**
-   * Validates that removing this admin won't leave the system without admins
+   * Validates that removing this admin will not leave the system without admins
    */
   static async validateLastAdmin(
     allAdmins: AdminUser[],
@@ -43,14 +43,14 @@ export class AdminGuards {
   /**
    * Validates that the master admin cannot be demoted
    */
-  static validateMasterAdminProtection(
-    targetUser: AdminUser,
-  ): { allowed: boolean; reason?: string } {
+  static validateMasterAdminProtection(targetUser: AdminUser): {
+    allowed: boolean;
+    reason?: string;
+  } {
     if (targetUser.isMasterAdmin && targetUser.role === "admin") {
       return {
         allowed: false,
-        reason:
-          "Cannot demote the master admin. This is a protected account.",
+        reason: "Cannot demote the master admin. This is a protected account.",
       };
     }
 

@@ -1,13 +1,8 @@
 "use client";
 
-import {
-  Bell,
-  CreditCard,
-  LogOut,
-  MoreVertical,
-  UserCircle2,
-} from "lucide-react";
+import { LogOut, MoreVertical, UserCircle2 } from "lucide-react";
 import { useActionState } from "react";
+import Link from "next/link";
 
 import { logout } from "@/actions/logout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -96,17 +91,11 @@ export function NavUser({ user }: NavUserProps) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <UserCircle2 className="size-4" />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard className="size-4" />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell className="size-4" />
-                Notifications
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard/account" className="cursor-pointer">
+                  <UserCircle2 className="size-4" />
+                  Account
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

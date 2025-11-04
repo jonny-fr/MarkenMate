@@ -42,7 +42,11 @@ interface FavoritesViewProps {
   onRefresh?: () => void;
 }
 
-export function FavoritesView({ userId, dataPromise, onRefresh }: FavoritesViewProps) {
+export function FavoritesView({
+  userId,
+  dataPromise,
+  onRefresh,
+}: FavoritesViewProps) {
   const data = use(dataPromise);
   const { restaurants, menuItems } = data;
 

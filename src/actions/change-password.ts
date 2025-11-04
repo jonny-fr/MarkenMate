@@ -1,5 +1,6 @@
 "use server";
 
+import "server-only";
 import { z } from "zod";
 import { getServerSession } from "@/lib/auth-server";
 import { db } from "@/db";
@@ -7,6 +8,11 @@ import { user, account } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
+import {
+  canPerformAccountAction,
+  recordAccountAction,
+  formatTimeRemaining,
+} from "@/lib/rate-limit";
 
 const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, "Aktuelles Passwort erforderlich"),
@@ -22,6 +28,29 @@ export async function changePasswordAction(formData: FormData) {
     if (!session?.user?.id) {
       console.error("[change-password] No session");
       return { success: false, error: "Nicht authentifiziert" };
+    }
+
+    // Check rate limit (only for normal password changes, not forced changes)
+    const [userDetails] = await db
+      .select({ mustChangePassword: user.mustChangePassword })
+      .from(user)
+      .where(eq(user.id, session.user.id))
+      .limit(1);
+
+    if (!userDetails?.mustChangePassword) {
+      // Only apply rate limiting for voluntary password changes
+      const rateLimitCheck = await canPerformAccountAction(
+        session.user.id,
+        "CHANGE_PASSWORD",
+      );
+
+      if (!rateLimitCheck.allowed && rateLimitCheck.nextAllowedAt) {
+        const timeRemaining = formatTimeRemaining(rateLimitCheck.nextAllowedAt);
+        return {
+          success: false,
+          error: `Du kannst dein Passwort nur 1x pro Tag ändern. Nächste Änderung möglich ${timeRemaining}.`,
+        };
+      }
     }
 
     // Validate input
@@ -49,24 +78,24 @@ export async function changePasswordAction(formData: FormData) {
     );
 
     // Get user email for better-auth
-    const [userDetails] = await db
+    const [userEmailDetails] = await db
       .select({ email: user.email })
       .from(user)
       .where(eq(user.id, session.user.id))
       .limit(1);
 
-    if (!userDetails) {
+    if (!userEmailDetails) {
       console.error("[change-password] User not found");
       return { success: false, error: "Benutzer nicht gefunden" };
     }
 
-    console.log("[change-password] User email:", userDetails.email);
+    console.log("[change-password] User email:", userEmailDetails.email);
 
     // Verify current password by trying to sign in
     try {
       await auth.api.signInEmail({
         body: {
-          email: userDetails.email,
+          email: userEmailDetails.email,
           password: currentPassword,
         },
       });
@@ -139,10 +168,15 @@ export async function changePasswordAction(formData: FormData) {
 
     console.log("[change-password] mustChangePassword flag removed");
 
+    // Record the action for rate limiting (only for voluntary changes)
+    if (!userDetails?.mustChangePassword) {
+      await recordAccountAction(session.user.id, "CHANGE_PASSWORD");
+    }
+
     revalidatePath("/", "layout");
 
     console.log("[change-password] Password change successful");
-    return { success: true };
+    return { success: true, message: "Passwort erfolgreich geändert" };
   } catch (error) {
     console.error("[change-password] Unexpected error:", error);
     return {

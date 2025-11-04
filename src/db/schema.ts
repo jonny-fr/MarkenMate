@@ -394,3 +394,18 @@ export const auditLog = pgTable("audit_log", {
     .defaultNow()
     .notNull(),
 });
+
+// Account actions rate limiting (1x per day for password, email, username changes)
+export const accountAction = pgTable("account_action", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  action: text("action").notNull(), // 'CHANGE_PASSWORD', 'CHANGE_EMAIL', 'CHANGE_USERNAME'
+  lastActionAt: timestamp("last_action_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});

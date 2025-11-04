@@ -5,7 +5,10 @@
  */
 
 import { describe, it, expect, beforeEach } from "vitest";
-import { StepUpAuthService, type StepUpToken } from "@/domain/services/step-up-auth";
+import {
+  StepUpAuthService,
+  type StepUpToken,
+} from "@/domain/services/step-up-auth";
 
 describe("StepUpAuthService", () => {
   describe("Token Generation", () => {

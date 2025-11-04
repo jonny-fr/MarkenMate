@@ -1,13 +1,13 @@
-# Simple full-stack starter
+# MarkenMate - Enterprise Restaurant Management System
 
-Used deps:
+## Technology Stack
 
-- Main framework: Next.js
-- DB: PostgreSQL (Dockerised)
-- ORM: Drizzle
-- Styling: Tailwind v4
-- Auth: better-auth
-- Components: shadcn/ui (radix-ui based)
+- **Framework**: Next.js 15 (App Router)
+- **Database**: PostgreSQL (Containerized)
+- **ORM**: Drizzle ORM
+- **Styling**: Tailwind CSS v4
+- **Authentication**: better-auth
+- **UI Components**: shadcn/ui (Radix UI based)
 
 
 ## Getting Started
@@ -47,40 +47,41 @@ You can start editing the page by modifying `src/app/page.tsx`. The page auto-up
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-### Dev agent compatibility
+## Development Guidelines
 
-This project defines a AGENTS.md file for context and rules for coding agents. Feel free to use it as additional info when asking other external chat tools as well!
+For comprehensive coding standards and architectural decisions, refer to the `AGENTS.md` file which defines development context and rules.
 
+## Additional Resources
 
-### Recommended dependencies
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Drizzle ORM Documentation](https://orm.drizzle.team/)
+- [TanStack Table](https://tanstack.com/table/latest) - For data table implementations
+- [better-auth Documentation](https://www.better-auth.com/)
 
-- If you build tables, it's highly recommended to store pagination, sorting and filtering state in search params. Use [nuqs](https://nuqs.dev/) for that. Use [TanStack Table](https://tanstack.com/table/latest) for base table components.
-- If you really need client-side data fetching, use [SWR](https://swr.vercel.app/) or [TanStack Query](https://tanstack.com/query/v5/docs/framework/react/overview) instead of fetch calls in "useEffect" hooks.
-- If the manual validation and middleware boilerplate in your server actions get's too much, build your server actions with [next-safe-action](https://next-safe-action.dev/)
+## Docker Deployment
 
+### Development Environment (with Hot Module Replacement)
 
-### Recommended MCPs
-
-If you use tooling that allows integration of MCP servers, I recommend the following ones:
-
-- [Context7 by upstash](https://upstash.com/blog/context7-mcp)
-    - Returns up-to-date info about all kinds of dependencies
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-- [Next.js templates](https://vercel.com/templates/next.js) - need other functionality? Look here for other cool templates
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Development (HMR)
+```bash
 docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
-# Next.js: http://localhost:3000
-# Postgres: localhost:5432 (user: markenmate, password: markenmate)
+```
 
-## Production
+**Services:**
+- Next.js Application: http://localhost:3000
+- PostgreSQL Database: localhost:5432
+  - User: `markenmate`
+  - Password: `markenmate`
+  - Database: `markenmate`
+
+### Production Environment
+
+```bash
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up --build -d
-# Application: http://localhost:8080
+```
+
+**Services:**
+- Application: http://localhost:8080
+
+## Contributing
+
+Please review the architectural decision records in `docs/adrs/` before contributing to understand the system design principles.

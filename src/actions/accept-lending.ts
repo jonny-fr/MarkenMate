@@ -88,7 +88,7 @@ export async function acceptLendingAction(formData: FormData) {
     revalidatePath("/", "layout"); // Revalidate entire app
     revalidatePath("/dashboard"); // Revalidate dashboard page
     revalidatePath("/dashboard", "page"); // Revalidate dashboard page specifically
-    
+
     return {
       success: true,
       message:
@@ -99,7 +99,7 @@ export async function acceptLendingAction(formData: FormData) {
   } catch (error) {
     console.error("Error accepting lending:", error);
 
-    // Don't expose internal errors to client
+    // Prevent exposure of internal errors to client
     const message =
       error instanceof Error && error.name === "ForbiddenError"
         ? "Keine Berechtigung"

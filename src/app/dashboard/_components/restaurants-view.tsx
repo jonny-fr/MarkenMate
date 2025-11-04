@@ -161,7 +161,11 @@ interface RestaurantsViewProps {
   onRefresh?: () => void;
 }
 
-export function RestaurantsView({ userId, dataPromise, onRefresh }: RestaurantsViewProps) {
+export function RestaurantsView({
+  userId,
+  dataPromise,
+  onRefresh,
+}: RestaurantsViewProps) {
   const restaurants = use(dataPromise);
   const [order, setOrder] = useState<OrderDish[]>([]);
   const [isPending, setIsPending] = useState(false);

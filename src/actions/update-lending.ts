@@ -15,7 +15,10 @@ import { correlationContext } from "@/infrastructure/correlation-context";
 const updateLendingSchema = z.object({
   lendingId: z.number().int().positive("Lending ID is required"),
   tokenCount: z.number().int("Token count must be an integer"),
-  version: z.number().int().positive("Version is required for concurrency control"),
+  version: z
+    .number()
+    .int()
+    .positive("Version is required for concurrency control"),
 });
 
 export async function updateLendingAction(formData: FormData) {
@@ -155,7 +158,7 @@ export async function updateLendingAction(formData: FormData) {
       revalidatePath("/", "layout"); // Revalidate entire app
       revalidatePath("/dashboard"); // Revalidate dashboard page
       revalidatePath("/dashboard", "page"); // Revalidate dashboard page specifically
-      
+
       return {
         success: true,
         message: "Verleihung aktualisiert",
@@ -163,7 +166,7 @@ export async function updateLendingAction(formData: FormData) {
     } catch (error) {
       console.error("Error updating lending:", error);
 
-      // Don't expose internal errors to client
+      // Prevent exposure of internal errors to client
       const message =
         error instanceof Error && error.name === "ForbiddenError"
           ? "Keine Berechtigung"

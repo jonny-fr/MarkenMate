@@ -49,7 +49,11 @@ interface LendingViewProps {
   onRefresh?: () => void;
 }
 
-export function LendingView({ userId, dataPromise, onRefresh }: LendingViewProps) {
+export function LendingView({
+  userId,
+  dataPromise,
+  onRefresh,
+}: LendingViewProps) {
   const users = use(dataPromise); // Direct use - no local state!
   const [isUpdating, setIsUpdating] = useState<number | null>(null);
   const router = useRouter();
@@ -250,7 +254,8 @@ export function LendingView({ userId, dataPromise, onRefresh }: LendingViewProps
         <Card className="border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950">
           <CardHeader>
             <CardTitle className="text-blue-900 dark:text-blue-200">
-              ⏳ {pendingSentCount} gesendete Anfrage{pendingSentCount !== 1 ? "n" : ""}
+              ⏳ {pendingSentCount} gesendete Anfrage
+              {pendingSentCount !== 1 ? "n" : ""}
             </CardTitle>
             <p className="text-sm text-blue-700 dark:text-blue-300">
               Warte auf Bestätigung vom Empfänger
@@ -271,7 +276,10 @@ export function LendingView({ userId, dataPromise, onRefresh }: LendingViewProps
                         {Math.abs(user.balance)} Marken angeboten
                       </p>
                     </div>
-                    <Badge variant="outline" className="text-xs bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900 dark:text-blue-200 dark:border-blue-700">
+                    <Badge
+                      variant="outline"
+                      className="text-xs bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900 dark:text-blue-200 dark:border-blue-700"
+                    >
                       ⏳ Ausstehend
                     </Badge>
                   </div>
