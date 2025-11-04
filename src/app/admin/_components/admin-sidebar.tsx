@@ -9,6 +9,7 @@ import {
   Ticket,
   LayoutDashboard,
   LogOut,
+  Upload,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,11 @@ const navItems = [
     title: "Benutzerverwaltung",
     href: "/admin/users",
     icon: Users,
+  },
+  {
+    title: "Menü-Uploads",
+    href: "/admin/menu-uploads",
+    icon: Upload,
   },
   {
     title: "Tickets",
