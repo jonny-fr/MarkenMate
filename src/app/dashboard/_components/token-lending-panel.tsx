@@ -72,9 +72,15 @@ export function TokenLendingPanel({
     [users],
   );
 
-  // Only count pending requests where current user is the BORROWER (needs to accept)
+  // Count pending requests where current user is the BORROWER (needs to accept)
   const pendingCount = useMemo(
     () => users.filter((u) => u.status === "pending" && !u.isLender).length,
+    [users],
+  );
+
+  // Count pending requests where current user is the LENDER (waiting for acceptance)
+  const pendingSentCount = useMemo(
+    () => users.filter((u) => u.status === "pending" && u.isLender).length,
     [users],
   );
 
@@ -172,11 +178,42 @@ export function TokenLendingPanel({
         <AddLendingPersonDialog userId={userId} onSuccess={onRefresh} />
       </CardHeader>
       <CardContent className="space-y-3">
-        {/* Pending Requests */}
+        {/* Pending Sent Requests - Lender waiting */}
+        {pendingSentCount > 0 && (
+          <div className="space-y-2 rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-900 dark:bg-blue-950">
+            <p className="text-sm font-medium text-blue-900 dark:text-blue-200">
+              ⏳ {pendingSentCount} gesendet
+            </p>
+            <div className="space-y-2">
+              {users
+                .filter((u) => u.status === "pending" && u.isLender)
+                .map((user) => (
+                  <div
+                    key={user.id}
+                    className="flex items-center justify-between gap-2 rounded-lg border border-blue-200 bg-background p-2 dark:border-blue-900"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground">
+                        {user.name}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {Math.abs(user.balance)} Marken angeboten
+                      </p>
+                    </div>
+                    <Badge variant="outline" className="text-xs bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900 dark:text-blue-200 dark:border-blue-700">
+                      ⏳
+                    </Badge>
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
+
+        {/* Pending Received Requests - Borrower needs to accept */}
         {pendingCount > 0 && (
-          <div className="space-y-3 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-900 dark:bg-amber-950">
+          <div className="space-y-2 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-900 dark:bg-amber-950">
             <p className="text-sm font-medium text-amber-900 dark:text-amber-200">
-              {pendingCount} ausstehende Anfrage{pendingCount !== 1 ? "n" : ""}
+              {pendingCount} ausstehend
             </p>
             <div className="space-y-2">
               {users
@@ -191,43 +228,31 @@ export function TokenLendingPanel({
                         {user.name}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {user.isLender 
-                          ? `${Math.abs(user.balance)} Marken verliehen`
-                          : `${Math.abs(user.balance)} Marken geliehen`
-                        }
+                        {Math.abs(user.balance)} Marken
                       </p>
                     </div>
-                    {/* Only show accept/decline for borrower */}
-                    {!user.isLender && (
-                      <div className="flex gap-1">
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-7 w-7"
-                          onClick={() => handleAcceptLending(user.id, "accepted")}
-                          disabled={isUpdating === user.id}
-                          title="Akzeptieren"
-                        >
-                          <Check className="size-3 text-green-600" />
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-7 w-7"
-                          onClick={() => handleAcceptLending(user.id, "declined")}
-                          disabled={isUpdating === user.id}
-                          title="Ablehnen"
-                        >
-                          <X className="size-3 text-red-600" />
-                        </Button>
-                      </div>
-                    )}
-                    {/* Lender sees waiting badge */}
-                    {user.isLender && (
-                      <Badge variant="outline" className="text-xs">
-                        ⏳ Warte
-                      </Badge>
-                    )}
+                    <div className="flex gap-1">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7"
+                        onClick={() => handleAcceptLending(user.id, "accepted")}
+                        disabled={isUpdating === user.id}
+                        title="Akzeptieren"
+                      >
+                        <Check className="size-3 text-green-600" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7"
+                        onClick={() => handleAcceptLending(user.id, "declined")}
+                        disabled={isUpdating === user.id}
+                        title="Ablehnen"
+                      >
+                        <X className="size-3 text-red-600" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
             </div>
@@ -306,28 +331,30 @@ export function TokenLendingPanel({
                       <Plus className="size-4" />
                     </Button>
 
-                    {/* Dropdown Menu */}
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          type="button"
-                          size="icon"
-                          variant="ghost"
-                          className="size-8"
-                        >
-                          <MoreVertical className="size-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={() => handleDeleteLending(user.id)}
-                          className="text-destructive focus:text-destructive"
-                        >
-                          <Trash2 className="size-4 mr-2" />
-                          Löschen
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    {/* Dropdown Menu - Only visible for LENDER */}
+                    {user.isLender && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            type="button"
+                            size="icon"
+                            variant="ghost"
+                            className="size-8"
+                          >
+                            <MoreVertical className="size-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => handleDeleteLending(user.id)}
+                            className="text-destructive focus:text-destructive"
+                          >
+                            <Trash2 className="size-4 mr-2" />
+                            Löschen
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
                   </div>
                 </div>
               ))

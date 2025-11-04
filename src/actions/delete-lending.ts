@@ -48,8 +48,23 @@ export async function deleteLendingAction(formData: FormData) {
       };
     }
 
-    // Security check: Verify user owns this lending record
-    await authorizationService.requireOwnership(userId, lendingRecord.userId);
+    // Security check: Only the LENDER (who created the record) can delete it
+    // The borrower (lendToUserId) cannot delete the lending record
+    if (lendingRecord.userId !== userId) {
+      await logger.audit(
+        "DELETE_LENDING_UNAUTHORIZED",
+        {
+          lendingId: data.lendingId,
+          attemptedByUserId: userId,
+          actualOwnerId: lendingRecord.userId,
+        },
+        userId,
+      );
+      return {
+        success: false,
+        message: "Keine Berechtigung - Nur der Verleiher kann diese Verleihung löschen",
+      };
+    }
 
     // Delete lending record
     await db.delete(tokenLending).where(eq(tokenLending.id, data.lendingId));

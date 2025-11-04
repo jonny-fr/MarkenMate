@@ -166,9 +166,15 @@ export function LendingView({ userId, dataPromise, onRefresh }: LendingViewProps
     [users],
   );
 
-  // Only count pending requests where current user is the BORROWER (needs to accept)
+  // Count pending requests where current user is the BORROWER (needs to accept)
   const pendingCount = useMemo(
     () => users.filter((u) => u.status === "pending" && !u.isLender).length,
+    [users],
+  );
+
+  // Count pending requests where current user is the LENDER (waiting for acceptance)
+  const pendingSentCount = useMemo(
+    () => users.filter((u) => u.status === "pending" && u.isLender).length,
     [users],
   );
 
@@ -239,13 +245,52 @@ export function LendingView({ userId, dataPromise, onRefresh }: LendingViewProps
         </Card>
       </div>
 
-      {/* Pending Requests */}
+      {/* Pending Sent Requests - Lender waiting for acceptance */}
+      {pendingSentCount > 0 && (
+        <Card className="border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950">
+          <CardHeader>
+            <CardTitle className="text-blue-900 dark:text-blue-200">
+              ⏳ {pendingSentCount} gesendete Anfrage{pendingSentCount !== 1 ? "n" : ""}
+            </CardTitle>
+            <p className="text-sm text-blue-700 dark:text-blue-300">
+              Warte auf Bestätigung vom Empfänger
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {sortedUsers
+                .filter((u) => u.status === "pending" && u.isLender)
+                .map((user) => (
+                  <div
+                    key={user.id}
+                    className="flex items-center justify-between gap-2 rounded-lg border border-blue-200 bg-background p-3 dark:border-blue-900"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-foreground">{user.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {Math.abs(user.balance)} Marken angeboten
+                      </p>
+                    </div>
+                    <Badge variant="outline" className="text-xs bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900 dark:text-blue-200 dark:border-blue-700">
+                      ⏳ Ausstehend
+                    </Badge>
+                  </div>
+                ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Pending Received Requests - Borrower needs to accept */}
       {pendingCount > 0 && (
         <Card className="border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950">
           <CardHeader>
             <CardTitle className="text-amber-900 dark:text-amber-200">
               {pendingCount} ausstehende Anfrage{pendingCount !== 1 ? "n" : ""}
             </CardTitle>
+            <p className="text-sm text-amber-700 dark:text-amber-300">
+              Bitte bestätigen oder ablehnen
+            </p>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
@@ -259,48 +304,31 @@ export function LendingView({ userId, dataPromise, onRefresh }: LendingViewProps
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-foreground">{user.name}</p>
                       <p className="text-xs text-muted-foreground">
-                        {user.isLender 
-                          ? `${Math.abs(user.balance)} Marken verliehen an ${user.name}`
-                          : `${Math.abs(user.balance)} Marken von ${user.name} geliehen`
-                        }
+                        Möchte {Math.abs(user.balance)} Marken leihen
                       </p>
-                      {user.note && (
-                        <p className="text-xs text-muted-foreground italic">
-                          {user.note}
-                        </p>
-                      )}
                     </div>
-                    {/* Only show accept/decline buttons for borrower (not lender) */}
-                    {!user.isLender && (
-                      <div className="flex gap-1">
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-7 w-7"
-                          onClick={() => handleAcceptLending(user.id, "accepted")}
-                          disabled={isUpdating === user.id}
-                          title="Akzeptieren"
-                        >
-                          <Check className="size-3 text-green-600" />
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-7 w-7"
-                          onClick={() => handleAcceptLending(user.id, "declined")}
-                          disabled={isUpdating === user.id}
-                          title="Ablehnen"
-                        >
-                          <X className="size-3 text-red-600" />
-                        </Button>
-                      </div>
-                    )}
-                    {/* Lender sees "waiting" state */}
-                    {user.isLender && (
-                      <Badge variant="outline" className="text-xs">
-                        Warte auf Bestätigung
-                      </Badge>
-                    )}
+                    <div className="flex gap-1">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7"
+                        onClick={() => handleAcceptLending(user.id, "accepted")}
+                        disabled={isUpdating === user.id}
+                        title="Akzeptieren"
+                      >
+                        <Check className="size-3 text-green-600" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7"
+                        onClick={() => handleAcceptLending(user.id, "declined")}
+                        disabled={isUpdating === user.id}
+                        title="Ablehnen"
+                      >
+                        <X className="size-3 text-red-600" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
             </div>
@@ -437,13 +465,16 @@ export function LendingView({ userId, dataPromise, onRefresh }: LendingViewProps
                           </DropdownMenuItem>
                         ) : null}
 
-                        <DropdownMenuItem
-                          onClick={() => handleDeleteLending(user.id)}
-                          className="text-destructive focus:text-destructive"
-                        >
-                          <Trash2 className="size-4 mr-2" />
-                          Löschen
-                        </DropdownMenuItem>
+                        {/* Only show delete option if current user is the LENDER */}
+                        {user.isLender && (
+                          <DropdownMenuItem
+                            onClick={() => handleDeleteLending(user.id)}
+                            className="text-destructive focus:text-destructive"
+                          >
+                            <Trash2 className="size-4 mr-2" />
+                            Löschen
+                          </DropdownMenuItem>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
