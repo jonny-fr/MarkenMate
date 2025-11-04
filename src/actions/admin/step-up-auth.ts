@@ -26,8 +26,6 @@ const requestStepUpSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
-
-
 /**
  * Requests a step-up token by re-authenticating with password
  */
