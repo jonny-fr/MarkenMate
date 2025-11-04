@@ -49,6 +49,25 @@ export const logLevelEnum = pgEnum("log_level", [
   "debug",
 ]);
 
+export const menuParseBatchStatusEnum = pgEnum("menu_parse_batch_status", [
+  "UPLOADED",
+  "PARSING",
+  "PARSED",
+  "PARSE_FAILED",
+  "CHANGES_PROPOSED",
+  "APPROVED",
+  "PUBLISHING",
+  "PUBLISHED",
+  "REJECTED",
+]);
+
+export const menuParseItemActionEnum = pgEnum("menu_parse_item_action", [
+  "PENDING",
+  "ACCEPT",
+  "EDIT",
+  "REJECT",
+]);
+
 /**
  * Authentication schema.
  *
@@ -405,6 +424,97 @@ export const accountAction = pgTable("account_action", {
   lastActionAt: timestamp("last_action_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+/**
+ * Menu PDF Ingestion & Review System
+ */
+
+// Menu parse batches - tracks PDF upload and parsing lifecycle
+export const menuParseBatch = pgTable("menu_parse_batch", {
+  id: serial("id").primaryKey(),
+  uploadedByAdminId: text("uploaded_by_admin_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  filename: text("filename").notNull(),
+  fileHash: text("file_hash").notNull().unique(), // SHA-256 hash for deduplication
+  fileSize: integer("file_size").notNull(), // in bytes
+  filePath: text("file_path").notNull(), // storage path
+  status: menuParseBatchStatusEnum("status").default("UPLOADED").notNull(),
+  isTextNative: boolean("is_text_native"), // true = text PDF, false = scanned/OCR needed
+  parseLog: text("parse_log"), // JSON string with parsing details
+  errorMessage: text("error_message"), // error details if parse failed
+  restaurantId: integer("restaurant_id").references(() => restaurant.id, {
+    onDelete: "set null",
+  }), // assigned restaurant (can be set during review)
+  approvedByAdminId: text("approved_by_admin_id").references(() => user.id, {
+    onDelete: "set null",
+  }),
+  approvedAt: timestamp("approved_at", { withTimezone: true }),
+  publishedAt: timestamp("published_at", { withTimezone: true }),
+  rejectedByAdminId: text("rejected_by_admin_id").references(() => user.id, {
+    onDelete: "set null",
+  }),
+  rejectedAt: timestamp("rejected_at", { withTimezone: true }),
+  rejectionReason: text("rejection_reason"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+});
+
+// Menu parse items - staging area for parsed dishes before approval
+export const menuParseItem = pgTable("menu_parse_item", {
+  id: serial("id").primaryKey(),
+  batchId: integer("batch_id")
+    .notNull()
+    .references(() => menuParseBatch.id, { onDelete: "cascade" }),
+  dishName: text("dish_name").notNull(),
+  dishNameNormalized: text("dish_name_normalized").notNull(), // normalized for matching
+  description: text("description"),
+  priceEur: numeric("price_eur", { precision: 10, scale: 2 }).notNull(), // parsed price in EUR
+  priceConfidence: numeric("price_confidence", { precision: 3, scale: 2 }), // 0.00-1.00 confidence score
+  category: text("category"), // detected category (e.g., "Hauptgerichte", "Getränke")
+  options: text("options"), // JSON string for variants/sizes
+  pageNumber: integer("page_number"), // source page in PDF
+  boundingBox: text("bounding_box"), // JSON string with coordinates {x, y, width, height}
+  rawText: text("raw_text"), // original extracted text for this item
+  action: menuParseItemActionEnum("action").default("PENDING").notNull(),
+  editedData: text("edited_data"), // JSON string with manual edits during review
+  existingMenuItemId: integer("existing_menu_item_id").references(
+    () => menuItem.id,
+    { onDelete: "set null" },
+  ), // matched existing dish for diff
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+});
+
+// Dish versions - track changes to published dishes
+export const dishVersion = pgTable("dish_version", {
+  id: serial("id").primaryKey(),
+  menuItemId: integer("menu_item_id")
+    .notNull()
+    .references(() => menuItem.id, { onDelete: "cascade" }),
+  dishName: text("dish_name").notNull(),
+  description: text("description"),
+  price: numeric("price", { precision: 10, scale: 2 }).notNull(),
+  category: text("category").notNull(),
+  type: text("type").notNull(), // stored as text for history
+  changedByAdminId: text("changed_by_admin_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  changeReason: text("change_reason"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
