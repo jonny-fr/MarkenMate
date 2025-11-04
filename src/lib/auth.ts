@@ -10,9 +10,12 @@ import { nextCookies } from "better-auth/next-js";
  */
 
 // SECURITY: Validate critical environment variables at startup
-if (!process.env.NEXT_PUBLIC_BETTER_AUTH_URL) {
+const betterAuthBaseUrl =
+  process.env.BETTER_AUTH_URL ?? process.env.NEXT_PUBLIC_BETTER_AUTH_URL;
+
+if (!betterAuthBaseUrl) {
   throw new Error(
-    "NEXT_PUBLIC_BETTER_AUTH_URL is required for authentication to work",
+    "Either BETTER_AUTH_URL or NEXT_PUBLIC_BETTER_AUTH_URL must be configured for authentication to work",
   );
 }
 
@@ -21,7 +24,7 @@ if (!process.env.BETTER_AUTH_SECRET) {
 }
 
 export const auth = betterAuth({
-  baseURL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL,
+  baseURL: betterAuthBaseUrl,
   secret: process.env.BETTER_AUTH_SECRET,
   database: drizzleAdapter(db, {
     provider: "pg",

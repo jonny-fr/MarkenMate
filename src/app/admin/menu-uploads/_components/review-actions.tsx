@@ -74,11 +74,16 @@ export function ReviewActions({
     }
 
     try {
-      const response = await fetch(`/api/admin/menu-batches/${batchId}/assign`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ restaurantId: Number.parseInt(selectedRestaurantId, 10) }),
-      });
+      const response = await fetch(
+        `/api/admin/menu-batches/${batchId}/assign`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            restaurantId: Number.parseInt(selectedRestaurantId, 10),
+          }),
+        },
+      );
 
       const result = await response.json();
 
@@ -110,11 +115,14 @@ export function ReviewActions({
     }
 
     try {
-      const response = await fetch(`/api/admin/menu-batches/${batchId}/approve`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ itemActions }),
-      });
+      const response = await fetch(
+        `/api/admin/menu-batches/${batchId}/approve`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ itemActions }),
+        },
+      );
 
       const result = await response.json();
 
@@ -135,11 +143,14 @@ export function ReviewActions({
     if (!reason) return;
 
     try {
-      const response = await fetch(`/api/admin/menu-batches/${batchId}/reject`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ reason }),
-      });
+      const response = await fetch(
+        `/api/admin/menu-batches/${batchId}/reject`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ reason }),
+        },
+      );
 
       const result = await response.json();
 
@@ -178,7 +189,10 @@ export function ReviewActions({
                 </SelectTrigger>
                 <SelectContent>
                   {restaurants.map((restaurant) => (
-                    <SelectItem key={restaurant.id} value={restaurant.id.toString()}>
+                    <SelectItem
+                      key={restaurant.id}
+                      value={restaurant.id.toString()}
+                    >
                       {restaurant.name} - {restaurant.location}
                     </SelectItem>
                   ))}

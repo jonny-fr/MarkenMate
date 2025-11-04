@@ -11,6 +11,7 @@ import type { ParsedItem } from "./pdf-parser";
 
 export class OcrService {
   private static worker: Worker | null = null;
+  private static canvasPolyfillsPromise: Promise<void> | null = null;
 
   /**
    * Initialize OCR worker with German language
@@ -26,6 +27,50 @@ export class OcrService {
   }
 
   /**
+   * Load native canvas polyfills required by tesseract.js when running on Node.js
+   */
+  private static async ensureCanvasPolyfills(): Promise<void> {
+    if (typeof process === "undefined" || process.env.NEXT_RUNTIME === "edge") {
+      return;
+    }
+
+    if (!this.canvasPolyfillsPromise) {
+      this.canvasPolyfillsPromise = (async () => {
+        try {
+          // Avoid bundlers trying to include native .node binaries. Load at runtime only.
+          // biome-ignore lint/security/noGlobalEval: Intentionally using eval to avoid bundling native module
+          const dynamicRequire: ((id: string) => unknown) | undefined = (() => {
+            try {
+              return eval("require");
+            } catch {
+              return undefined;
+            }
+          })();
+
+          if (dynamicRequire) {
+            try {
+              dynamicRequire("@napi-rs/canvas");
+            } catch (err) {
+              // Module not available in environment; continue without it.
+              console.warn(
+                "[OCR] @napi-rs/canvas not loaded. OCR rendering fidelity may be reduced.",
+                err,
+              );
+            }
+          }
+        } catch (error) {
+          console.warn(
+            "[OCR] @napi-rs/canvas is not available. OCR rendering fidelity may be reduced.",
+            error,
+          );
+        }
+      })();
+    }
+
+    await this.canvasPolyfillsPromise;
+  }
+
+  /**
    * Perform OCR on PDF buffer
    * Note: This is a simplified version. Full implementation would:
    * - Convert PDF pages to images
@@ -34,6 +79,7 @@ export class OcrService {
    */
   static async performOcr(buffer: Buffer): Promise<ParsedItem[]> {
     try {
+      await this.ensureCanvasPolyfills();
       const worker = await this.getWorker();
 
       // In a real implementation, we would:

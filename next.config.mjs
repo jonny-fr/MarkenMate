@@ -1,28 +1,21 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   typedRoutes: false,
   output: process.env.DOCKER_BUILD === "true" ? "standalone" : undefined,
   serverExternalPackages: ["pg", "@napi-rs/canvas"],
-
-  // CRITICAL: Disable aggressive caching for production reliability
   experimental: {
-    // Disable static optimization to ensure fresh data
     staleTimes: {
       dynamic: 0,
       static: 0,
     },
   },
-
   webpack: (config, { isServer }) => {
     // Force pdfjs-dist to use CommonJS build on server to avoid worker import issues
-    if (!config.resolve) config.resolve = {} as typeof config.resolve;
-    if (!config.resolve.alias) config.resolve.alias = {} as typeof config.resolve.alias;
-    (config.resolve.alias as Record<string, string>)[
-      "pdfjs-dist/legacy/build/pdf.mjs"
-    ] = "pdfjs-dist/legacy/build/pdf.js";
-    // Allow imports ending with .mjs to resolve to .js as a fallback (for pdfjs-dist worker)
-    ;(config.resolve as unknown as { extensionAlias?: Record<string, string[]> }).extensionAlias = {
+    if (!config.resolve) config.resolve = {};
+    if (!config.resolve.alias) config.resolve.alias = {};
+    config.resolve.alias["pdfjs-dist/legacy/build/pdf.mjs"] = "pdfjs-dist/legacy/build/pdf.js";
+    // Allow .mjs requests to fall back to .js
+    config.resolve.extensionAlias = {
       ".mjs": [".mjs", ".js"],
     };
 
@@ -35,7 +28,6 @@ const nextConfig: NextConfig = {
       });
       config.externals = externals;
     }
-
     return config;
   },
 };

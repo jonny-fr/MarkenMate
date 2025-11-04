@@ -31,9 +31,7 @@ export class MenuParserOrchestrator {
    * Upload and parse PDF menu
    * Main entry point for the ingestion pipeline
    */
-  static async uploadAndParse(
-    options: ParseOptions,
-  ): Promise<UploadResult> {
+  static async uploadAndParse(options: ParseOptions): Promise<UploadResult> {
     const { adminId, filename, buffer, mimeType } = options;
 
     try {
@@ -172,8 +170,9 @@ export class MenuParserOrchestrator {
     // Store parsed items in database
     if (items.length > 0) {
       // Only insert items that have a price
-      const validItems = items.filter((item): item is typeof item & { priceEur: number } => 
-        item.priceEur !== undefined
+      const validItems = items.filter(
+        (item): item is typeof item & { priceEur: number } =>
+          item.priceEur !== undefined,
       );
 
       if (validItems.length > 0) {
@@ -184,7 +183,10 @@ export class MenuParserOrchestrator {
             dishNameNormalized: item.dishNameNormalized,
             description: item.description || null,
             priceEur: item.priceEur.toString(),
-            priceConfidence: item.priceConfidence !== undefined ? item.priceConfidence.toString() : null,
+            priceConfidence:
+              item.priceConfidence !== undefined
+                ? item.priceConfidence.toString()
+                : null,
             category: item.category || null,
             pageNumber: item.pageNumber || 1,
             rawText: item.rawText,

@@ -53,7 +53,11 @@ export class PdfValidator {
     if (sanitizedFilename.startsWith(".")) {
       sanitizedFilename = `file${sanitizedFilename}`;
     }
-    if (sanitizedFilename === "" || sanitizedFilename === "." || sanitizedFilename === "..") {
+    if (
+      sanitizedFilename === "" ||
+      sanitizedFilename === "." ||
+      sanitizedFilename === ".."
+    ) {
       sanitizedFilename = "unknown.pdf";
     }
 
@@ -82,7 +86,8 @@ export class PdfValidator {
     if (!hasPdfMagicNumber) {
       return {
         isValid: false,
-        error: "File does not appear to be a valid PDF (invalid file signature)",
+        error:
+          "File does not appear to be a valid PDF (invalid file signature)",
       };
     }
 
@@ -112,10 +117,7 @@ export class PdfValidator {
   /**
    * Generate safe storage path
    */
-  static generateStoragePath(
-    sanitizedFilename: string,
-    hash: string,
-  ): string {
+  static generateStoragePath(sanitizedFilename: string, hash: string): string {
     // Use hash to prevent collisions and organize files
     const prefix = hash.substring(0, 2);
     const timestamp = Date.now();

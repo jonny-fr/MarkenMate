@@ -2,15 +2,162 @@ import "server-only";
 import { PriceParser } from "./price-parser";
 import { TextNormalizer } from "./text-normalizer";
 
-// Dynamic import for pdf-parse since it doesn't have proper ES module support
-const pdfParse = require("pdf-parse") as (
-  buffer: Buffer,
-  options?: { max?: number },
-) => Promise<{
+type PdfParseResult = {
   numpages: number;
   text: string;
   info?: Record<string, unknown>;
-}>;
+};
+
+type PdfParseFn = (
+  buffer: Buffer,
+  options?: { max?: number },
+) => Promise<PdfParseResult>;
+
+type PdfParseTextResult = { text: string; total: number };
+type PdfParseInfoResult = { info?: Record<string, unknown> };
+
+type PdfParseConstructor = new (options: { data: Buffer }) => {
+  getText: (options?: { first?: number }) => Promise<PdfParseTextResult>;
+  getInfo: () => Promise<PdfParseInfoResult>;
+  destroy?: () => Promise<void>;
+};
+
+interface GlobalWithRequire {
+  require?: (id: string) => unknown;
+}
+
+/**
+ * Attempt to resolve a callable pdf-parse export from the loaded module.
+ */
+function resolvePdfParseExport(moduleExport: unknown): PdfParseFn | null {
+  if (typeof moduleExport === "function") {
+    return moduleExport as PdfParseFn;
+  }
+
+  if (
+    typeof moduleExport === "object" &&
+    moduleExport !== null &&
+    "default" in moduleExport &&
+    typeof (moduleExport as Record<string, unknown>).default === "function"
+  ) {
+    return (moduleExport as { default: PdfParseFn }).default;
+  }
+
+  const pdfParseClass =
+    extractPdfParseClass(moduleExport) ??
+    extractPdfParseClass(
+      typeof moduleExport === "object" &&
+        moduleExport !== null &&
+        "default" in moduleExport
+        ? (moduleExport as Record<string, unknown>).default
+        : null,
+    );
+
+  if (pdfParseClass) {
+    return createPdfParseWrapper(pdfParseClass);
+  }
+
+  return null;
+}
+
+/**
+ * Narrow a Module export that exposes a PDFParse class.
+ */
+function extractPdfParseClass(moduleExport: unknown): PdfParseConstructor | null {
+  if (
+    typeof moduleExport === "object" &&
+    moduleExport !== null &&
+    "PDFParse" in moduleExport &&
+    typeof (moduleExport as Record<string, unknown>).PDFParse === "function"
+  ) {
+    return (moduleExport as { PDFParse: PdfParseConstructor }).PDFParse;
+  }
+
+  return null;
+}
+
+/**
+ * Wrap the new PDFParse class API (>=2.x) with the legacy function signature we rely on.
+ */
+function createPdfParseWrapper(PdfParseClass: PdfParseConstructor): PdfParseFn {
+  return async (buffer: Buffer, options?: { max?: number }) => {
+    const parser = new PdfParseClass({ data: buffer });
+
+    try {
+      const textOptions =
+        typeof options?.max === "number" && options.max > 0
+          ? { first: options.max }
+          : undefined;
+
+      const [textResult, infoResult] = await Promise.all([
+        parser.getText(textOptions),
+        parser.getInfo(),
+      ]);
+
+      return {
+        numpages: textResult.total,
+        text: textResult.text,
+        info: infoResult.info,
+      };
+    } finally {
+      if (typeof parser.destroy === "function") {
+        await parser.destroy();
+      }
+    }
+  };
+}
+
+/**
+ * Load pdf-parse dynamically to support both CommonJS and modern ESM builds and
+ * to ensure compatibility across legacy and new library APIs.
+ */
+async function loadPdfParse(): Promise<PdfParseFn> {
+  try {
+    const pdfParseModule = await import("pdf-parse");
+    const resolved = resolvePdfParseExport(pdfParseModule);
+
+    if (resolved) {
+      return resolved;
+    }
+
+    const globalRequire =
+      (globalThis as GlobalWithRequire).require ??
+      // biome-ignore lint/security/noGlobalEval: we only probe for CommonJS require at runtime
+      (() => {
+        try {
+          return eval("require") as ((id: string) => unknown) | undefined;
+        } catch {
+          return undefined;
+        }
+      })();
+
+    if (globalRequire) {
+      const requiredModule = globalRequire("pdf-parse");
+      const requiredResolved = resolvePdfParseExport(requiredModule);
+
+      if (requiredResolved) {
+        return requiredResolved;
+      }
+    }
+
+    throw new Error("Failed to load pdf-parse: no valid export found");
+  } catch (error) {
+    throw new Error(
+      `Failed to load pdf-parse library: ${error instanceof Error ? error.message : "Unknown error"}`,
+    );
+  }
+}
+
+// Cache the loaded function so we only resolve the module once.
+let pdfParseCache: PdfParseFn | null = null;
+
+async function getPdfParse(): Promise<PdfParseFn> {
+  if (!pdfParseCache) {
+    pdfParseCache = await loadPdfParse();
+  }
+
+  return pdfParseCache;
+}
 
 /**
  * PDF Parser Service
@@ -44,18 +191,17 @@ export class PdfParser {
     const warnings: string[] = [];
 
     try {
-      // Parse PDF using pdf-parse
+      const pdfParse = await getPdfParse();
       const data = await pdfParse(buffer);
 
-      // Check if PDF has extractable text
-      const hasText = data.text && data.text.trim().length > 0;
-      const isTextNative = hasText && data.text.length > 100; // Reasonable threshold
+      const hasText = data.text !== undefined && data.text.trim().length > 0;
+      const isTextNative = hasText && data.text.length > 100;
 
       if (!isTextNative) {
         warnings.push(
           "PDF appears to be scanned or image-based. OCR fallback needed.",
         );
-        // Return early - OCR will be handled separately
+
         return {
           items: [],
           isTextNative: false,
@@ -64,7 +210,6 @@ export class PdfParser {
         };
       }
 
-      // Extract items from text
       const items = this.extractItems(data.text);
 
       return {
@@ -99,26 +244,21 @@ export class PdfParser {
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
 
-      // Skip empty lines
       if (!line.trim()) {
         continue;
       }
 
-      // Check if this is a category header
       if (TextNormalizer.isCategoryHeader(line)) {
         currentCategory = line;
         continue;
       }
 
-      // Try to parse price from line
       const price = PriceParser.parse(line);
 
       if (price && price.confidence >= 0.5) {
-        // This line has a price, likely a menu item
         const dishName = TextNormalizer.extractDishName(line);
 
         if (dishName.length > 2) {
-          // Valid dish name
           const item: ParsedItem = {
             dishName,
             dishNameNormalized: TextNormalizer.toSearchForm(dishName),
@@ -128,7 +268,6 @@ export class PdfParser {
             rawText: line,
           };
 
-          // Check if previous line might be a description
           if (
             previousLine &&
             TextNormalizer.looksLikeDescription(previousLine)
@@ -138,8 +277,10 @@ export class PdfParser {
 
           items.push(item);
         }
-      } else if (line.length > 50 && TextNormalizer.looksLikeDescription(line)) {
-        // Might be a description for next item
+      } else if (
+        line.length > 50 &&
+        TextNormalizer.looksLikeDescription(line)
+      ) {
         previousLine = line;
       } else {
         previousLine = undefined;
@@ -155,8 +296,9 @@ export class PdfParser {
    */
   static async isTextNative(buffer: Buffer): Promise<boolean> {
     try {
+      const pdfParse = await getPdfParse();
       const data = await pdfParse(buffer, {
-        max: 1, // Only parse first page
+        max: 1,
       });
 
       return Boolean(data.text && data.text.trim().length > 100);
@@ -165,3 +307,4 @@ export class PdfParser {
     }
   }
 }
+

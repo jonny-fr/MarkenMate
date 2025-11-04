@@ -73,10 +73,15 @@ export const login = async (
       asResponse: false,
     });
 
-    // Login successful
+    // Login successful - redirect will throw NEXT_REDIRECT
     console.debug("Login successful");
-    redirect("/dashboard");
   } catch (err) {
+    // Check if this is a Next.js redirect (which is expected after successful login)
+    if (err instanceof Error && err.message === "NEXT_REDIRECT") {
+      // This is expected behavior - re-throw to allow the redirect
+      throw err;
+    }
+
     // SECURITY: Record failed attempt for rate limiting
     if (userRecord) {
       await recordRateLimitAttempt(userRecord.id, "LOGIN_ATTEMPT");
@@ -93,4 +98,7 @@ export const login = async (
       error: "E-Mail oder Passwort ist falsch",
     };
   }
+
+  // Only reached if login succeeded but no redirect occurred
+  redirect("/dashboard");
 };

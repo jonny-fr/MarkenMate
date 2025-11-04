@@ -2,7 +2,10 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Eye } from "lucide-react";
+import { Eye, Trash2 } from "lucide-react";
+import { useTransition } from "react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface Batch {
   id: number;
@@ -31,6 +34,43 @@ const statusColors: Record<string, string> = {
 };
 
 export function BatchList({ batches }: BatchListProps) {
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+
+  const handleDelete = async (batchId: number, filename: string) => {
+    if (
+      !confirm(
+        `Are you sure you want to delete "${filename}"? This action cannot be undone.`,
+      )
+    ) {
+      return;
+    }
+
+    startTransition(async () => {
+      try {
+        const response = await fetch("/api/admin/menu-batch/delete", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ batchId }),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || "Failed to delete batch");
+        }
+
+        toast.success("Batch deleted successfully");
+        router.refresh();
+      } catch (error) {
+        toast.error(
+          error instanceof Error ? error.message : "Failed to delete batch",
+        );
+      }
+    });
+  };
+
   if (batches.length === 0) {
     return (
       <div className="text-center py-12 border rounded-lg bg-card">
@@ -70,17 +110,30 @@ export function BatchList({ batches }: BatchListProps) {
               <td className="p-4 text-sm text-muted-foreground">
                 {(batch.fileSize / 1024 / 1024).toFixed(2)} MB
               </td>
-              <td className="p-4 text-sm">{batch.uploadedByName || "Unknown"}</td>
+              <td className="p-4 text-sm">
+                {batch.uploadedByName || "Unknown"}
+              </td>
               <td className="p-4 text-sm text-muted-foreground">
                 {new Date(batch.createdAt).toLocaleString("de-DE")}
               </td>
               <td className="p-4 text-right">
-                <Button variant="ghost" size="sm" asChild>
-                  <Link href={`/admin/menu-uploads/${batch.id}`}>
-                    <Eye className="size-4" />
-                    Review
-                  </Link>
-                </Button>
+                <div className="flex gap-2 justify-end">
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link href={`/admin/menu-uploads/${batch.id}`}>
+                      <Eye className="size-4" />
+                      Review
+                    </Link>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDelete(batch.id, batch.filename)}
+                    disabled={isPending}
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                  >
+                    <Trash2 className="size-4" />
+                  </Button>
+                </div>
               </td>
             </tr>
           ))}

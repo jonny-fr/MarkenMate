@@ -23,6 +23,8 @@ ARG BETTER_AUTH_URL=http://localhost:3000
 ENV BETTER_AUTH_URL=$BETTER_AUTH_URL
 # DO NOT SET NEXT_PUBLIC_BETTER_AUTH_URL - we use window.location.origin at runtime
 # If set, it gets embedded in the client bundle and can't be changed
+# Enable standalone output for Docker
+ENV DOCKER_BUILD=true
 RUN pnpm build
 
 FROM node:20-alpine AS runner

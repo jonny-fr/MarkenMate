@@ -1,5 +1,11 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
+import { useTransition } from "react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+
 interface BatchDetailProps {
   batch: {
     id: number;
@@ -29,18 +35,65 @@ const statusColors: Record<string, string> = {
 
 export function BatchDetail({ batch }: BatchDetailProps) {
   const parseLog = batch.parseLog ? JSON.parse(batch.parseLog) : null;
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+
+  const handleDelete = async () => {
+    if (
+      !confirm(
+        `Are you sure you want to delete "${batch.filename}"? This action cannot be undone.`,
+      )
+    ) {
+      return;
+    }
+
+    startTransition(async () => {
+      try {
+        const response = await fetch("/api/admin/menu-batch/delete", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ batchId: batch.id }),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || "Failed to delete batch");
+        }
+
+        toast.success("Batch deleted successfully");
+        router.push("/admin/menu-uploads");
+      } catch (error) {
+        toast.error(
+          error instanceof Error ? error.message : "Failed to delete batch",
+        );
+      }
+    });
+  };
 
   return (
     <div className="border rounded-lg p-6 bg-card space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Batch Information</h2>
-        <span
-          className={`px-3 py-1 rounded-md text-sm font-medium ${
-            statusColors[batch.status] || "bg-gray-500/10 text-gray-500"
-          }`}
-        >
-          {batch.status}
-        </span>
+        <div className="flex items-center gap-2">
+          <span
+            className={`px-3 py-1 rounded-md text-sm font-medium ${
+              statusColors[batch.status] || "bg-gray-500/10 text-gray-500"
+            }`}
+          >
+            {batch.status}
+          </span>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={handleDelete}
+            disabled={isPending}
+          >
+            <Trash2 className="size-4" />
+            Delete Batch
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
