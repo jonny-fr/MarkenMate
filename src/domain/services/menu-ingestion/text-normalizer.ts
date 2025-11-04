@@ -131,23 +131,11 @@ export class TextNormalizer {
    * Clean up OCR artifacts and common errors
    */
   static cleanOcrText(text: string): string {
-    let cleaned = this.normalize(text);
+    const cleaned = this.normalize(text);
 
-    // Common OCR errors in German
-    const replacements: Record<string, string> = {
-      // Letter confusions
-      "0": "O", // Context-dependent, be careful
-      "1": "I", // Context-dependent
-      "l": "I", // Context-dependent
-      // Preserve German special characters
-      "ae": "ä",
-      "oe": "ö",
-      "ue": "ü",
-      "ss": "ß",
-    };
-
-    // Only apply selective replacements that make sense
+    // Common OCR errors in German could be handled here
     // This is a simplified version; real OCR cleanup would be more sophisticated
+    // Examples: "0" vs "O", "1" vs "I", "ae" vs "ä"
 
     return cleaned;
   }

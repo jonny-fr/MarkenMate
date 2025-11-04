@@ -9,8 +9,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Check, X, Edit, Plus } from "lucide-react";
+import { Check, X, Edit } from "lucide-react";
 import { toast } from "sonner";
+import { CreateRestaurantDialog } from "./create-restaurant-dialog";
 
 interface Restaurant {
   id: number;
@@ -190,10 +191,12 @@ export function ReviewActions({
               Assign
             </Button>
 
-            <Button variant="outline">
-              <Plus className="size-4" />
-              New Restaurant
-            </Button>
+            <CreateRestaurantDialog
+              onCreated={(restaurantId) => {
+                setSelectedRestaurantId(restaurantId.toString());
+                toast.success("Restaurant created and selected");
+              }}
+            />
           </div>
         </div>
       )}
