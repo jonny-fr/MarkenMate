@@ -221,12 +221,31 @@ export async function checkIPRateLimit(
   } catch (error) {
     console.error("[ip-rate-limit] Error checking rate limit:", error);
     
-    // SECURITY: Fail open with conservative limits
-    // Better to allow some requests than to block all traffic on error
+    // SECURITY: Hybrid fail-safe approach
+    // For critical endpoints (login, signup), fail closed
+    // For general API, fail open with very conservative limits
+    const isCriticalEndpoint = ['login', 'signup', 'password_reset'].includes(endpointType);
+    
+    if (isCriticalEndpoint) {
+      // SECURITY: Fail closed for critical endpoints
+      // Deny access during database errors to prevent attack bypass
+      console.error(`[ip-rate-limit] Denying access to critical endpoint due to error: ${endpointType}`);
+      return {
+        allowed: false,
+        limit: config.maxRequests,
+        remaining: 0,
+        resetAt: new Date(now.getTime() + 60000), // Retry after 1 minute
+        retryAfter: 60,
+      };
+    }
+    
+    // SECURITY: Fail open for general API with very conservative limits
+    // This prevents complete service disruption but still provides some protection
+    console.warn(`[ip-rate-limit] Allowing with conservative limits due to error: ${endpointType}`);
     return {
       allowed: true,
-      limit: config.maxRequests,
-      remaining: config.maxRequests,
+      limit: Math.floor(config.maxRequests / 2), // Half the normal rate
+      remaining: Math.floor(config.maxRequests / 2),
       resetAt: new Date(now.getTime() + config.windowSeconds * 1000),
     };
   }
@@ -265,22 +284,29 @@ export function getClientIP(headers: Headers): string | null {
  * Validate IP address format
  * SECURITY: Prevents header injection
  * 
+ * Uses Node.js built-in net.isIP for reliable validation
+ * 
  * @param ip - IP address to validate
  * @returns True if valid IPv4 or IPv6
  */
 function validateIP(ip: string): boolean {
-  // IPv4 pattern
-  const ipv4Pattern = /^(\d{1,3}\.){3}\d{1,3}$/;
-  // IPv6 pattern (simplified)
-  const ipv6Pattern = /^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$/;
-  
-  if (ipv4Pattern.test(ip)) {
-    // Validate IPv4 octets
-    const octets = ip.split(".").map(Number);
-    return octets.every(octet => octet >= 0 && octet <= 255);
+  try {
+    const net = require('net');
+    // net.isIP returns 0 for invalid, 4 for IPv4, 6 for IPv6
+    return net.isIP(ip) !== 0;
+  } catch {
+    // Fallback to basic validation if net module unavailable
+    // IPv4 pattern with proper octet validation
+    const ipv4Pattern = /^(\d{1,3}\.){3}\d{1,3}$/;
+    
+    if (ipv4Pattern.test(ip)) {
+      const octets = ip.split(".").map(Number);
+      return octets.every(octet => octet >= 0 && octet <= 255);
+    }
+    
+    // For IPv6, reject if fallback (too complex to validate correctly)
+    return false;
   }
-  
-  return ipv6Pattern.test(ip);
 }
 
 /**

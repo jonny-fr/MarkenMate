@@ -104,11 +104,14 @@ export function applySecurityHeaders(
   response: NextResponse,
   config: SecurityHeadersConfig = {},
 ): NextResponse {
-  const nonce = config.nonce || generateNonce();
   const isProd = process.env.NODE_ENV === "production";
   
-  // Build CSP with nonce if in production
-  const csp = config.contentSecurityPolicy || buildCSP(isProd ? nonce : undefined);
+  // SECURITY: Only generate nonce if we're going to use it (production)
+  // This avoids unnecessary cryptographic operations in development
+  const nonce = isProd ? (config.nonce || generateNonce()) : undefined;
+  
+  // Build CSP with nonce in production
+  const csp = config.contentSecurityPolicy || buildCSP(nonce);
   
   // Content Security Policy
   // SECURITY: Primary defense against XSS attacks

@@ -99,23 +99,34 @@ export async function validateCSRFToken(submittedToken?: string): Promise<boolea
 
 /**
  * Timing-safe string comparison
- * SECURITY: Prevents timing attacks by comparing all characters
+ * SECURITY: Prevents timing attacks by using crypto.timingSafeEqual
  * 
  * @param a - First string
  * @param b - Second string
  * @returns True if strings are equal
  */
 function timingSafeEqual(a: string, b: string): boolean {
-  if (a.length !== b.length) {
+  // SECURITY: Use constant-time comparison to prevent timing attacks
+  // Even the length check should be done in constant time
+  try {
+    const bufA = Buffer.from(a, 'utf8');
+    const bufB = Buffer.from(b, 'utf8');
+    
+    // If lengths differ, still compare same-length buffers to prevent timing leak
+    if (bufA.length !== bufB.length) {
+      // Compare bufA with itself to maintain constant time
+      // This ensures we always do the same work regardless of length mismatch
+      const crypto = require('crypto');
+      crypto.timingSafeEqual(bufA, bufA);
+      return false;
+    }
+    
+    const crypto = require('crypto');
+    return crypto.timingSafeEqual(bufA, bufB);
+  } catch {
+    // If crypto comparison fails, fall back to safe false
     return false;
   }
-  
-  let result = 0;
-  for (let i = 0; i < a.length; i++) {
-    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  }
-  
-  return result === 0;
 }
 
 /**
