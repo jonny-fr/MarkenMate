@@ -37,6 +37,10 @@ import { DashboardClient } from "./_components/dashboard-client";
 
 // Force dynamic rendering since this page requires database access
 export const dynamic = "force-dynamic";
+// Disable all caching for this page - ensures fresh data on every request
+export const revalidate = 0;
+// Disable fetch cache - critical for production data freshness
+export const fetchCache = "force-no-store";
 
 export default async function Page() {
   // Get authenticated user
@@ -65,25 +69,26 @@ export default async function Page() {
   const userRole = userDetails?.role || "user";
 
   // Fetch all data from database for authenticated user
-  const restaurantsPromise = getRestaurants(userId);
-  const lendingPromise = getLendingData(userId);
-  const historyPromise = getHistoryData(userId);
+  // Create fresh promises on every render to ensure router.refresh() works
+  const restaurantsPromise = Promise.resolve(getRestaurants(userId));
+  const lendingPromise = Promise.resolve(getLendingData(userId));
+  const historyPromise = Promise.resolve(getHistoryData(userId));
 
   // Compute stats and graph data from database
-  const statsPromise = getStatsData(userId);
-  const graphDataPromise = getGraphDataWeek(userId);
-  const graphDataMonth = getGraphDataMonth(userId);
-  const graphDataQuarter = getGraphDataQuarter(userId);
-  const graphDataYear = getGraphDataYear(userId);
+  const statsPromise = Promise.resolve(getStatsData(userId));
+  const graphDataPromise = Promise.resolve(getGraphDataWeek(userId));
+  const graphDataMonth = Promise.resolve(getGraphDataMonth(userId));
+  const graphDataQuarter = Promise.resolve(getGraphDataQuarter(userId));
+  const graphDataYear = Promise.resolve(getGraphDataYear(userId));
 
   // Compute comparison data from database
-  const comparisonDataSpending = getComparisonDataSpending(userId);
-  const comparisonDataFrequency = getComparisonDataFrequency(userId);
-  const comparisonDataAvgPrice = getComparisonDataAvgPrice(userId);
+  const comparisonDataSpending = Promise.resolve(getComparisonDataSpending(userId));
+  const comparisonDataFrequency = Promise.resolve(getComparisonDataFrequency(userId));
+  const comparisonDataAvgPrice = Promise.resolve(getComparisonDataAvgPrice(userId));
 
   // Fetch favorites and tickets
-  const favoritesPromise = getUserFavorites(userId);
-  const ticketsPromise = getUserTickets();
+  const favoritesPromise = Promise.resolve(getUserFavorites(userId));
+  const ticketsPromise = Promise.resolve(getUserTickets());
 
   return (
     <DashboardClient

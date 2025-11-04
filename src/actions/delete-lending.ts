@@ -65,7 +65,12 @@ export async function deleteLendingAction(formData: FormData) {
       userId,
     );
 
-    revalidatePath("/", "layout");
+    // Aggressive cache invalidation for immediate UI updates
+    // This ensures the data is immediately refreshed on the client
+    revalidatePath("/", "layout"); // Revalidate entire app
+    revalidatePath("/dashboard"); // Revalidate dashboard page
+    revalidatePath("/dashboard", "page"); // Revalidate dashboard page specifically
+    
     return {
       success: true,
       message: "Verleihung gelöscht",

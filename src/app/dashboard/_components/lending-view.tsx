@@ -1,6 +1,7 @@
 "use client";
 
-import { use, useMemo, useState } from "react";
+import { use, useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import {
   Minus,
   Plus,
@@ -38,28 +39,38 @@ export type LendingUser = {
   balance: number;
   status: "pending" | "accepted" | "declined";
   note?: string;
+  isLender: boolean;
+  otherUserId?: string;
 };
 
 interface LendingViewProps {
   userId: string;
   dataPromise: Promise<LendingUser[]>;
+  onRefresh?: () => void;
 }
 
-export function LendingView({ userId, dataPromise }: LendingViewProps) {
-  const initialUsers = use(dataPromise);
-  const [users, setUsers] = useState(initialUsers);
+export function LendingView({ userId, dataPromise, onRefresh }: LendingViewProps) {
+  const users = use(dataPromise); // Direct use - no local state!
   const [isUpdating, setIsUpdating] = useState<number | null>(null);
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
-  // Berechne die Statistiken
+  // Berechne die Statistiken - NUR accepted lendings zählen!
   const stats = useMemo(() => {
     const lent = users.reduce((sum, user) => {
-      // Positive balance = verliehen
-      return sum + (user.balance > 0 ? user.balance : 0);
+      // Positive balance = verliehen, aber nur wenn accepted
+      if (user.balance > 0 && user.status === "accepted") {
+        return sum + user.balance;
+      }
+      return sum;
     }, 0);
 
     const owed = users.reduce((sum, user) => {
-      // Negative balance = schulden
-      return sum + (user.balance < 0 ? Math.abs(user.balance) : 0);
+      // Negative balance = schulden, aber nur wenn accepted
+      if (user.balance < 0 && user.status === "accepted") {
+        return sum + Math.abs(user.balance);
+      }
+      return sum;
     }, 0);
 
     const total = lent - owed;
@@ -78,11 +89,10 @@ export function LendingView({ userId, dataPromise }: LendingViewProps) {
       const result = await updateLendingAction(formData);
       if (result.success) {
         toast.success(result.message);
-        setUsers((prev) =>
-          prev.map((u) =>
-            u.id === lendingId ? { ...u, balance: newBalance } : u,
-          ),
-        );
+        // Force router refresh to re-fetch server data
+        startTransition(() => {
+          router.refresh();
+        });
       } else {
         toast.error(result.message);
       }
@@ -108,7 +118,10 @@ export function LendingView({ userId, dataPromise }: LendingViewProps) {
       const result = await deleteLendingAction(formData);
       if (result.success) {
         toast.success(result.message);
-        setUsers((prev) => prev.filter((u) => u.id !== lendingId));
+        // Force router refresh to re-fetch server data
+        startTransition(() => {
+          router.refresh();
+        });
       } else {
         toast.error(result.message);
       }
@@ -132,9 +145,10 @@ export function LendingView({ userId, dataPromise }: LendingViewProps) {
       const result = await acceptLendingAction(formData);
       if (result.success) {
         toast.success(result.message);
-        setUsers((prev) =>
-          prev.map((u) => (u.id === lendingId ? { ...u, status } : u)),
-        );
+        // Force router refresh to re-fetch server data
+        startTransition(() => {
+          router.refresh();
+        });
       } else {
         toast.error(result.message);
       }
@@ -152,8 +166,9 @@ export function LendingView({ userId, dataPromise }: LendingViewProps) {
     [users],
   );
 
+  // Only count pending requests where current user is the BORROWER (needs to accept)
   const pendingCount = useMemo(
-    () => users.filter((u) => u.status === "pending").length,
+    () => users.filter((u) => u.status === "pending" && !u.isLender).length,
     [users],
   );
 
@@ -176,7 +191,7 @@ export function LendingView({ userId, dataPromise }: LendingViewProps) {
       {/* Überschrift */}
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Verleihen</h1>
-        <AddLendingPersonDialog userId={userId} />
+        <AddLendingPersonDialog userId={userId} onSuccess={onRefresh} />
       </div>
 
       {/* Drei Container mit Statistiken */}
@@ -235,7 +250,7 @@ export function LendingView({ userId, dataPromise }: LendingViewProps) {
           <CardContent>
             <div className="space-y-2">
               {sortedUsers
-                .filter((u) => u.status === "pending")
+                .filter((u) => u.status === "pending" && !u.isLender)
                 .map((user) => (
                   <div
                     key={user.id}
@@ -244,31 +259,48 @@ export function LendingView({ userId, dataPromise }: LendingViewProps) {
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-foreground">{user.name}</p>
                       <p className="text-xs text-muted-foreground">
-                        {user.balance} Marken verliehen
+                        {user.isLender 
+                          ? `${Math.abs(user.balance)} Marken verliehen an ${user.name}`
+                          : `${Math.abs(user.balance)} Marken von ${user.name} geliehen`
+                        }
                       </p>
+                      {user.note && (
+                        <p className="text-xs text-muted-foreground italic">
+                          {user.note}
+                        </p>
+                      )}
                     </div>
-                    <div className="flex gap-1">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-7 w-7"
-                        onClick={() => handleAcceptLending(user.id, "accepted")}
-                        disabled={isUpdating === user.id}
-                        title="Akzeptieren"
-                      >
-                        <Check className="size-3 text-green-600" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-7 w-7"
-                        onClick={() => handleAcceptLending(user.id, "declined")}
-                        disabled={isUpdating === user.id}
-                        title="Ablehnen"
-                      >
-                        <X className="size-3 text-red-600" />
-                      </Button>
-                    </div>
+                    {/* Only show accept/decline buttons for borrower (not lender) */}
+                    {!user.isLender && (
+                      <div className="flex gap-1">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-7 w-7"
+                          onClick={() => handleAcceptLending(user.id, "accepted")}
+                          disabled={isUpdating === user.id}
+                          title="Akzeptieren"
+                        >
+                          <Check className="size-3 text-green-600" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-7 w-7"
+                          onClick={() => handleAcceptLending(user.id, "declined")}
+                          disabled={isUpdating === user.id}
+                          title="Ablehnen"
+                        >
+                          <X className="size-3 text-red-600" />
+                        </Button>
+                      </div>
+                    )}
+                    {/* Lender sees "waiting" state */}
+                    {user.isLender && (
+                      <Badge variant="outline" className="text-xs">
+                        Warte auf Bestätigung
+                      </Badge>
+                    )}
                   </div>
                 ))}
             </div>

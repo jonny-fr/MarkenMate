@@ -4,6 +4,7 @@ ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 ENV NODE_OPTIONS="--dns-result-order=ipv4first"
 RUN corepack enable
+RUN apk add --no-cache postgresql16-client
 
 WORKDIR /app
 

@@ -75,7 +75,8 @@ export async function saveOrder(input: SaveOrderInput): Promise<{
       })),
     );
 
-    // Revalidate the entire app to refresh data
+    // Revalidate specific paths for production reliability
+    revalidatePath("/dashboard", "page");
     revalidatePath("/", "layout");
 
     return {

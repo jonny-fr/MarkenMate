@@ -1,6 +1,6 @@
 import "server-only";
 import { db } from "@/db";
-import { restaurant, menuItem, user } from "@/db/schema";
+import { restaurant, menuItem, user, account } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 
@@ -253,23 +253,22 @@ export async function seedAdminUser() {
     if (existingAdmin.length > 0) {
       console.info("[seed] Admin user already exists");
 
-      // Check if the existing admin has a valid password hash
-      // If not (from old SHA-256 implementation), recreate the user
-      try {
-        const _testLogin = await auth.api.signInEmail({
-          body: {
-            email: "admin@markenmate.app",
-            password: "Admin2024!",
-          },
-        });
+      // Check if the existing admin has a valid account with password
+      // Better-auth stores passwords in the account table
+      const [adminAccount] = await db
+        .select()
+        .from(account)
+        .where(eq(account.userId, existingAdmin[0].id))
+        .limit(1);
 
-        // If login works, admin is properly set up
+      if (adminAccount && adminAccount.password) {
+        // Admin has a valid password hash (bcrypt from better-auth)
         console.info("[seed] Admin user password hash is valid, skipping");
         return { success: true, alreadySeeded: true };
-      } catch (_error) {
-        // Password hash is invalid, need to recreate user
+      } else {
+        // No account or no password hash - need to recreate user
         console.warn(
-          "[seed] Admin user has invalid password hash, recreating...",
+          "[seed] Admin user has invalid or missing password hash, recreating...",
         );
 
         // Delete old admin user (this will cascade delete account due to FK)

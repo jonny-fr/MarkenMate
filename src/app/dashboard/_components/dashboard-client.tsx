@@ -1,6 +1,7 @@
 "use client";
 
-import { Suspense, type CSSProperties, useState } from "react";
+import { Suspense, type CSSProperties, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 
 import { AppSidebar } from "@/components/app-sidebar";
 import { ChartAreaInteractive } from "@/components/chart-area-interactive";
@@ -86,6 +87,19 @@ export function DashboardClient({
   ticketsPromise,
 }: DashboardClientProps) {
   const [currentView, setCurrentView] = useState<ViewType>("dashboard");
+  const [refreshKey, setRefreshKey] = useState(0);
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+
+  // PRODUCTION-READY refresh function using Next.js router.refresh()
+  // This forces Next.js to re-fetch all Server Components and update the UI
+  // We also increment refreshKey to force re-render of components with new data
+  const handleRefresh = () => {
+    startTransition(() => {
+      setRefreshKey((prev) => prev + 1);
+      router.refresh();
+    });
+  };
 
   return (
     <SidebarProvider
@@ -135,8 +149,8 @@ export function DashboardClient({
                 </div>
               ) : currentView === "lending" ? (
                 <div className="px-4 lg:px-6">
-                  <Suspense fallback={<LoadingCard label="Markenleihen" />}>
-                    <LendingView userId={userId} dataPromise={lendingPromise} />
+                  <Suspense key={`lending-${refreshKey}`} fallback={<LoadingCard label="Markenleihen" />}>
+                    <LendingView key={`lending-view-${refreshKey}`} userId={userId} dataPromise={lendingPromise} onRefresh={handleRefresh} />
                   </Suspense>
                 </div>
               ) : currentView === "favorites" ? (
@@ -173,10 +187,12 @@ export function DashboardClient({
                       <ChartAreaInteractive />
                     </div>
                     <div className="space-y-4">
-                      <Suspense fallback={<LoadingCard label="Markenleihen" />}>
+                      <Suspense key={`lending-panel-${refreshKey}`} fallback={<LoadingCard label="Markenleihen" />}>
                         <TokenLendingPanel
+                          key={`lending-panel-view-${refreshKey}`}
                           userId={userId}
                           dataPromise={lendingPromise}
+                          onRefresh={handleRefresh}
                         />
                       </Suspense>
                     </div>

@@ -1,6 +1,7 @@
 "use client";
 
-import { use, useMemo, useState } from "react";
+import { use, useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import {
   Minus,
   Plus,
@@ -39,28 +40,41 @@ export type LendingUser = {
   balance: number;
   status: "pending" | "accepted" | "declined";
   note?: string;
+  isLender: boolean;
+  otherUserId?: string;
 };
 
 interface TokenLendingPanelProps {
   userId: string;
   dataPromise: Promise<LendingUser[]>;
+  onRefresh?: () => void;
 }
 
 export function TokenLendingPanel({
   userId,
   dataPromise,
+  onRefresh,
 }: TokenLendingPanelProps) {
-  const initialUsers = use(dataPromise);
-  const [users, setUsers] = useState(initialUsers);
+  const users = use(dataPromise); // Direct use - no local state!
   const [isUpdating, setIsUpdating] = useState<number | null>(null);
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
+  // Total outstanding - NUR accepted lendings zählen!
   const totalOutstanding = useMemo(
-    () => users.reduce((sum, user) => sum + user.balance, 0),
+    () =>
+      users.reduce((sum, user) => {
+        if (user.status === "accepted") {
+          return sum + user.balance;
+        }
+        return sum;
+      }, 0),
     [users],
   );
 
+  // Only count pending requests where current user is the BORROWER (needs to accept)
   const pendingCount = useMemo(
-    () => users.filter((u) => u.status === "pending").length,
+    () => users.filter((u) => u.status === "pending" && !u.isLender).length,
     [users],
   );
 
@@ -75,12 +89,10 @@ export function TokenLendingPanel({
       const result = await updateLendingAction(formData);
       if (result.success) {
         toast.success(result.message);
-        // Update local state
-        setUsers((prev) =>
-          prev.map((u) =>
-            u.id === lendingId ? { ...u, balance: newBalance } : u,
-          ),
-        );
+        // Force router refresh to re-fetch server data
+        startTransition(() => {
+          router.refresh();
+        });
       } else {
         toast.error(result.message);
       }
@@ -106,7 +118,10 @@ export function TokenLendingPanel({
       const result = await deleteLendingAction(formData);
       if (result.success) {
         toast.success(result.message);
-        setUsers((prev) => prev.filter((u) => u.id !== lendingId));
+        // Force router refresh to re-fetch server data
+        startTransition(() => {
+          router.refresh();
+        });
       } else {
         toast.error(result.message);
       }
@@ -130,9 +145,10 @@ export function TokenLendingPanel({
       const result = await acceptLendingAction(formData);
       if (result.success) {
         toast.success(result.message);
-        setUsers((prev) =>
-          prev.map((u) => (u.id === lendingId ? { ...u, status } : u)),
-        );
+        // Force router refresh to re-fetch server data
+        startTransition(() => {
+          router.refresh();
+        });
       } else {
         toast.error(result.message);
       }
@@ -153,7 +169,7 @@ export function TokenLendingPanel({
             Verwalte ausgeliehene Essensmarken zwischen Teammitgliedern
           </CardDescription>
         </div>
-        <AddLendingPersonDialog userId={userId} />
+        <AddLendingPersonDialog userId={userId} onSuccess={onRefresh} />
       </CardHeader>
       <CardContent className="space-y-3">
         {/* Pending Requests */}
@@ -164,7 +180,7 @@ export function TokenLendingPanel({
             </p>
             <div className="space-y-2">
               {users
-                .filter((u) => u.status === "pending")
+                .filter((u) => u.status === "pending" && !u.isLender)
                 .map((user) => (
                   <div
                     key={user.id}
@@ -175,31 +191,43 @@ export function TokenLendingPanel({
                         {user.name}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {user.balance} Marken verliehen
+                        {user.isLender 
+                          ? `${Math.abs(user.balance)} Marken verliehen`
+                          : `${Math.abs(user.balance)} Marken geliehen`
+                        }
                       </p>
                     </div>
-                    <div className="flex gap-1">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-7 w-7"
-                        onClick={() => handleAcceptLending(user.id, "accepted")}
-                        disabled={isUpdating === user.id}
-                        title="Akzeptieren"
-                      >
-                        <Check className="size-3 text-green-600" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-7 w-7"
-                        onClick={() => handleAcceptLending(user.id, "declined")}
-                        disabled={isUpdating === user.id}
-                        title="Ablehnen"
-                      >
-                        <X className="size-3 text-red-600" />
-                      </Button>
-                    </div>
+                    {/* Only show accept/decline for borrower */}
+                    {!user.isLender && (
+                      <div className="flex gap-1">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-7 w-7"
+                          onClick={() => handleAcceptLending(user.id, "accepted")}
+                          disabled={isUpdating === user.id}
+                          title="Akzeptieren"
+                        >
+                          <Check className="size-3 text-green-600" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-7 w-7"
+                          onClick={() => handleAcceptLending(user.id, "declined")}
+                          disabled={isUpdating === user.id}
+                          title="Ablehnen"
+                        >
+                          <X className="size-3 text-red-600" />
+                        </Button>
+                      </div>
+                    )}
+                    {/* Lender sees waiting badge */}
+                    {user.isLender && (
+                      <Badge variant="outline" className="text-xs">
+                        ⏳ Warte
+                      </Badge>
+                    )}
                   </div>
                 ))}
             </div>

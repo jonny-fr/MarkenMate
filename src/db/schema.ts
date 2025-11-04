@@ -63,6 +63,7 @@ export const user = pgTable("user", {
   emailVerified: boolean("email_verified").default(false).notNull(),
   image: text("image"),
   role: userRoleEnum("role").default("user").notNull(), // 'user' or 'admin'
+  isMasterAdmin: boolean("is_master_admin").default(false).notNull(), // first admin, cannot be demoted
   mustChangePassword: boolean("must_change_password").default(false).notNull(), // force password change on first login
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
@@ -217,6 +218,7 @@ export const tokenLending = pgTable("token_lending", {
   acceptanceStatus: acceptanceStatusEnum("acceptance_status")
     .default("pending")
     .notNull(), // 'pending', 'accepted', 'declined'
+  version: integer("version").default(1).notNull(), // optimistic locking for concurrency control
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -340,6 +342,7 @@ export const appLog = pgTable("app_log", {
   message: text("message").notNull(),
   context: text("context"), // JSON string with additional context
   userId: text("user_id").references(() => user.id, { onDelete: "set null" }), // optional user context
+  correlationId: text("correlation_id"), // for distributed tracing
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -354,6 +357,39 @@ export const dbBackup = pgTable("db_backup", {
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   description: text("description"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+// Step-up authentication tokens (for sensitive operations like role changes)
+export const stepUpToken = pgTable("step_up_token", {
+  id: serial("id").primaryKey(),
+  token: text("token").notNull().unique(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(), // TTL: 10 minutes
+  used: boolean("used").default(false).notNull(), // one-time use
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+// Audit log for sensitive operations (role changes, admin actions, etc.)
+export const auditLog = pgTable("audit_log", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  action: text("action").notNull(), // e.g., 'CHANGE_ROLE', 'DELETE_USER', 'STEP_UP_AUTH'
+  targetUserId: text("target_user_id").references(() => user.id, {
+    onDelete: "set null",
+  }), // user affected by the action
+  metadata: text("metadata"), // JSON string with additional details (oldRole, newRole, etc.)
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  correlationId: text("correlation_id"), // for distributed tracing
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),

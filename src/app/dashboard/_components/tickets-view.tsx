@@ -39,6 +39,7 @@ interface TicketsViewProps {
     tickets?: Ticket[];
     error?: string;
   }>;
+  onRefresh?: () => void;
 }
 
 const statusLabels = {
@@ -67,7 +68,7 @@ const priorityColors = {
   urgent: "bg-red-500/10 text-red-600 border-red-500/20",
 };
 
-function CreateTicketDialog() {
+function CreateTicketDialog({ onSuccess }: { onSuccess?: () => void }) {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -82,6 +83,8 @@ function CreateTicketDialog() {
       toast.success("Ticket erfolgreich erstellt");
       setOpen(false);
       e.currentTarget.reset();
+      // Refresh data from server
+      onSuccess?.();
     } else {
       setError(result.error || "Fehler beim Erstellen des Tickets");
     }
@@ -161,7 +164,7 @@ function CreateTicketDialog() {
   );
 }
 
-export function TicketsView({ ticketsPromise }: TicketsViewProps) {
+export function TicketsView({ ticketsPromise, onRefresh }: TicketsViewProps) {
   const result = use(ticketsPromise);
 
   if (!result.success || !result.tickets) {
@@ -176,7 +179,7 @@ export function TicketsView({ ticketsPromise }: TicketsViewProps) {
               Verwalten Sie Ihre Support-Anfragen
             </p>
           </div>
-          <CreateTicketDialog />
+          <CreateTicketDialog onSuccess={onRefresh} />
         </div>
         <Card>
           <CardContent className="pt-6">
@@ -203,7 +206,7 @@ export function TicketsView({ ticketsPromise }: TicketsViewProps) {
             Verwalten Sie Ihre Support-Anfragen
           </p>
         </div>
-        <CreateTicketDialog />
+        <CreateTicketDialog onSuccess={onRefresh} />
       </div>
 
       {/* Stats Cards */}

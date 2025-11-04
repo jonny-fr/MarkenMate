@@ -30,7 +30,7 @@ import { useSession } from "@/lib/auth-client";
 import { Loader2Icon } from "lucide-react";
 
 type NavUserProps = {
-  user: {
+  user?: {
     name: string;
     email: string;
     avatar: string;
@@ -42,10 +42,11 @@ export function NavUser({ user }: NavUserProps) {
   const [, logoutAction, pending] = useActionState(logout, {});
   const session = useSession();
 
-  const displayName = session.data?.user.name ?? user.name;
-  const displayEmail = session.data?.user.email ?? user.email;
-  const displayAvatar = session.data?.user.image ?? user.avatar;
-  const initials = displayName ? displayName.charAt(0).toUpperCase() : "M";
+  // Always prefer session data over prop data
+  const displayName = session.data?.user.name ?? user?.name ?? "User";
+  const displayEmail = session.data?.user.email ?? user?.email ?? "";
+  const displayAvatar = session.data?.user.image ?? user?.avatar ?? "";
+  const initials = displayName ? displayName.charAt(0).toUpperCase() : "U";
 
   return (
     <SidebarMenu>

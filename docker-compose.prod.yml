@@ -1,36 +1,83 @@
-# Production Docker Compose Override
-# Verwendung: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
-
-version: "3.9"
+# Production Docker Compose Configuration
+# Verwendet compiled build statt dev-mounted code
+# Verwendung: docker compose -f docker-compose.prod.yml up -d --build
 
 services:
+  db:
+    image: postgres:16-alpine
+    container_name: markenmate-db-prod
+    restart: always
+    ports:
+      - "5433:5432"  # Different port to avoid conflict with dev
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-markenmate}
+      POSTGRES_USER: ${POSTGRES_USER:-markenmate}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-markenmate}
+      POSTGRES_INITDB_ARGS: "-E UTF8 --lc-collate=C --lc-ctype=C"
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-markenmate}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - markenmate-prod
+    dns:
+      - 1.1.1.1
+      - 1.0.0.1
+      - 8.8.8.8
+      - 8.8.4.4
+    sysctls:
+      - net.ipv6.conf.all.disable_ipv6=1
+
+  migrations:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: migrations
+    container_name: markenmate-migrations-prod
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-markenmate}:${POSTGRES_PASSWORD:-markenmate}@db:5432/${POSTGRES_DB:-markenmate}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - markenmate-prod
+    restart: "no"
+
   app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+      args:
+        - NODE_ENV=production
+    container_name: markenmate-app-prod
     restart: always
     ports:
       - "8080:3000"
     environment:
       NODE_ENV: production
-      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
-      NEXT_PUBLIC_BETTER_AUTH_URL: ${NEXT_PUBLIC_BETTER_AUTH_URL}
-    dns:
-      - 1.1.1.1
-      - 1.0.0.1
-      - 8.8.8.8
-      - 8.8.4.4
-    sysctls:
-      - net.ipv6.conf.all.disable_ipv6=1
-      - net.ipv6.conf.default.disable_ipv6=1
+      PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-markenmate}:${POSTGRES_PASSWORD:-markenmate}@db:5432/${POSTGRES_DB:-markenmate}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-CHANGE_THIS_IN_PRODUCTION_USE_OPENSSL_RAND_BASE64_32}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:8080}
+      # NEXT_PUBLIC_BETTER_AUTH_URL is NOT set - we use window.location.origin in client
+      # Runtime env vars with NEXT_PUBLIC_ prefix don't work anyway (embedded at build time)
+    depends_on:
+      db:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    networks:
+      - markenmate-prod
     healthcheck:
-      interval: 60s
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:3000/api/health"]
+      interval: 30s
       timeout: 10s
-      retries: 5
-      start_period: 60s
-
-  db:
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      retries: 3
+      start_period: 40s
     dns:
       - 1.1.1.1
       - 1.0.0.1
@@ -38,14 +85,12 @@ services:
       - 8.8.4.4
     sysctls:
       - net.ipv6.conf.all.disable_ipv6=1
-      - net.ipv6.conf.default.disable_ipv6=1
+    # No volumes - uses compiled code from image!
 
-  migrations:
-    dns:
-      - 1.1.1.1
-      - 1.0.0.1
-      - 8.8.8.8
-      - 8.8.4.4
-    sysctls:
-      - net.ipv6.conf.all.disable_ipv6=1
-      - net.ipv6.conf.default.disable_ipv6=1
+volumes:
+  postgres_data_prod:
+    driver: local
+
+networks:
+  markenmate-prod:
+    driver: bridge

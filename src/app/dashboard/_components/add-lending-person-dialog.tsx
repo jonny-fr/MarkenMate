@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,16 +20,20 @@ import { toast } from "sonner";
 
 interface AddLendingPersonDialogProps {
   userId: string;
+  onSuccess?: () => void;
 }
 
 export function AddLendingPersonDialog({
   userId,
+  onSuccess,
 }: AddLendingPersonDialogProps) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState("");
   const [selectedUserName, setSelectedUserName] = useState("");
   const [tokenCount, setTokenCount] = useState(0);
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
   const handleUserSelect = (lendToUserId: string, lendToUserName: string) => {
     setSelectedUserId(lendToUserId);
@@ -65,6 +70,11 @@ export function AddLendingPersonDialog({
         setSelectedUserName("");
         setTokenCount(0);
         setOpen(false);
+        // Force router refresh to re-fetch server data
+        startTransition(() => {
+          router.refresh();
+        });
+        onSuccess?.();
       } else {
         toast.error(result.message);
       }

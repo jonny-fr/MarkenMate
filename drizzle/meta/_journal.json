@@ -8,6 +8,13 @@
       "when": 1762129867208,
       "tag": "0000_flowery_hellfire_club",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1762205906728,
+      "tag": "0001_ancient_jasper_sitwell",
+      "breakpoints": true
     }
   ]
 }

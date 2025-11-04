@@ -31,7 +31,9 @@ export function NavSecondary({
       | "stats"
       | "history"
       | "comparison"
-      | "lending",
+      | "lending"
+      | "favorites"
+      | "tickets",
   ) => void;
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
   const handleClick = (title: string) => {
@@ -39,6 +41,8 @@ export function NavSecondary({
       onNavigateAction?.("stats");
     } else if (title === "History") {
       onNavigateAction?.("history");
+    } else if (title === "Support") {
+      onNavigateAction?.("tickets");
     }
   };
 

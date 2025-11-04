@@ -28,11 +28,6 @@ import {
 } from "@/components/ui/sidebar";
 
 const sidebarData = {
-  user: {
-    name: "Nora Marken",
-    email: "nora@markenmate.de",
-    avatar: "/avatars/shadcn.jpg",
-  },
   navigation: [
     {
       title: "Restaurants",
@@ -141,7 +136,7 @@ export function AppSidebar({
         )}
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={sidebarData.user} />
+        <NavUser />
       </SidebarFooter>
     </Sidebar>
   );

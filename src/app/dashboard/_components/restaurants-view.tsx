@@ -158,9 +158,10 @@ function RestaurantCard({
 interface RestaurantsViewProps {
   userId: string;
   dataPromise: Promise<Restaurant[]>;
+  onRefresh?: () => void;
 }
 
-export function RestaurantsView({ userId, dataPromise }: RestaurantsViewProps) {
+export function RestaurantsView({ userId, dataPromise, onRefresh }: RestaurantsViewProps) {
   const restaurants = use(dataPromise);
   const [order, setOrder] = useState<OrderDish[]>([]);
   const [isPending, setIsPending] = useState(false);
@@ -236,6 +237,8 @@ export function RestaurantsView({ userId, dataPromise }: RestaurantsViewProps) {
       if (result.success) {
         toast.success(result.message);
         setOrder([]);
+        // Refresh data from server
+        onRefresh?.();
       } else {
         toast.error(result.message);
       }

@@ -39,9 +39,10 @@ interface FavoritesViewProps {
     restaurants: FavoriteRestaurant[];
     menuItems: FavoriteMenuItem[];
   }>;
+  onRefresh?: () => void;
 }
 
-export function FavoritesView({ userId, dataPromise }: FavoritesViewProps) {
+export function FavoritesView({ userId, dataPromise, onRefresh }: FavoritesViewProps) {
   const data = use(dataPromise);
   const { restaurants, menuItems } = data;
 
