@@ -80,7 +80,7 @@ export class AuditLogger {
     reason: string,
     correlationId?: string,
   ): Promise<void> {
-    await this.log({
+    await AuditLogger.log({
       userId,
       action: `AUTHZ_FAILURE_${action}`,
       metadata: { reason },
@@ -98,7 +98,7 @@ export class AuditLogger {
     newRole: string,
     correlationId?: string,
   ): Promise<void> {
-    await this.log({
+    await AuditLogger.log({
       userId: actorId,
       action: "CHANGE_ROLE",
       targetUserId,
@@ -115,7 +115,7 @@ export class AuditLogger {
     success: boolean,
     correlationId?: string,
   ): Promise<void> {
-    await this.log({
+    await AuditLogger.log({
       userId,
       action: success ? "STEP_UP_AUTH_SUCCESS" : "STEP_UP_AUTH_FAILURE",
       correlationId,
@@ -132,7 +132,7 @@ export class AuditLogger {
     metadata?: Record<string, unknown>,
     correlationId?: string,
   ): Promise<void> {
-    await this.log({
+    await AuditLogger.log({
       userId,
       action: `LENDING_${action}`,
       metadata: { lendingId, ...metadata },

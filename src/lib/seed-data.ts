@@ -261,7 +261,7 @@ export async function seedAdminUser() {
         .where(eq(account.userId, existingAdmin[0].id))
         .limit(1);
 
-      if (adminAccount && adminAccount.password) {
+      if (adminAccount?.password) {
         // Admin has a valid password hash (bcrypt from better-auth)
         console.info("[seed] Admin user password hash is valid, skipping");
         return { success: true, alreadySeeded: true };

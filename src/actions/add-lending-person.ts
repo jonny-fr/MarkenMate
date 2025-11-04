@@ -3,7 +3,7 @@
 import "server-only";
 import { db } from "@/db";
 import { tokenLending } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { LendingStateMachine } from "@/domain/services/lending-state-machine";

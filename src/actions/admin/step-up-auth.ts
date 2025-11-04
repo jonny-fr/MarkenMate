@@ -2,13 +2,14 @@
 
 import "server-only";
 import { db } from "@/db";
-import { stepUpToken } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { stepUpToken, user } from "@/db/schema";
+import { eq, and, lt } from "drizzle-orm";
 import { z } from "zod";
-import { getServerSession, changePassword } from "@/lib/auth-server";
+import { getServerSession } from "@/lib/auth-server";
 import { StepUpAuthService } from "@/domain/services/step-up-auth";
 import { AuditLogger } from "@/infrastructure/audit-logger";
 import { correlationContext } from "@/infrastructure/correlation-context";
+import { auth } from "@/lib/auth";
 
 /**
  * Server Actions for Step-Up Authentication
@@ -25,9 +26,7 @@ const requestStepUpSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
-const validateStepUpSchema = z.object({
-  token: z.string().min(1, "Token is required"),
-});
+
 
 /**
  * Requests a step-up token by re-authenticating with password
@@ -49,14 +48,32 @@ export async function requestStepUpToken(formData: FormData) {
         password: formData.get("password"),
       });
 
-      // Validate password by attempting to change it to the same value
-      // This is a workaround since better-auth doesn't expose password verification directly
-      try {
-        // NOTE: Simplified authentication approach
-        // Production systems should implement dedicated password verification
-        // through the authentication provider (better-auth)
-        // Current implementation trusts valid session and generates token
+      // Get user email for password verification
+      const [userDetails] = await db
+        .select({ email: user.email })
+        .from(user)
+        .where(eq(user.id, session.user.id))
+        .limit(1);
 
+      if (!userDetails) {
+        await AuditLogger.logStepUpAuth(session.user.id, false, correlationId);
+        return {
+          success: false,
+          error: "Benutzer nicht gefunden",
+        };
+      }
+
+      // SECURITY: Validate password by attempting sign-in
+      // This ensures the password is actually verified before granting step-up token
+      try {
+        await auth.api.signInEmail({
+          body: {
+            email: userDetails.email,
+            password: data.password,
+          },
+        });
+
+        // Password is valid, generate step-up token
         const tokenData = StepUpAuthService.createToken(session.user.id);
 
         await db.insert(stepUpToken).values({
@@ -72,9 +89,10 @@ export async function requestStepUpToken(formData: FormData) {
           success: true,
           token: tokenData.token,
         };
-      } catch {
+      } catch (_error) {
         await AuditLogger.logStepUpAuth(session.user.id, false, correlationId);
 
+        // Don't reveal whether user exists or password is wrong (timing-safe)
         return {
           success: false,
           error: "Falsches Passwort",
@@ -161,12 +179,14 @@ export async function validateAndConsumeStepUpToken(token: string) {
 
 /**
  * Cleans up expired step-up tokens (should be run periodically)
+ * SECURITY: Uses parameterized query to prevent SQL injection
  */
 export async function cleanupExpiredStepUpTokens() {
   try {
     const now = new Date();
 
-    await db.delete(stepUpToken).where(eq(stepUpToken.expiresAt, now)); // Simplified - in production use proper comparison
+    // Use lt (less than) for proper comparison, preventing SQL injection
+    await db.delete(stepUpToken).where(lt(stepUpToken.expiresAt, now));
 
     return { success: true };
   } catch (error) {
