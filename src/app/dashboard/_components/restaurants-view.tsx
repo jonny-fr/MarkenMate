@@ -268,7 +268,7 @@ export function RestaurantsView({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex max-h-[420px] flex-col gap-3 overflow-y-auto pr-2">
+          <div className="flex flex-col gap-3">
             {openRestaurants.length > 0 ? (
               openRestaurants.map((restaurant) => (
                 <RestaurantCard
@@ -296,7 +296,7 @@ export function RestaurantsView({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex max-h-[420px] flex-col gap-3 overflow-y-auto pr-2">
+          <div className="flex flex-col gap-3">
             {closedRestaurants.length > 0 ? (
               closedRestaurants.map((restaurant) => (
                 <RestaurantCard
