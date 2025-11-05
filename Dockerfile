@@ -28,23 +28,64 @@ ENV DOCKER_BUILD=true
 RUN pnpm build
 
 FROM node:20-alpine AS runner
+
+# SECURITY: Use minimal base image and install only required packages
+RUN apk add --no-cache \
+    curl=~8 \
+    postgresql16-client=~16 \
+    && rm -rf /var/cache/apk/*
+
+# SECURITY: Create non-root user (CIS Docker Benchmark 4.1)
+# User ID 1001 is commonly used for application users
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nextjs -u 1001 -G nodejs
+
+# Set environment variables
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 ENV NODE_OPTIONS="--dns-result-order=ipv4first"
-RUN corepack enable
-RUN apk add --no-cache curl postgresql16-client
-WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
+
+# Enable pnpm
+RUN corepack enable
+
+# Create app directory with proper permissions
+WORKDIR /app
+
+# SECURITY: Copy files with appropriate ownership
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
+COPY --from=builder --chown=nextjs:nodejs /app/pnpm-lock.yaml ./pnpm-lock.yaml
+
+# SECURITY: Switch to non-root user (CIS Docker Benchmark 4.1)
+USER nextjs
+
+# Expose port (non-privileged port)
 EXPOSE 3000
+
+# SECURITY: Add healthcheck (CIS Docker Benchmark 4.6)
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:3000/api/health || exit 1
+
+# Run application
 CMD ["node", "server.js"]
 
 FROM workspace AS migrations
+
+# SECURITY: Create non-root user for migrations
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nextjs -u 1001 -G nodejs
+
+# Change ownership of workspace files
+RUN chown -R nextjs:nodejs /app
+
+# SECURITY: Switch to non-root user
+USER nextjs
+
 # Prepare pnpm to avoid runtime downloads
 RUN pnpm --version
+
 CMD ["pnpm", "db:push"]
