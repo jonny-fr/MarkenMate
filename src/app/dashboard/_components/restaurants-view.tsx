@@ -12,6 +12,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { FavoriteButton } from "@/components/favorite-button";
 import { calculateTokens } from "@/lib/token-calculator";
 import { saveOrderAction, type OrderItem } from "@/actions/save-order-client";
@@ -58,6 +65,19 @@ function RestaurantCard({
   userId,
   onAddDish,
 }: RestaurantCardProps) {
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+
+  // Extract unique categories from dishes
+  const uniqueCategories = Array.from(
+    new Set(restaurant.dishes.map((dish) => dish.category || "unknown")),
+  ).sort();
+
+  // Filter dishes based on selected category
+  const filteredDishes =
+    selectedCategory === "all"
+      ? restaurant.dishes
+      : restaurant.dishes.filter((dish) => dish.category === selectedCategory);
+
   return (
     <details className="group rounded-lg border border-border/60 bg-card/80 p-4 transition-all open:bg-card">
       <summary className="flex cursor-pointer list-none items-start justify-between gap-3 text-left">
@@ -80,17 +100,37 @@ function RestaurantCard({
         <ChevronDown className="size-4 transition-transform group-open:-rotate-180" />
       </summary>
       <div className="mt-4 space-y-3 text-sm">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           <p className="text-muted-foreground">Gerichte & Markenpreise</p>
-          <FavoriteButton
-            userId={userId}
-            restaurantId={Number.parseInt(restaurant.id, 10)}
-            isFavorited={restaurant.isFavorited}
-            className="h-7 w-7"
-          />
+          <div className="flex items-center gap-2">
+            {uniqueCategories.length > 1 && (
+              <Select
+                value={selectedCategory}
+                onValueChange={setSelectedCategory}
+              >
+                <SelectTrigger size="sm">
+                  <SelectValue placeholder="Kategorie wählen" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Alle Kategorien</SelectItem>
+                  {uniqueCategories.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category.charAt(0).toUpperCase() + category.slice(1)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            <FavoriteButton
+              userId={userId}
+              restaurantId={Number.parseInt(restaurant.id, 10)}
+              isFavorited={restaurant.isFavorited}
+              className="h-7 w-7"
+            />
+          </div>
         </div>
         <ul className="space-y-2">
-          {restaurant.dishes.map((dish) => {
+          {filteredDishes.map((dish) => {
             const price = Number.parseFloat(
               dish.priceEuro.replace("€", "").replace(",", "."),
             );
@@ -149,6 +189,11 @@ function RestaurantCard({
               </li>
             );
           })}
+          {filteredDishes.length === 0 && (
+            <li className="text-center text-sm text-muted-foreground py-4">
+              Keine Gerichte in dieser Kategorie
+            </li>
+          )}
         </ul>
       </div>
     </details>
