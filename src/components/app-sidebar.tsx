@@ -100,7 +100,7 @@ export function AppSidebar({
                 href="#"
                 onClick={(e) => {
                   e.preventDefault();
-                  onNavigateAction?.("dashboard");
+                  onNavigateAction?.("restaurants");
                 }}
               >
                 <Building2 className="size-5" />

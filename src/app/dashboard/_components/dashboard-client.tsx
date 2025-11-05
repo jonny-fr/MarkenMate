@@ -86,7 +86,7 @@ export function DashboardClient({
   favoritesPromise,
   ticketsPromise,
 }: DashboardClientProps) {
-  const [currentView, setCurrentView] = useState<ViewType>("dashboard");
+  const [currentView, setCurrentView] = useState<ViewType>("restaurants");
   const [refreshKey, setRefreshKey] = useState(0);
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
