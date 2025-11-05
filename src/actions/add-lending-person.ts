@@ -15,7 +15,17 @@ const addLendingPersonSchema = z.object({
   userId: z.string().min(1, "User ID is required"),
   lendToUserId: z.string().min(1, "Lend to user ID is required"),
   personName: z.string().min(1, "Person name is required"),
-  tokenCount: z.number().int().positive("Token count must be positive"),
+  tokenCount: z
+    .string()
+    .trim()
+    .min(1, "Bitte geben Sie mehr als 0 Marken ein")
+    .refine((value) => /^-?\d+$/.test(value), {
+      message: "Die Markenanzahl muss eine ganze Zahl sein",
+    })
+    .transform((value) => Number.parseInt(value, 10))
+    .refine((value) => value > 0, {
+      message: "Bitte geben Sie mehr als 0 Marken ein",
+    }),
 });
 
 export async function addLendingPersonAction(formData: FormData) {
@@ -38,9 +48,7 @@ export async function addLendingPersonAction(formData: FormData) {
         userId: rawData.userId,
         lendToUserId: rawData.lendToUserId,
         personName: rawData.personName,
-        tokenCount: rawData.tokenCount
-          ? Number.parseInt(rawData.tokenCount as string, 10)
-          : 0,
+        tokenCount: rawData.tokenCount,
       });
 
       // Validate token count

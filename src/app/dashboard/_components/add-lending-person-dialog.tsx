@@ -31,13 +31,46 @@ export function AddLendingPersonDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState("");
   const [selectedUserName, setSelectedUserName] = useState("");
-  const [tokenCount, setTokenCount] = useState(0);
+  const [tokenCount, setTokenCount] = useState("");
+  const [tokenError, setTokenError] = useState<string | null>(null);
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const trimmedTokenCount = tokenCount.trim();
+  const numericTokenCount = Number(trimmedTokenCount);
+  const isTokenCountNumeric = Number.isFinite(numericTokenCount);
+  const isValidTokenCount =
+    trimmedTokenCount.length > 0 &&
+    isTokenCountNumeric &&
+    Number.isInteger(numericTokenCount) &&
+    numericTokenCount > 0;
+  const inlineTokenError =
+    tokenError ??
+    (trimmedTokenCount.length > 0 && !isValidTokenCount
+      ? "Bitte geben Sie mehr als 0 Marken ein"
+      : null);
 
   const handleUserSelect = (lendToUserId: string, lendToUserName: string) => {
     setSelectedUserId(lendToUserId);
     setSelectedUserName(lendToUserName);
+  };
+
+  const resetFormState = () => {
+    setSelectedUserId("");
+    setSelectedUserName("");
+    setTokenCount("");
+    setTokenError(null);
+  };
+
+  const requireValidTokenCount = () => {
+    if (!isValidTokenCount) {
+      const message = "Bitte geben Sie mehr als 0 Marken ein";
+      setTokenError(message);
+      toast.error(message);
+      return false;
+    }
+
+    setTokenError(null);
+    return numericTokenCount;
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -48,8 +81,8 @@ export function AddLendingPersonDialog({
       return;
     }
 
-    if (tokenCount < 0) {
-      toast.error("Die Token-Anzahl muss positiv sein");
+    const validTokenCount = requireValidTokenCount();
+    if (validTokenCount === false) {
       return;
     }
 
@@ -59,16 +92,14 @@ export function AddLendingPersonDialog({
     formData.append("userId", userId);
     formData.append("lendToUserId", selectedUserId);
     formData.append("personName", selectedUserName);
-    formData.append("tokenCount", tokenCount.toString());
+  formData.append("tokenCount", validTokenCount.toString());
 
     try {
       const result = await addLendingPersonAction(formData);
 
       if (result.success) {
         toast.success(result.message);
-        setSelectedUserId("");
-        setSelectedUserName("");
-        setTokenCount(0);
+        resetFormState();
         setOpen(false);
         // Force router refresh to re-fetch server data
         startTransition(() => {
@@ -87,7 +118,15 @@ export function AddLendingPersonDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        setOpen(nextOpen);
+        if (!nextOpen) {
+          resetFormState();
+        }
+      }}
+    >
       <DialogTrigger asChild>
         <Button size="sm" variant="outline" className="gap-2">
           <Plus className="size-4" />
@@ -117,21 +156,30 @@ export function AddLendingPersonDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="tokenCount">Anfängliche Marken (optional)</Label>
+            <Label htmlFor="tokenCount">Anfängliche Marken</Label>
             <Input
               id="tokenCount"
               type="number"
-              placeholder="0"
+              placeholder="1"
               value={tokenCount}
-              onChange={(e) =>
-                setTokenCount(Number.parseInt(e.target.value, 10) || 0)
-              }
+              onChange={(event) => {
+                setTokenCount(event.target.value);
+                if (tokenError) {
+                  setTokenError(null);
+                }
+              }}
               disabled={isSubmitting}
-              min="0"
+              min="1"
+              inputMode="numeric"
+              aria-invalid={Boolean(inlineTokenError)}
             />
             <p className="text-xs text-muted-foreground">
               Geben Sie ein, wie viele Marken Sie dieser Person leihen möchten
+              (mindestens eine Marke)
             </p>
+            {inlineTokenError ? (
+              <p className="text-xs text-destructive">{inlineTokenError}</p>
+            ) : null}
           </div>
 
           <div className="flex gap-2 justify-end">
@@ -143,7 +191,10 @@ export function AddLendingPersonDialog({
             >
               Abbrechen
             </Button>
-            <Button type="submit" disabled={isSubmitting || !selectedUserId}>
+            <Button
+              type="submit"
+              disabled={isSubmitting || !selectedUserId || !isValidTokenCount}
+            >
               {isSubmitting ? "Wird hinzugefügt..." : "Hinzufügen"}
             </Button>
           </div>
