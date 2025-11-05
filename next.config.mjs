@@ -1,3 +1,5 @@
+import path from "node:path";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   typedRoutes: false,
@@ -14,6 +16,8 @@ const nextConfig = {
     if (!config.resolve) config.resolve = {};
     if (!config.resolve.alias) config.resolve.alias = {};
     config.resolve.alias["pdfjs-dist/legacy/build/pdf.mjs"] = "pdfjs-dist/legacy/build/pdf.js";
+    // Ensure '@' alias resolves to the src directory (robust in Docker/Linux)
+    config.resolve.alias["@"] = path.resolve(process.cwd(), "src");
     // Allow .mjs requests to fall back to .js
     config.resolve.extensionAlias = {
       ".mjs": [".mjs", ".js"],

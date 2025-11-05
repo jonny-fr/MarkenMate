@@ -50,11 +50,11 @@ docs
 AGENTS.md
 LICENSE
 
-# Configuration files (not needed in production)
+# Configuration files
+# Keep tsconfig.json for Next.js to respect path aliases during the build
 biome.json
 .eslintrc*
 .prettierrc*
-tsconfig.json
 
 # Temporary files
 tmp
