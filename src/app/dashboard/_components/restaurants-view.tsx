@@ -69,7 +69,7 @@ function RestaurantCard({
 
   // Extract unique categories from dishes
   const uniqueCategories = Array.from(
-    new Set(restaurant.dishes.map((dish) => dish.category || "unknown")),
+    new Set(restaurant.dishes.map((dish) => dish.category || "sonstige")),
   ).sort();
 
   // Filter dishes based on selected category
