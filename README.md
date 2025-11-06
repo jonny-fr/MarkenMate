@@ -41,7 +41,7 @@ Generate secure secret (Windows PowerShell):
 
 3. Start production environment:
 ```bash
-docker-compose -f docker-compose.prod.yml up -d --build
+docker-compose -f docker-compose.prod.yml up --build
 ```
 
 4. Wait for services to be ready:
