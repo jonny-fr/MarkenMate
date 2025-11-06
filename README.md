@@ -41,12 +41,12 @@ Generate secure secret (Windows PowerShell):
 
 3. Start production environment:
 ```bash
-docker compose -f docker-compose.prod.yml up -d --build
+docker-compose -f docker-compose.prod.yml up -d --build
 ```
 
 4. Wait for services to be ready:
 ```bash
-docker compose -f docker-compose.prod.yml ps
+docker-compose -f docker-compose.prod.yml ps
 ```
 
 5. Access the application at http://localhost:8080
@@ -54,7 +54,7 @@ docker compose -f docker-compose.prod.yml ps
 ### Stopping
 
 ```bash
-docker compose -f docker-compose.prod.yml down
+docker-compose -f docker-compose.prod.yml down
 ```
 
 
